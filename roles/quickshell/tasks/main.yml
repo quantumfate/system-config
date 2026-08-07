@@ -1,0 +1,75 @@
+---
+- name: Install Quickshell runtime packages
+  become: true
+  community.general.pacman:
+    name: "{{ quickshell_packages }}"
+    state: present
+  when: quickshell_install_packages | bool
+
+- name: Install extra Dofus tooling
+  become: true
+  community.general.pacman:
+    name: "{{ quickshell_extra_packages }}"
+    state: present
+  when: quickshell_install_extra_packages | bool
+
+# The shell IS the notification daemon (Notify.qml owns
+# org.freedesktop.Notifications). A running mako would race for the same DBus
+# name, so stop and disable its user service. Ignored if mako isn't installed.
+- name: Disable the mako notification daemon (shell serves notifications now)
+  ansible.builtin.systemd_service:
+    name: mako.service
+    scope: user
+    state: stopped
+    enabled: false
+  failed_when: false
+  when: quickshell_disable_mako | bool
+
+- name: Ensure the quickshell config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.config/quickshell"
+    state: directory
+    mode: "0755"
+
+- name: Symlink this config into place
+  ansible.builtin.file:
+    src: "{{ quickshell_repo_path | realpath }}"
+    dest: "{{ ansible_facts.user_dir }}/.config/quickshell/{{ quickshell_config_name }}"
+    state: link
+    force: true
+
+# State files (team.json, theme.json) are self-seeded by the shell on first run
+# via Store defaults, so we only need the directory to exist.
+- name: Ensure the XDG state directory exists
+  ansible.builtin.file:
+    path: "{{ quickshell_state_home }}/dofus"
+    state: directory
+    mode: "0755"
+
+- name: Ensure the zsh completion directory exists
+  ansible.builtin.file:
+    path: "{{ quickshell_completion_dir }}"
+    state: directory
+    mode: "0755"
+  when: quickshell_install_zsh_completions | bool
+
+- name: Symlink the zsh completions (_qs, _qfs)
+  ansible.builtin.file:
+    src: "{{ (quickshell_repo_path | realpath) + '/completions/' + item }}"
+    dest: "{{ quickshell_completion_dir }}/{{ item }}"
+    state: link
+    force: true
+  loop: "{{ quickshell_completions }}"
+  when: quickshell_install_zsh_completions | bool
+
+- name: Add the completion dir to fpath (before compinit)
+  ansible.builtin.blockinfile:
+    path: "{{ quickshell_zshrc }}"
+    marker: "# {mark} ANSIBLE quantumfate quickshell completions"
+    insertbefore: BOF
+    create: false
+    block: |
+      fpath=({{ quickshell_completion_dir }} $fpath)
+  when:
+    - quickshell_install_zsh_completions | bool
+    - quickshell_manage_zshrc | bool
