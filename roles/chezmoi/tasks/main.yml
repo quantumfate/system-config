@@ -18,6 +18,25 @@
   failed_when: false
   check_mode: false
 
+# An existing checkout keeps its old origin (git's module never repoints it),
+# so force it onto the codeberg repo from the parameter. chezmoi uses `origin`
+# as its own bootstrap/update remote, so this is what makes chezmoi use codeberg.
+- name: Check the dotfiles origin remote
+  ansible.builtin.command: git remote get-url origin
+  args:
+    chdir: "{{ chezmoi_source }}"
+  register: chezmoi_origin
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Point the dotfiles origin at {{ chezmoi_repo }}
+  ansible.builtin.command: git remote set-url origin {{ chezmoi_repo }}
+  args:
+    chdir: "{{ chezmoi_source }}"
+  changed_when: true
+  when: chezmoi_origin.stdout != chezmoi_repo
+
 - name: Clone or update the dotfiles source
   ansible.builtin.git:
     repo: "{{ chezmoi_repo }}"
