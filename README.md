@@ -1,4 +1,4 @@
-# System Config
+# System Configuration
 
 Ansible playbook that provisions my CachyOS/Arch system config end to end, then
 hands `$HOME` over to chezmoi.
@@ -10,6 +10,7 @@ hands `$HOME` over to chezmoi.
 | `/etc`, system units, groups, bootloader, packages | Ansible |
 | `$HOME` dotfiles                        | chezmoi |
 | External checkouts, themes, downloads (`$HOME`) | Ansible (`roles/externals`) |
+| Quickshell desktop shell (config symlink, completions) | Ansible (`roles/quickshell`, vendored) |
 | Prompted values (profile, monitors, feature flags) | Ansible → rendered into `~/.config/chezmoi/chezmoi.toml` |
 
 chezmoi no longer prompts and no longer carries `.chezmoiscripts` or
@@ -19,8 +20,8 @@ chezmoi no longer prompts and no longer carries `.chezmoiscripts` or
 
 ```sh
 sudo pacman -S --needed ansible git
-git clone git@codeberg.org:quantumfate/workstation.git
-cd workstation
+git clone git@codeberg.org:quantumfate/system-configuration.git
+cd system-configuration
 ansible-galaxy install -r requirements.yml
 ./bootstrap.sh            # == ansible-playbook site.yml --ask-become-pass
 ```

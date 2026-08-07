@@ -42,10 +42,13 @@ externals_repos:
 # skipped while a checkout is dirty, mirroring the old .pull.args = ["--ff-only"].
 externals_projects:
   - name: hypr
-    repo: git@github.com:quantumfate/hypr
+    repo: git@codeberg.org:quantumfate/hypr.git
     dest: "{{ target_home }}/.config/hypr"
+  - name: quickshell
+    repo: git@codeberg.org:quantumfate/quickshell.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
   - name: nvim
-    repo: git@github.com:quantumfate/nvim
+    repo: git@codeberg.org:quantumfate/nvim.git
     dest: "{{ target_home }}/.config/nvim"
   - name: aiagent
     repo: git@github.com:quantumfate/aiagent.git
