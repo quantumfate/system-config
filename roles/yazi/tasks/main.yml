@@ -1,0 +1,12 @@
+---
+# Bootstrap the yazi plugins and flavors declared in ~/.config/yazi/package.toml
+# (written by the chezmoi role). "ya pkg install" pins each dep to the rev/hash
+# in package.toml and leaves locally modified plugins untouched, matching the
+# repo's never-clobber rule. Runs after chezmoi so the manifest exists.
+
+- name: Bootstrap yazi packages
+  ansible.builtin.command: ya pkg install
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"
+  changed_when: false
+  when: (target_home + '/.config/yazi/package.toml') is exists

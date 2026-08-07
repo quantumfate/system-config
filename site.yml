@@ -50,11 +50,11 @@
 
     - role: chezmoi
       tags: [dotfiles, chezmoi]
+    - role: yazi
+      tags: [dotfiles, yazi]
     - role: externals
       tags: [dotfiles, externals]
 
-    - role: clight
-      tags: [dotfiles, clight]
     - role: browser_profiles
       tags: [dotfiles, browser]
     - role: theming

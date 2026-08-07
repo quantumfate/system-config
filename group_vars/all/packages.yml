@@ -44,7 +44,6 @@ common_packages:
   - yazi
   - wiremix
   - lf
-  - ranger
   - parui
   - bluetui
   - gimp
@@ -93,8 +92,6 @@ common_packages:
   - proton-drive-sync-bin
   - proton-vpn-gtk-app
 
-  - clight
-  - clightd
   - niri
   - sway
   # Hyprland ecosystem
@@ -189,8 +186,6 @@ common_packages:
   - catppuccin-cursors-macchiato
   - juno-palenight-gtk-theme-git
   - juno-palenight-standard-buttons-gtk-theme-git
-  - catppuccin-plasma-colorscheme-macchiato
-  - catppuccin-plasma-colorscheme-latte
   - quickshell
   - qt5-svg
   - qt6-svg

@@ -33,7 +33,11 @@
   when: item.stdout | length == 0
   register: project_pull
   changed_when: "'up to date' not in item.stdout | lower"
-  failed_when: false
+  failed_when: >
+    'Permission denied' in item.stderr | default('')
+    or 'Could not read from remote repository' in item.stderr | default('')
+    or 'Could not resolve host' in item.stderr | default('')
+    or 'Connection timed out' in item.stderr | default('')
 
 - name: Report dirty project checkouts
   ansible.builtin.debug:
@@ -45,8 +49,10 @@
 
 - name: Report diverged project checkouts
   ansible.builtin.debug:
-    msg: "{{ item.item.name }} diverged from its remote — left as-is."
-  loop: "{{ project_pull.results | default([]) }}"
+    msg: |-
+      {{ item.item.item.name }} diverged from its remote — left as-is.
+      {{ item.stderr | default('') }}
+  loop: "{{ project_pull.results | selectattr('skipped', 'undefined') | list }}"
   loop_control:
-    label: "{{ item.item.name }}"
+    label: "{{ item.item.item.name }}"
   when: item.rc != 0

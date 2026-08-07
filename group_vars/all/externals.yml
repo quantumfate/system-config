@@ -42,10 +42,10 @@ externals_repos:
 # skipped while a checkout is dirty, mirroring the old .pull.args = ["--ff-only"].
 externals_projects:
   - name: hypr
-    repo: https://github.com/quantumfate/hypr
+    repo: git@github.com:quantumfate/hypr
     dest: "{{ target_home }}/.config/hypr"
   - name: nvim
-    repo: https://github.com/quantumfate/nvim
+    repo: git@github.com:quantumfate/nvim
     dest: "{{ target_home }}/.config/nvim"
   - name: aiagent
     repo: git@github.com:quantumfate/aiagent.git
@@ -59,6 +59,9 @@ externals_projects:
   - name: security-and-privacy
     repo: git@gitlab.com:quantumfate/security-and-privacy.git
     dest: "{{ target_home }}/Projects/gitlab/quantumfate/security-and-privacy"
+  - name: system-config
+    repo: https://codeberg.org/quantumfate/system-config
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/system-config"
 
 # Former {{ if .gaming }} / {{ if eq .profile "desktop" }} blocks.
 externals_projects_gaming:
@@ -126,16 +129,5 @@ externals_archives:
     dest: "{{ target_home }}/.config/wlogout/catppuccin/themes"
 
 # Single-file downloads (former type = "file")
-externals_files:
-  - name: ranger-catppuccin-latte
-    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_latte.py
-    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_latte.py"
-  - name: ranger-catppuccin-frappe
-    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_frappe.py
-    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_frappe.py"
-  - name: ranger-catppuccin-macchiato
-    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_macchiato.py
-    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_macchiato.py"
-  - name: ranger-catppuccin-mocha
-    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_mocha.py
-    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_mocha.py"
+# ranger's catppuccin colorschemes were removed with the ranger → yazi switch.
+externals_files: []

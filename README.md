@@ -60,7 +60,6 @@ roles/                   one concern each
 | `devenv`           | `05-prepare-nvim-deps`, `06-install-dev-env-packages` |
 | `chezmoi`          | dotfiles clone + apply, `03-reload-user-units`      |
 | `externals`        | `.chezmoiexternal.toml.tmpl` (plugins, dev checkouts, catppuccin themes) |
-| `clight`           | `13-install-clight-geoclue`, `14-restart-clight`    |
 | `browser_profiles` | `05-install-userjs-for-browser`                     |
 | `theming`          | `00-finalise-theme`, `20-do-additional-theming`     |
 
