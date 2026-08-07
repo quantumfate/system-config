@@ -1,6 +1,6 @@
-# workstation
+# System Config
 
-Ansible playbook that provisions a CachyOS/Arch workstation end to end, then
+Ansible playbook that provisions my CachyOS/Arch system config end to end, then
 hands `$HOME` over to chezmoi.
 
 ## Separation of concerns
@@ -95,9 +95,3 @@ ansible-playbook site.yml --ask-become-pass --skip-tags bootstrap
   With `vault`, `roles/password_manager` is skipped entirely — no Proton Pass
   dependency during provisioning.
 
-## Notes
-
-- Package installs all go through `yay`, so repo and AUR packages share one
-  transaction (`kewlfft.aur.aur`).
-- Group changes (`docker`, `libvirt`, `kvm`) need a re-login.
-- Bootloader cmdline edits (`console`) need a reboot.
