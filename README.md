@@ -20,8 +20,8 @@ chezmoi no longer prompts and no longer carries `.chezmoiscripts` or
 
 ```sh
 sudo pacman -S --needed ansible git
-git clone git@codeberg.org:quantumfate/system-configuration.git
-cd system-configuration
+git clone git@codeberg.org:quantumfate/system-config.git
+cd system-config
 ansible-galaxy install -r requirements.yml
 ./bootstrap.sh            # == ansible-playbook site.yml --ask-become-pass
 ```

@@ -63,7 +63,7 @@ externals_projects:
     repo: git@gitlab.com:quantumfate/security-and-privacy.git
     dest: "{{ target_home }}/Projects/gitlab/quantumfate/security-and-privacy"
   - name: system-config
-    repo: https://codeberg.org/quantumfate/system-config
+    repo: git@codeberg.org:quantumfate/system-config.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/system-config"
 
 # Former {{ if .gaming }} / {{ if eq .profile "desktop" }} blocks.
