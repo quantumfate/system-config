@@ -1,0 +1,22 @@
+---
+# Assembles the package set from the feature flags, then hands the whole list
+# to yay in one transaction (repo + AUR alike).
+
+- name: Build package list
+  ansible.builtin.set_fact:
+    resolved_packages: >-
+      {{ (common_packages
+          + (desktop_packages if profile == 'desktop' else [])
+          + (laptop_packages if profile == 'laptop' else [])
+          + (dev_packages if devenv else [])
+          + (gaming_packages if gaming else [])
+          + (vm_packages if vms else [])
+          + (llm_packages if llms else []))
+         | unique }}
+
+- name: Install packages
+  kewlfft.aur.aur:
+    name: "{{ resolved_packages }}"
+    use: yay
+    state: present
+  become: false

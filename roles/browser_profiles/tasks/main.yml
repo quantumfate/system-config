@@ -1,0 +1,24 @@
+---
+# Link user.js to zen-profiles
+
+- name: Create browser profiles by starting each browser once
+  ansible.builtin.shell:
+    cmd: timeout 5 {{ item }} --headless >/dev/null 2>&1 || true
+  loop:
+    - firefox
+    - zen-twilight
+    - zen-twilight -P Media
+  changed_when: false
+
+- name: Check for the shared user.js
+  ansible.builtin.stat:
+    path: "{{ browser_config_src }}/user.js"
+  register: user_js
+
+- name: Link prefs into each profile
+  ansible.builtin.include_tasks: link_profiles.yml
+  loop: "{{ browser_roots }}"
+  loop_control:
+    loop_var: browser
+    label: "{{ browser.name }}"
+  when: user_js.stat.exists

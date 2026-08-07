@@ -1,0 +1,32 @@
+---
+# Rewrites GRUB_CMDLINE_LINUX with a fresh copy of the palette params.
+
+- name: Read the current grub cmdline
+  become: true
+  ansible.builtin.shell:
+    cmd: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub || true
+  register: grub_line
+  check_mode: false
+  changed_when: false
+
+- name: Fail when the cmdline entry is missing
+  ansible.builtin.fail:
+    msg: No GRUB_CMDLINE_LINUX entry in /etc/default/grub.
+  when: grub_line.stdout | length == 0
+
+- name: Compute the cmdline without any palette params
+  ansible.builtin.set_fact:
+    grub_inner: >-
+      {{ grub_line.stdout
+         | regex_search('="(.*)"', '\1') | first
+         | regex_replace('vt\.default_(red|grn|blu)=[0-9,]+', '')
+         | regex_replace('\s+', ' ') | trim }}
+
+- name: Write the cmdline with the palette
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: ^GRUB_CMDLINE_LINUX=
+    line: 'GRUB_CMDLINE_LINUX="{{ (grub_inner ~ " " ~ vt_color_params | join(" ")) | trim }}"'
+    backup: true
+  notify: Regenerate grub config

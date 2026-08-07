@@ -1,0 +1,81 @@
+---
+# Installs the custom Dvorak XKB layout system-wide and mirrors it to the TTY.
+# The symbols file lives in this role, not in chezmoi — it targets /usr/share.
+
+- name: Install XKB symbols file
+  become: true
+  ansible.builtin.copy:
+    src: dvorak-custom
+    dest: /usr/share/X11/xkb/symbols/{{ keyboard_layout }}
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Clear XKB cache
+    - Rebuild TTY keymap
+
+- name: Register the layout in evdev.xml
+  become: true
+  ansible.builtin.blockinfile:
+    path: /usr/share/X11/xkb/rules/evdev.xml
+    marker: "<!-- {mark} ANSIBLE {{ keyboard_layout }} -->"
+    insertbefore: "</layoutList>"
+    backup: true
+    block: |2
+        <layout>
+          <configItem>
+            <name>{{ keyboard_layout }}</name>
+            <shortDescription>dvc</shortDescription>
+            <description>Dvorak (Custom Symbols)</description>
+            <languageList>
+              <iso639Id>eng</iso639Id>
+            </languageList>
+          </configItem>
+          <variantList/>
+        </layout>
+  notify: Clear XKB cache
+
+- name: Register the layout in evdev.lst
+  become: true
+  ansible.builtin.lineinfile:
+    path: /usr/share/X11/xkb/rules/evdev.lst
+    insertafter: '^! layout$'
+    line: "  {{ keyboard_layout }}   Dvorak (Custom Symbols)"
+    backup: true
+  notify: Clear XKB cache
+
+- name: Install ckbcomp (XKB to kernel keymap converter)
+  become: true
+  community.general.pacman:
+    name: ckbcomp
+    state: present
+
+- name: Ensure the XKB keymap directory exists
+  become: true
+  ansible.builtin.file:
+    path: /usr/share/kbd/keymaps/xkb
+    state: directory
+    mode: "0755"
+
+- name: Check for a generated TTY keymap
+  ansible.builtin.stat:
+    path: /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
+  register: tty_keymap
+
+- name: Generate the TTY keymap
+  become: true
+  ansible.builtin.shell:
+    cmd: set -o pipefail && ckbcomp {{ keyboard_layout }} | gzip > /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
+    executable: /bin/bash
+  when: not tty_keymap.stat.exists
+  changed_when: true
+
+- name: Set the console keymap
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/vconsole.conf
+    regexp: ^KEYMAP=
+    line: KEYMAP={{ keyboard_layout }}
+    create: true
+    mode: "0644"
+  notify: Apply keymap to current VT

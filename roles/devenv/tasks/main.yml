@@ -1,0 +1,49 @@
+---
+# Toolchain bits that no package provides: rustup channel/components, the
+# tree-sitter CLI, and the pip-only git tools.
+
+- name: Read the default rust toolchain
+  ansible.builtin.command: rustup default
+  register: rustup_default
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Fail when rustup is missing
+  ansible.builtin.fail:
+    msg: rustup not found — it should have come from dev_packages.
+  when: rustup_default.rc != 0
+
+- name: Select the nightly toolchain
+  ansible.builtin.command: rustup default nightly
+  when: "'nightly' not in rustup_default.stdout"
+  changed_when: true
+
+- name: List installed rustup components
+  ansible.builtin.command: rustup component list --installed
+  register: rustup_components
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Add missing rustup components
+  ansible.builtin.command: rustup component add {{ item }}
+  loop: [rustfmt, clippy, rust-analyzer]
+  when: item not in rustup_components.stdout
+  changed_when: true
+
+- name: Install tree-sitter-cli
+  kewlfft.aur.aur:
+    name: tree-sitter-cli-git
+    use: yay
+    state: present
+  become: false
+
+# --break-system-packages: Arch marks its Python as externally managed, and
+# these two tools are wanted on PATH rather than in a project venv.
+- name: Install pip-only git tools
+  ansible.builtin.pip:
+    name:
+      - pre-commit
+      - git-filter-repo
+    extra_args: --user --break-system-packages

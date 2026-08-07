@@ -1,0 +1,10 @@
+---
+- name: Update limine
+  become: true
+  ansible.builtin.command: limine-update
+  changed_when: true
+
+- name: Regenerate grub config
+  become: true
+  ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
+  changed_when: true

@@ -1,0 +1,48 @@
+---
+# Catppuccin theme dirs. Each archive is downloaded to the cache (re-fetched
+# weekly, mirroring the old refreshPeriod = 168h) and the archive_subdir
+# contents are copied to the real destination, replicating the old
+# stripComponents/include pair.
+
+- name: Ensure the catppuccin cache directories exist
+  ansible.builtin.file:
+    path: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ externals_archives }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Check cached theme archives
+  ansible.builtin.stat:
+    path: "{{ target_home }}/.cache/catppuccin/{{ item.name }}.tar.gz"
+  loop: "{{ externals_archives }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: theme_cache
+
+- name: Download stale theme archives
+  ansible.builtin.get_url:
+    url: "{{ item.item.url }}"
+    dest: "{{ target_home }}/.cache/catppuccin/{{ item.item.name }}.tar.gz"
+    force: "{{ item.stat.mtime is undefined or item.stat.mtime < (ansible_facts.date_time.epoch | int) - 604800 }}"
+  loop: "{{ theme_cache.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Extract theme archives
+  ansible.builtin.unarchive:
+    src: "{{ target_home }}/.cache/catppuccin/{{ item.name }}.tar.gz"
+    dest: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
+  loop: "{{ externals_archives }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Install catppuccin theme dirs
+  ansible.posix.synchronize:
+    src: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}/{{ item.archive_subdir }}/"
+    dest: "{{ item.dest }}/"
+    checksum: true
+  loop: "{{ externals_archives }}"
+  loop_control:
+    label: "{{ item.name }}"

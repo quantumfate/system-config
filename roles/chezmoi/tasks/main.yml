@@ -1,0 +1,60 @@
+---
+# Chezmoi needs to be bootstrapped for the user config
+
+- name: Install chezmoi
+  become: true
+  community.general.pacman:
+    name: chezmoi
+    state: present
+
+# The source dir doubles as the dotfiles dev checkout, so a dirty tree is
+# normal. Pull only when it is clean — never discard uncommitted work.
+- name: Check the dotfiles checkout for local modifications
+  ansible.builtin.command: git status --porcelain
+  args:
+    chdir: "{{ chezmoi_source }}"
+  register: chezmoi_dirty
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Clone or update the dotfiles source
+  ansible.builtin.git:
+    repo: "{{ chezmoi_repo }}"
+    dest: "{{ chezmoi_source }}"
+    version: "{{ chezmoi_version | default('HEAD') }}"
+    update: "{{ chezmoi_update | default(true) }}"
+    accept_newhostkey: true
+  when: chezmoi_dirty.stdout | default('') | length == 0
+
+- name: Report a dirty dotfiles checkout
+  ansible.builtin.debug:
+    msg: >-
+      {{ chezmoi_source }} has uncommitted changes — skipped the pull and
+      applying the working tree as-is.
+  when: chezmoi_dirty.stdout | default('') | length > 0
+
+- name: Ensure the chezmoi config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/chezmoi"
+    state: directory
+    mode: "0755"
+
+- name: Render the chezmoi config
+  ansible.builtin.template:
+    src: chezmoi.toml.j2
+    dest: "{{ target_home }}/.config/chezmoi/chezmoi.toml"
+    mode: "0644"
+
+- name: Apply the dotfiles
+  ansible.builtin.command: chezmoi apply --force
+  register: chezmoi_apply
+  changed_when: chezmoi_apply.stdout | length > 0
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"
+
+- name: Reload the systemd user manager
+  ansible.builtin.systemd_service:
+    scope: user
+    daemon_reload: true
+  failed_when: false

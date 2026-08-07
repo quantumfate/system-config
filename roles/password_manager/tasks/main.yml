@@ -1,0 +1,39 @@
+---
+# Replaces chezmoi's read-source-state hook: install pass-cli and make sure a
+# session exists, so later roles can read secrets non-interactively.
+# Skipped entirely when secrets come from ansible-vault.
+
+# check_mode: false on the probes — they only read, and the tasks gated on
+# them would otherwise see an undefined rc during a dry run.
+- name: Detect pass-cli
+  ansible.builtin.command: command -v pass-cli
+  register: pass_cli_bin
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"
+
+- name: Install pass-cli from vendor script
+  ansible.builtin.shell:
+    cmd: set -o pipefail && curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+    executable: /bin/bash
+  when: pass_cli_bin.rc != 0
+  changed_when: true
+
+- name: Check for an active vault session
+  ansible.builtin.command: pass-cli vault list
+  register: pass_cli_session
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"
+
+# Interactive by design — run the playbook from a TTY on first provision.
+- name: Log in to Proton Pass
+  ansible.builtin.command: pass-cli login --interactive
+  when: pass_cli_session.rc != 0
+  changed_when: true
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"

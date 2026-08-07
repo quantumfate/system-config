@@ -1,0 +1,15 @@
+---
+# uwsm-wrapped Wayland sessions, offered by the display manager.
+
+- name: Install Wayland session entries
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /usr/share/wayland-sessions/{{ item }}
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - sway-uwsm.desktop
+    - niri-uwsm.desktop
+  notify: Update desktop database

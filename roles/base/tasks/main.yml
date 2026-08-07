@@ -1,0 +1,24 @@
+---
+# Minimum needed before anything else can run: fetch tools and an AUR helper.
+
+- name: Assert Arch-family host
+  ansible.builtin.assert:
+    that: ansible_facts.os_family == 'Archlinux'
+    fail_msg: This playbook targets Arch/CachyOS only.
+
+- name: Install bootstrap dependencies
+  become: true
+  community.general.pacman:
+    name:
+      - curl
+      - jq
+      - git
+      - base-devel
+    state: present
+    update_cache: true
+
+- name: Install yay (AUR helper)
+  become: true
+  community.general.pacman:
+    name: yay
+    state: present

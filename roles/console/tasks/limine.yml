@@ -1,0 +1,32 @@
+---
+# Rewrites KERNEL_CMDLINE[default] with a fresh copy of the palette params.
+
+- name: Read the current limine cmdline
+  become: true
+  ansible.builtin.shell:
+    cmd: grep 'KERNEL_CMDLINE\[default\]' /etc/default/limine || true
+  register: limine_line
+  check_mode: false
+  changed_when: false
+
+- name: Fail when the cmdline entry is missing
+  ansible.builtin.fail:
+    msg: No KERNEL_CMDLINE[default] entry in /etc/default/limine.
+  when: limine_line.stdout | length == 0
+
+- name: Compute the cmdline without any palette params
+  ansible.builtin.set_fact:
+    limine_inner: >-
+      {{ limine_line.stdout
+         | regex_search('\+="(.*)"', '\1') | first
+         | regex_replace('vt\.default_(red|grn|blu)=[0-9,]+', '')
+         | regex_replace('\s+', ' ') | trim }}
+
+- name: Write the cmdline with the palette
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/limine
+    regexp: '^KERNEL_CMDLINE\[default\]'
+    line: 'KERNEL_CMDLINE[default]+="{{ (limine_inner ~ " " ~ vt_color_params | join(" ")) | trim }}"'
+    backup: true
+  notify: Update limine

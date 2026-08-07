@@ -1,0 +1,51 @@
+---
+# Catppuccin finishing touches that no package or dotfile can do: icon folder
+# recolouring, the oh-my-zsh theme checkout, and applying GTK settings.
+
+- name: Recolour Papirus folders
+  ansible.builtin.command: papirus-folders -C {{ gtk_icon_theme_flavour }} --theme Papirus-Dark
+  register: papirus
+  changed_when: "'already' not in papirus.stdout"
+
+- name: Apply GTK settings from the chezmoi-managed config
+  ansible.builtin.command: nwg-look -a
+  changed_when: true
+  failed_when: false
+
+- name: Clone the Catppuccin oh-my-zsh theme
+  ansible.builtin.git:
+    repo: https://github.com/zyoNoob/catppuccin-ohmyzsh.git
+    dest: "{{ target_home }}/.cache/catppuccin-ohmyzsh"
+    version: HEAD
+    update: true
+
+- name: Ensure the oh-my-zsh theme directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ target_home }}/.config/oh-my-zsh/themes"
+    - "{{ target_home }}/.config/oh-my-zsh/themes/catppuccin-flavors"
+
+- name: Link the theme
+  ansible.builtin.file:
+    src: "{{ target_home }}/.cache/catppuccin-ohmyzsh/catppuccin.zsh-theme"
+    dest: "{{ target_home }}/.config/oh-my-zsh/themes/catppuccin.zsh-theme"
+    state: link
+    force: true
+
+- name: Find the flavour files
+  ansible.builtin.find:
+    paths: "{{ target_home }}/.cache/catppuccin-ohmyzsh/catppuccin-flavors"
+  register: flavours
+
+- name: Link the flavours
+  ansible.builtin.file:
+    src: "{{ item.path }}"
+    dest: "{{ target_home }}/.config/oh-my-zsh/themes/catppuccin-flavors/{{ item.path | basename }}"
+    state: link
+    force: true
+  loop: "{{ flavours.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"

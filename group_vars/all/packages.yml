@@ -1,0 +1,337 @@
+---
+# Package sets, sourced from the former chezmoi .chezmoidata/packages.yaml.
+# All installs go through yay (repo + AUR), see roles/packages.
+common_packages:
+  # Core utilities
+  - base-devel
+  - age
+  - neovim-nightly-bin
+  - chezmoi
+  - btop
+  - glances
+  - duf
+  - lsd
+  - jless
+  - glow
+  - grc
+  - lazygit
+  - plocate
+  - tmux
+  - tmux-sessionizer
+  - lesspipe
+  - fd
+  - ripgrep
+  - tree
+  - cmatrix
+  - fzf
+  - cava
+  - kimageformats
+  - cups-pk-helper
+  - wf-recorder
+  - slurp
+  - zoxide
+  - thefuck
+  - trash-cli
+  - qtkeychain-qt6
+  - copyq
+
+  # Cryptsetup
+  - fwupd
+  - tpm2-tss
+  - sbctl
+
+  # TUIs
+  - yazi
+  - wiremix
+  - lf
+  - ranger
+  - parui
+  - bluetui
+  - gimp
+
+  # Shell & Terminal
+  - kitty
+  - foot
+  - zsh
+  - zsh-autocomplete
+  - zsh-autopair-git
+
+  # System tools
+  - cpupower
+  - hdparm
+  - logrotate
+  - rebuild-detector
+  - reflector
+  - udiskie
+  - ex-vi-compat
+  - s-nail
+  - socat
+  - scdoc
+
+  # File systems & disk tools
+  - btrfs-assistant
+  - snapper
+  - fsarchiver
+
+  # Compression & archives
+  - unzip
+  - unrar
+
+  # Applications
+  - zen-twilight-bin
+  - brave-bin
+  - obsidian
+  - spotify
+  - vesktop
+  - qalculate-qt
+  - vlc-plugins-all
+
+  # Proton
+  - proton-authenticator-bin
+  - proton-pass-bin
+  - proton-mail-bin
+  - proton-drive-sync-bin
+  - proton-vpn-gtk-app
+
+  - clight
+  - clightd
+  - niri
+  - sway
+  # Hyprland ecosystem
+  - hyprland
+  - hyprutils
+  - hyprlang
+  - hyprgraphics
+  - hyprcursor
+  - hyprland-qt-support
+  - hyprland-guiutils
+  - hyprpaper
+  - hyprpicker
+  - hyprpolkitagent
+  - hyprshot
+  - grim-hyprland-git
+
+  # Sway
+  - sway
+  - swaybg
+  - swaylock-effects-git
+  - swaylock-fancy-git
+
+  # Wayland tools
+  - kanshi
+  - shikane
+  - waybar
+  - wofi
+  - rofi
+  - bemenu
+  - bemenu-wayland
+  - wmenu
+  - mako
+  - wlogout
+  - wl-clipboard
+  - wtype
+  - xdotool
+  - cliphist
+  - wob
+  - uwsm
+  - xwayland-satellite
+  - wev
+
+  # Audio
+  - playerctl
+  - pamixer
+  - pavucontrol
+  - alsa-firmware
+  - alsa-plugins
+
+  # Graphics & display
+  - brightnessctl
+  - feh
+  - chafa
+
+  # XDG portals
+  - xdg-desktop-portal-hyprland
+  - xdg-desktop-portal-wlr
+  - xdg-desktop-portal-gtk
+  - xdg-desktop-portal-kde
+
+  # Package management
+  - yay
+  - octopi
+  - pacman-contrib
+
+  # System & boot
+  - grub-btrfs-support
+  - grub-hook
+  - efitools
+
+  # Network
+  - networkmanager-openvpn
+  - netctl
+  - dhclient
+  - ufw
+  - dnsmasq
+
+  # Bluetooth
+  - bluez-hid2hci
+  - bluez-utils
+
+  # Themes & appearance
+  - nwg-look
+  - qt5ct
+  - qt6ct-kde
+  - kvantum
+  - kvantum-theme-nordic-git
+  - papirus-folders-catppuccin-git
+  - catppuccin-gtk-theme-latte
+  - catppuccin-gtk-theme-macchiato
+  - catppuccin-cursors-latte
+  - catppuccin-cursors-macchiato
+  - juno-palenight-gtk-theme-git
+  - juno-palenight-standard-buttons-gtk-theme-git
+  - catppuccin-plasma-colorscheme-macchiato
+  - catppuccin-plasma-colorscheme-latte
+  - quickshell
+  - qt5-svg
+  - qt6-svg
+  - qt5-imageformats
+  - qt6-imageformats
+  - qt5-multimedia
+  - qt6-multimedia
+  - qt6-5compat
+  - unixodbc
+
+  # Spotify customization
+  # - spicetify-cli
+
+  # Fonts
+  - ttf-arimo-nerd
+  - ttf-cascadia-code-nerd
+  - ttf-dejavu-nerd
+  - ttf-firacode-nerd
+  - ttf-hack-nerd
+  - ttf-inconsolata-nerd
+  - ttf-iosevka-nerd
+  - ttf-jetbrains-mono-nerd
+  - ttf-meslo-nerd
+  - ttf-roboto
+  - noto-color-emoji-fontconfig
+  - cantarell-fonts
+  - awesome-terminal-fonts
+  - otf-font-awesome
+  - woff2-font-awesome
+
+  # Libraries & codecs
+  - gst-libav
+  - gst-plugin-pipewire
+  - gst-plugins-bad
+  - gst-plugins-ugly
+  - ffmpegthumbnailer
+  - libdvdcss
+  - libgsf
+  - libopenraw
+  - poppler-glib
+  - ghostscript
+  - qt5-wayland
+  - wayland-protocols
+
+  # System utilities
+  - man-db
+  - man-pages
+  - texinfo
+  - iptables-nft
+
+  # X11 (compatibility)
+  - xorg-server
+  - xorg-xinit
+  - xorg-xinput
+  - xorg-xkill
+  - xf86-input-libinput
+
+gaming_packages:
+  - steam
+  - gamemode
+  - mangohud
+  - ankama-launcher
+  - cachyos-gaming-meta
+
+vm_packages:
+  - cockpit
+  - cockpit-files
+  - cockpit-machines
+  - cockpit-packagekit
+  - cockpit-podman
+  - cockpit-storaged
+  - cockpit-docker
+  - bridge-utils
+  - libvirt
+  - swtpm
+  - qemu-full
+  - virt-viewer
+  - virtio-win
+  - edk2-ovmf
+  - virt-install
+  - docker
+  - docker-compose-bin
+
+llm_packages:
+  - ollama-bin
+  - ollama-cuda13-bin
+  # - open-webui
+
+dev_packages:
+  # Language servers & tooling
+  - bash-language-server
+  - typescript-language-server
+  - lua-language-server
+  - rust-analyzer
+  - codebook-lsp
+
+  # Runtimes & build tools
+  - just
+  - pnpm
+  - base-devel
+  - npm
+  - go
+  - rustup
+  - cargo
+  - python-pip
+  - python-pipx
+  - lua51
+  - luarocks
+  - hererocks
+  - ruby-colorls
+  - claude-code
+
+  # Python libs
+  - python-pillow
+  - python-packaging
+  - python-defusedxml
+
+  # Docs & markup
+  - pandoc-cli
+  - tectonic
+  - texlive-bin
+  - mermaid-cli
+
+  # Dev utilities
+  - meld
+  - js-util-bin
+  - git-filter-repo
+  - github-cli
+  - scdoc
+  - uv
+  - commitlint
+  - firefox-developer-edition
+
+desktop_packages:
+  - ckb-next
+  - qmk
+  - dos2unix
+
+  - sddm
+  - catppuccin-sddm-theme-latte
+  - catppuccin-sddm-theme-macchiato
+
+laptop_packages:
+  - greetd-tuigreet-fork-bin

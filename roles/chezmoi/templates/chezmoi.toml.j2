@@ -1,0 +1,16 @@
+{#- Rendered from group_vars/all/main.yml; replaces chezmoi's promptOnce flow. -#}
+# Managed by Ansible (roles/chezmoi). Edit group_vars/all/main.yml instead.
+
+[data]
+  profile = "{{ profile }}"
+  primary_monitor = "{{ primary_monitor }}"
+{% if secondary_monitor %}
+  secondary_monitor = "{{ secondary_monitor }}"
+{% endif %}
+  gaming = {{ gaming | lower }}
+  vms = {{ vms | lower }}
+  llms = {{ llms | lower }}
+  devenv = {{ devenv | lower }}
+
+[secret]
+  command = "pass-cli"

@@ -1,0 +1,141 @@
+# group_vars/externals.yml
+# External Repositories that must be present
+
+# External zsh plugins
+externals_repos:
+  - name: oh-my-zsh
+    repo: https://github.com/ohmyzsh/ohmyzsh
+    dest: "{{ target_home }}/.config/oh-my-zsh"
+  - name: zsh-ls
+    repo: https://github.com/zpm-zsh/ls
+    dest: "{{ target_home }}/.config/oh-my-zsh/custom/plugins/ls"
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ target_home }}/.zsh/zsh-autosuggestions"
+  - name: zsh-autopair
+    repo: https://github.com/hlissner/zsh-autopair
+    dest: "{{ target_home }}/.zsh/zsh-autopair"
+  - name: catppuccin-fzf
+    repo: https://github.com/catppuccin/fzf
+    dest: "{{ target_home }}/.zsh/catppuccin-fzf"
+  - name: fzf-tab
+    repo: https://github.com/Aloxaf/fzf-tab
+    dest: "{{ target_home }}/.zsh/fzf-tab"
+  - name: fzf-tab-source
+    repo: https://github.com/Freed-Wu/fzf-tab-source
+    dest: "{{ target_home }}/.zsh/fzf-tab-source"
+  - name: zsh-chezmoi
+    repo: https://github.com/mass8326/zsh-chezmoi
+    dest: "{{ target_home }}/.zsh/zsh-chezmoi"
+  - name: catppuccin-zsh-syntax-highlighting
+    repo: https://github.com/catppuccin/zsh-syntax-highlighting
+    dest: "{{ target_home }}/.zsh/catppuccin-zsh-syntax-highlighting"
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: "{{ target_home }}/.zsh/zsh-syntax-highlighting"
+  - name: tmux-catppuccin
+    repo: https://github.com/catppuccin/tmux
+    dest: "{{ target_home }}/.config/tmux/plugins/catppuccin"
+
+# --- Personal checkouts ---------------------------------------------------
+# ff-only pulls: local commits and edits are never clobbered. The pull is
+# skipped while a checkout is dirty, mirroring the old .pull.args = ["--ff-only"].
+externals_projects:
+  - name: hypr
+    repo: https://github.com/quantumfate/hypr
+    dest: "{{ target_home }}/.config/hypr"
+  - name: nvim
+    repo: https://github.com/quantumfate/nvim
+    dest: "{{ target_home }}/.config/nvim"
+  - name: aiagent
+    repo: git@github.com:quantumfate/aiagent.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/aiagent"
+  - name: lance.nvim
+    repo: git@github.com:quantumfate/lance.nvim.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/lance.nvim"
+  - name: scripts
+    repo: git@github.com:quantumfate/scripts.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/scripts"
+  - name: security-and-privacy
+    repo: git@gitlab.com:quantumfate/security-and-privacy.git
+    dest: "{{ target_home }}/Projects/gitlab/quantumfate/security-and-privacy"
+
+# Former {{ if .gaming }} / {{ if eq .profile "desktop" }} blocks.
+externals_projects_gaming:
+  - name: dofus-scripts
+    repo: git@gitlab.com:quantumfate/dofus-scripts.git
+    dest: "{{ target_home }}/Projects/gitlab/quantumfate/dofus-scripts"
+
+externals_projects_desktop:
+  - name: kbd75-rev2
+    repo: git@github.com:quantumfate/kbd75-rev2.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/kbd75-rev2"
+
+# Catppuccin themes (former archives)
+# archive_subdir is the directory inside the tarball whose contents land in
+# dest, replacing the old stripComponents/include pair. Refreshed on every
+# run instead of on a refreshPeriod timer.
+externals_archives:
+  - name: btop
+    url: https://github.com/catppuccin/btop/archive/refs/heads/main.tar.gz
+    archive_subdir: btop-main/themes
+    dest: "{{ target_home }}/.config/btop/themes"
+  - name: foot
+    url: https://github.com/catppuccin/foot/archive/refs/heads/main.tar.gz
+    archive_subdir: foot-main/themes
+    dest: "{{ target_home }}/.config/foot/themes"
+  - name: kitty
+    url: https://github.com/catppuccin/kitty/archive/refs/heads/main.tar.gz
+    archive_subdir: kitty-main/themes
+    dest: "{{ target_home }}/.config/kitty/themes"
+  - name: qt5ct
+    url: https://github.com/catppuccin/qt5ct/archive/refs/heads/main.tar.gz
+    archive_subdir: qt5ct-main/themes
+    dest: "{{ target_home }}/.config/qt5ct/colors"
+  - name: qt6ct
+    url: https://github.com/catppuccin/qt5ct/archive/refs/heads/main.tar.gz
+    archive_subdir: qt5ct-main/themes
+    dest: "{{ target_home }}/.config/qt6ct/colors"
+  - name: kvantum
+    url: https://github.com/catppuccin/kvantum/archive/refs/heads/main.tar.gz
+    archive_subdir: kvantum-main/themes
+    dest: "{{ target_home }}/.config/Kvantum"
+  - name: rofi
+    url: https://github.com/catppuccin/rofi/archive/refs/heads/main.tar.gz
+    archive_subdir: rofi-main/themes
+    dest: "{{ target_home }}/.local/share/rofi/themes"
+  - name: zathura
+    url: https://github.com/catppuccin/zathura/archive/refs/heads/main.tar.gz
+    archive_subdir: zathura-main/themes
+    dest: "{{ target_home }}/.config/zathura"
+  - name: mako
+    url: https://github.com/catppuccin/mako/archive/refs/heads/main.tar.gz
+    archive_subdir: mako-main/themes
+    dest: "{{ target_home }}/.config/mako/themes"
+  - name: spicetify
+    url: https://github.com/catppuccin/spicetify/archive/refs/heads/main.tar.gz
+    archive_subdir: spicetify-main/catppuccin
+    dest: "{{ target_home }}/.config/spicetify/Themes/catppuccin"
+  - name: wlogout-icons
+    url: https://github.com/catppuccin/wlogout/archive/refs/heads/main.tar.gz
+    archive_subdir: wlogout-main/icons
+    dest: "{{ target_home }}/.config/wlogout/catppuccin/icons"
+  - name: wlogout-themes
+    url: https://github.com/catppuccin/wlogout/archive/refs/heads/main.tar.gz
+    archive_subdir: wlogout-main/themes
+    dest: "{{ target_home }}/.config/wlogout/catppuccin/themes"
+
+# Single-file downloads (former type = "file")
+externals_files:
+  - name: ranger-catppuccin-latte
+    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_latte.py
+    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_latte.py"
+  - name: ranger-catppuccin-frappe
+    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_frappe.py
+    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_frappe.py"
+  - name: ranger-catppuccin-macchiato
+    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_macchiato.py
+    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_macchiato.py"
+  - name: ranger-catppuccin-mocha
+    url: https://github.com/dfrico/catppuccin-ranger/releases/latest/download/catppuccin_mocha.py
+    dest: "{{ target_home }}/.config/ranger/colorschemes/catppuccin_mocha.py"

@@ -1,0 +1,50 @@
+---
+- name: Find {{ browser.name }} profile directories
+  ansible.builtin.find:
+    paths: "{{ browser.path }}"
+    file_type: directory
+    recurse: false
+  register: found_profiles
+  failed_when: false
+
+- name: Select real profile directories
+  ansible.builtin.set_fact:
+    profile_dirs: >-
+      {{ found_profiles.files | default([]) | map(attribute='path')
+         | reject('search', '\.Default Profile$')
+         | reject('search', '/(' ~ (browser_profile_excludes | join('|')) ~ ')$')
+         | list }}
+
+- name: Link user.js
+  ansible.builtin.file:
+    src: "{{ browser_config_src }}/user.js"
+    dest: "{{ item }}/user.js"
+    state: link
+    force: true
+  loop: "{{ profile_dirs }}"
+
+- name: Link Zen profile extras
+  ansible.builtin.file:
+    src: "{{ browser_config_src }}/{{ item[1] }}"
+    dest: "{{ item[0] }}/{{ item[1] }}"
+    state: link
+    force: true
+  loop: "{{ profile_dirs | product(zen_profile_extras) | list }}"
+  when: browser.zen
+
+- name: Ensure Zen chrome directories exist
+  ansible.builtin.file:
+    path: "{{ item }}/chrome"
+    state: directory
+    mode: "0755"
+  loop: "{{ profile_dirs }}"
+  when: browser.zen
+
+- name: Link Zen chrome assets
+  ansible.builtin.file:
+    src: "{{ browser_config_src }}/{{ item[1] }}"
+    dest: "{{ item[0] }}/chrome/{{ item[1] }}"
+    state: link
+    force: true
+  loop: "{{ profile_dirs | product(zen_chrome_extras) | list }}"
+  when: browser.zen

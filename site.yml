@@ -1,0 +1,61 @@
+---
+# Full workstation convergence. Role order matters:
+#   1. bootstrap + credentials  (needed to clone anything over SSH)
+#   2. packages                 (everything below assumes binaries exist)
+#   3. system scope             (/etc, units, groups, bootloader)
+#   4. chezmoi                  ($HOME dotfiles)
+#   5. roles consuming dotfiles (they read files chezmoi just wrote)
+- name: Converge workstation
+  hosts: localhost
+  gather_facts: true
+
+  roles:
+    - role: base
+      tags: [base, bootstrap]
+    - role: password_manager
+      when: secrets_backend == 'pass-cli'
+      tags: [secrets, bootstrap]
+    - role: secrets
+      tags: [secrets, bootstrap]
+
+    - role: packages
+      tags: [packages]
+
+    - role: sudoers
+      tags: [system, sudoers]
+    - role: user_dirs
+      tags: [user]
+    - role: login_shell
+      tags: [system, shell]
+    - role: keyboard
+      tags: [system, keyboard]
+    - role: console
+      tags: [system, console]
+    - role: desktop_entries
+      tags: [system, sessions]
+    - role: display_manager
+      tags: [system, sddm]
+    - role: docker
+      when: vms
+      tags: [system, docker]
+    - role: virtualization
+      when: vms
+      tags: [system, vms]
+    - role: power_profile
+      when: gaming
+      tags: [system, power]
+    - role: devenv
+      when: devenv
+      tags: [devenv]
+
+    - role: chezmoi
+      tags: [dotfiles, chezmoi]
+    - role: externals
+      tags: [dotfiles, externals]
+
+    - role: clight
+      tags: [dotfiles, clight]
+    - role: browser_profiles
+      tags: [dotfiles, browser]
+    - role: theming
+      tags: [dotfiles, theming]

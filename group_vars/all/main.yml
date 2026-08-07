@@ -1,0 +1,40 @@
+---
+# Machine profile and feature flags
+# Single source of truth
+
+profile: desktop # desktop | laptop
+
+primary_monitor: DP-1
+secondary_monitor: "" # empty = single-head
+
+gaming: true
+vms: true
+llms: true
+devenv: true
+
+# Identity
+target_user: "{{ ansible_facts.user_id }}"
+target_home: "{{ ansible_facts.env.HOME }}"
+login_shell: /usr/bin/zsh
+
+# Dotfiles
+chezmoi_repo: git@codeberg.org:quantumfate/dotfiles.git
+chezmoi_source: "{{ target_home }}/.local/share/chezmoi"
+
+# Secrets
+# pass-cli: pull SSH/GPG material from Proton Pass at run time
+# vault:    read the same material from group_vars/all/vault.yml (ansible-vault)
+secrets_backend: pass-cli
+
+# vault: item title per SSH key target, in vault "Productivity"
+ssh_key_targets:
+  - codeberg
+  - gitlab
+  - github
+  - aur
+
+# Look and feel
+keyboard_layout: dvorak-custom
+console_font: ter-v32n
+sddm_theme_package: catppuccin-sddm-theme-macchiato
+gtk_icon_theme_flavour: cat-macchiato-mauve

@@ -1,0 +1,37 @@
+---
+# Removes leftovers from the greetd / dms-greeter / autologin setup so exactly
+# one display manager owns the seat.
+
+- name: Remove the systemd autologin override
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    state: absent
+  notify: Reload systemd
+
+- name: Disable competing display managers
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+  loop: [greetd, gdm, lightdm, lxdm, ly]
+  failed_when: false
+
+- name: Remove greetd artefacts
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/greetd.service.d
+    - /etc/greetd
+    - /var/cache/dms-greeter
+  notify: Reload systemd
+
+- name: Remove the greeter user
+  become: true
+  ansible.builtin.user:
+    name: greeter
+    state: absent
+    remove: true
+  failed_when: false

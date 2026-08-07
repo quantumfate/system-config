@@ -1,0 +1,52 @@
+---
+# Personal checkouts are pulled with --ff-only and only while clean, so local
+# commits or edits are never clobbered (the old externals did the same via
+# .pull.args = ["--ff-only"]).
+
+- name: Clone project checkout if missing
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+    version: HEAD
+    update: false
+  loop: "{{ project_repos }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: not item.dest is exists
+
+- name: Check for uncommitted changes in project checkouts
+  ansible.builtin.command: git -C {{ item.dest }} status --porcelain
+  loop: "{{ project_repos }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: project_dirty
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: item.dest is exists
+
+- name: Pull clean project checkouts with --ff-only
+  ansible.builtin.command: git -C {{ item.item.dest }} pull --ff-only
+  loop: "{{ project_dirty.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.stdout | length == 0
+  register: project_pull
+  changed_when: "'up to date' not in item.stdout | lower"
+  failed_when: false
+
+- name: Report dirty project checkouts
+  ansible.builtin.debug:
+    msg: "{{ item.item.name }} has uncommitted changes — pull skipped."
+  loop: "{{ project_dirty.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.stdout | length > 0
+
+- name: Report diverged project checkouts
+  ansible.builtin.debug:
+    msg: "{{ item.item.name }} diverged from its remote — left as-is."
+  loop: "{{ project_pull.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.rc != 0

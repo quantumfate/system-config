@@ -1,0 +1,46 @@
+---
+# Catppuccin colours for the kernel VT, plus a legible font on hidpi desktops.
+# The palette is a kernel cmdline parameter, so it goes through the bootloader.
+
+- name: Detect bootloader config files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /etc/default/limine
+    - /etc/default/grub
+  register: bootloader_stat
+
+- name: Select the active bootloader
+  ansible.builtin.set_fact:
+    bootloader: >-
+      {{ 'limine' if bootloader_stat.results[0].stat.exists
+         else ('grub' if bootloader_stat.results[1].stat.exists else 'unknown') }}
+
+- name: Apply the VT palette
+  ansible.builtin.include_tasks: "{{ bootloader }}.yml"
+  when: bootloader != 'unknown'
+
+- name: Warn when no supported bootloader was found
+  ansible.builtin.debug:
+    msg: >-
+      No limine/grub config found. Add manually to the kernel cmdline:
+      {{ vt_color_params | join(' ') }}
+  when: bootloader == 'unknown'
+
+- name: Configure the console font
+  when: profile == 'desktop'
+  block:
+    - name: Install terminus-font
+      become: true
+      community.general.pacman:
+        name: terminus-font
+        state: present
+
+    - name: Set the console font
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/vconsole.conf
+        regexp: ^FONT=
+        line: FONT={{ console_font }}
+        create: true
+        mode: "0644"

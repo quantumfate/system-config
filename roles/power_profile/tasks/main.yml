@@ -1,0 +1,34 @@
+---
+# Pins the CPU energy-performance preference to `performance` while the
+# machine is up. Only meaningful on EPP-capable scaling drivers.
+
+- name: Read the cpufreq scaling driver
+  ansible.builtin.slurp:
+    src: /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver
+  register: scaling_driver
+  failed_when: false
+
+- name: Install the EPP unit
+  when: (scaling_driver.content | default('') | b64decode | trim) in ['amd-pstate-epp', 'intel_pstate']
+  block:
+    - name: Write the unit file
+      become: true
+      ansible.builtin.copy:
+        src: epp-performance.service
+        dest: /etc/systemd/system/epp-performance.service
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Enable and start the unit
+      become: true
+      ansible.builtin.systemd_service:
+        name: epp-performance.service
+        enabled: true
+        state: started
+        daemon_reload: true
+
+- name: Report unsupported scaling drivers
+  ansible.builtin.debug:
+    msg: "EPP not supported (scaling_driver={{ scaling_driver.content | default('none') | b64decode | trim }}) — skipped."
+  when: (scaling_driver.content | default('') | b64decode | trim) not in ['amd-pstate-epp', 'intel_pstate']

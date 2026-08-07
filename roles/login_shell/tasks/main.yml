@@ -1,0 +1,6 @@
+---
+- name: Set the login shell
+  become: true
+  ansible.builtin.user:
+    name: "{{ target_user }}"
+    shell: "{{ login_shell }}"

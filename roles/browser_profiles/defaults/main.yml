@@ -1,0 +1,23 @@
+---
+# Source of the shared prefs, written by chezmoi.
+browser_config_src: "{{ target_home }}/.config/zen-chezmoi"
+
+# Profile dirs to skip when symlinking — not real browser profiles.
+browser_profile_excludes:
+  - Profile Groups
+  - firefox-mpris
+  - Pending Pings
+  - Crash Reports
+
+browser_roots:
+  - {name: Zen, path: "{{ target_home }}/.config/zen", zen: true}
+  - {name: Firefox, path: "{{ target_home }}/.config/mozilla/firefox", zen: false}
+
+# Symlinked into the profile root.
+zen_profile_extras: [zen-themes.json]
+
+# Symlinked into <profile>/chrome.
+zen_chrome_extras:
+  - userChrome.css
+  - userContent.css
+  - zen-logo-macchiato.svg

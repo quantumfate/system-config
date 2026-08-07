@@ -1,0 +1,12 @@
+---
+# sudo timestamp tuning. validate= makes a bad file abort instead of locking you out.
+
+- name: Install sudoers drop-in
+  become: true
+  ansible.builtin.copy:
+    src: 10-timeout
+    dest: /etc/sudoers.d/10-timeout
+    owner: root
+    group: root
+    mode: "0440"
+    validate: visudo -cf %s

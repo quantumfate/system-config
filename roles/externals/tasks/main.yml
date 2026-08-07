@@ -1,0 +1,39 @@
+---
+# Everything the dotfiles reference that is not a plain file: plugin/theme
+# git checkouts, personal project checkouts, catppuccin theme dirs and a few
+# single-file downloads. Replaces chezmoi's .chezmoiexternal.toml.tmpl.
+# The lists live in group_vars/all/externals.yml.
+
+- name: Clone dotfiles-support repos
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+    version: HEAD
+    update: true
+    force: true
+  loop: "{{ externals_repos }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Check out personal projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ externals_projects }}"
+
+- name: Check out gaming projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ externals_projects_gaming }}"
+  when: gaming
+
+- name: Check out desktop projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ externals_projects_desktop }}"
+  when: profile == 'desktop'
+
+- name: Install catppuccin themes
+  ansible.builtin.include_tasks: themes.yml
+
+- name: Download single-file themes
+  ansible.builtin.include_tasks: files.yml

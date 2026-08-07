@@ -1,0 +1,90 @@
+---
+# SDDM as the sole display manager: install, theme, keymap, keyring, and tear
+# down every competing greeter (greetd/dms-greeter era included).
+
+- name: Install sddm and theme
+  kewlfft.aur.aur:
+    name:
+      - sddm
+      - "{{ sddm_theme_package }}"
+    use: yay
+    state: present
+  become: false
+
+- name: Import greeter teardown
+  ansible.builtin.include_tasks: teardown.yml
+
+- name: Ensure the sddm config directory exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/sddm.conf.d
+    state: directory
+    mode: "0755"
+
+- name: Resolve the theme directory shipped by the package
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail;
+      pacman -Qlq {{ sddm_theme_package }}
+      | sed -n 's#^/usr/share/sddm/themes/\([^/]*\)/.*#\1#p'
+      | sort -u | grep mauve
+    executable: /bin/bash
+  register: sddm_theme_dir
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Select the theme
+  become: true
+  ansible.builtin.copy:
+    content: |
+      [Theme]
+      Current={{ sddm_theme_dir.stdout_lines | first }}
+    dest: /etc/sddm.conf.d/theme.conf
+    mode: "0644"
+  when: sddm_theme_dir.stdout_lines | length == 1
+
+- name: Warn when the theme directory could not be resolved
+  ansible.builtin.debug:
+    msg: "Could not resolve a mauve theme dir from {{ sddm_theme_package }} — keeping the default theme."
+  when: sddm_theme_dir.stdout_lines | length != 1
+
+# Xsetup runs as root on the greeter's X server before the login screen draws,
+# so it is the only place the custom layout can be loaded for SDDM.
+- name: Install the greeter Xsetup script
+  become: true
+  ansible.builtin.template:
+    src: Xsetup.j2
+    dest: /etc/sddm/Xsetup
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Point sddm at Xsetup
+  become: true
+  ansible.builtin.copy:
+    content: |
+      [X11]
+      DisplayCommand=/etc/sddm/Xsetup
+    dest: /etc/sddm.conf.d/keyboard.conf
+    mode: "0644"
+
+# No PAM task here on purpose: Arch's /etc/pam.d/sddm includes system-login,
+# which already loads pam_gnome_keyring for auth, password, and session.
+
+- name: Enable sddm
+  become: true
+  ansible.builtin.systemd_service:
+    name: sddm.service
+    enabled: true
+    daemon_reload: true
+
+- name: Check for a Hyprland session file
+  ansible.builtin.stat:
+    path: /usr/share/wayland-sessions/hyprland.desktop
+  register: hyprland_session
+
+- name: Warn when no Hyprland session is installed
+  ansible.builtin.debug:
+    msg: No Hyprland session file in /usr/share/wayland-sessions/.
+  when: not hyprland_session.stat.exists
