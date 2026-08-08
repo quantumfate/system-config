@@ -57,8 +57,8 @@ externals_projects:
     repo: git@github.com:quantumfate/lance.nvim.git
     dest: "{{ target_home }}/Projects/github/quantumfate/lance.nvim"
   - name: scripts
-    repo: git@github.com:quantumfate/scripts.git
-    dest: "{{ target_home }}/Projects/github/quantumfate/scripts"
+    repo: git@codeberg.org:quantumfate/scripts.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/scripts"
   - name: security-and-privacy
     repo: git@gitlab.com:quantumfate/security-and-privacy.git
     dest: "{{ target_home }}/Projects/gitlab/quantumfate/security-and-privacy"
