@@ -42,27 +42,27 @@ roles/                   one concern each
 
 ## Roles
 
-| Role               | Replaces (former `.chezmoiscripts` entry)          |
+| Role               | Description          |
 | ------------------ | -------------------------------------------------- |
-| `base`             | `05-install-yay`, `install-password-manager` deps   |
-| `password_manager` | `.install-password-manager.sh`, `10-login-proton-pass` |
-| `secrets`          | `01-install-ssh-keys`                               |
-| `packages`         | `install-packages`                                  |
-| `sudoers`          | `00-install-sudoers`                                |
-| `user_dirs`        | `02-xdg`                                            |
-| `login_shell`      | `09-change-login-shell`                             |
-| `keyboard`         | `01-install-layout`                                 |
-| `console`          | `08-configure-tty`                                  |
-| `desktop_entries`  | `04-install-desktop-entries`                        |
-| `display_manager`  | `12-install-sddm`                                   |
-| `docker`           | `11-setup-docker`                                   |
-| `virtualization`   | `07-install-cockpit-vm-kvm`                         |
-| `power_profile`    | `12-install-epp-performance`                        |
-| `devenv`           | `05-prepare-nvim-deps`, `06-install-dev-env-packages` |
-| `chezmoi`          | dotfiles clone + apply, `03-reload-user-units`      |
-| `externals`        | `.chezmoiexternal.toml.tmpl` (plugins, dev checkouts, catppuccin themes) |
-| `browser_profiles` | `05-install-userjs-for-browser`                     |
-| `theming`          | `00-finalise-theme`, `20-do-additional-theming`     |
+| `base`             | system deps   |
+| `password_manager` | provides all secrets |
+| `secrets`          | key management                               |
+| `packages`         | system packages                                  |
+| `sudoers`          | sudo configuration                                |
+| `user_dirs`        | xdg                                             |
+| `login_shell`      | zsh primary shell                             |
+| `keyboard`         | custom-dvorak layout                                 |
+| `console`          | tty theming                                  |
+| `desktop_entries`  | sway and niri                        |
+| `display_manager`  | system configuration for display-manager                                   |
+| `docker`           | infra tools                                   |
+| `virtualization`   | vms                         |
+| `power_profile`    | performance related                        |
+| `devenv`           | neovim and dev dependencies |
+| `chezmoi`          | dotfiles clone + apply, systemd unit-reload      |
+| `externals`        | plugins, dev checkouts, catppuccin themes |
+| `browser_profiles` | prowser profile settings                     |
+| `theming`          | rice     |
 
 ## Common runs
 
