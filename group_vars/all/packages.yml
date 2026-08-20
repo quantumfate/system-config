@@ -270,9 +270,6 @@ vm_packages:
   - docker-compose-bin
 
 llm_packages:
-  - ollama-bin
-  - ollama-cuda13-bin
-  # - open-webui
 
 dev_packages:
   # Language servers & tooling
