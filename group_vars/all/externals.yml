@@ -60,8 +60,8 @@ externals_projects:
     repo: git@codeberg.org:quantumfate/scripts.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/scripts"
   - name: security-and-privacy
-    repo: git@gitlab.com:quantumfate/security-and-privacy.git
-    dest: "{{ target_home }}/Projects/gitlab/quantumfate/security-and-privacy"
+    repo: git@codeberg.com:quantumfate/security-and-privacy.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy"
   - name: system-config
     repo: git@codeberg.org:quantumfate/system-config.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/system-config"
@@ -69,13 +69,13 @@ externals_projects:
 # Former {{ if .gaming }} / {{ if eq .profile "desktop" }} blocks.
 externals_projects_gaming:
   - name: dofus-scripts
-    repo: git@gitlab.com:quantumfate/dofus-scripts.git
-    dest: "{{ target_home }}/Projects/gitlab/quantumfate/dofus-scripts"
+    repo: git@codeberg.com:quantumfate/dofus-scripts.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/dofus-scripts"
 
 externals_projects_desktop:
   - name: kbd75-rev2
-    repo: git@github.com:quantumfate/kbd75-rev2.git
-    dest: "{{ target_home }}/Projects/github/quantumfate/kbd75-rev2"
+    repo: git@codeberg.com:quantumfate/kbd75-rev2.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/kbd75-rev2"
 
 # Catppuccin themes (former archives)
 # archive_subdir is the directory inside the tarball whose contents land in
