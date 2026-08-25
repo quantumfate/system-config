@@ -22,10 +22,11 @@
   changed_when: true
 
 - name: Check for an active vault session
-  ansible.builtin.command: pass-cli vault list
+  ansible.builtin.shell:
+    cmd: timeout 5 pass-cli vault list || true
+    executable: /bin/bash
   register: pass_cli_session
   changed_when: false
-  failed_when: false
   check_mode: false
   environment:
     PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"

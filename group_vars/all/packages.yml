@@ -269,8 +269,6 @@ vm_packages:
   - docker
   - docker-compose-bin
 
-llm_packages:
-
 dev_packages:
   # Language servers & tooling
   - bash-language-server

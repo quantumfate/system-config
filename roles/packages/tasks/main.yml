@@ -10,8 +10,7 @@
           + (laptop_packages if profile == 'laptop' else [])
           + (dev_packages if devenv else [])
           + (gaming_packages if gaming else [])
-          + (vm_packages if vms else [])
-          + (llm_packages if llms else []))
+          + (vm_packages if vms else []))
          | unique }}
 
 - name: Install packages
