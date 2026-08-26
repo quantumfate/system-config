@@ -1,0 +1,12 @@
+[Unit]
+Description=Audio device switch notifications
+After=pipewire.service wireplumber.service
+Requires=pipewire.service
+
+[Service]
+ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/,audio-notify.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

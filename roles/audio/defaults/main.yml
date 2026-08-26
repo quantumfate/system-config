@@ -1,0 +1,9 @@
+---
+# Bluetooth auto-switch: when a Bluetooth audio sink connects, switch the
+# default sink to it; on disconnect, fall back to the highest-priority
+# remaining sink. Fully portable — no hardcoded device names.
+audio_deploy_wireplumber_hooks: true
+
+# Desktop notification when the default audio sink changes. Uses pactl subscribe
+# (event-driven, zero CPU idle). Requires libnotify (notify-send).
+audio_deploy_notification_service: true

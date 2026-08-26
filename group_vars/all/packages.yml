@@ -95,18 +95,19 @@ common_packages:
 
   - niri
   - sway
-  # Hyprland ecosystem
-  - hyprland
-  - hyprutils
-  - hyprlang
-  - hyprgraphics
-  - hyprcursor
-  - hyprland-qt-support
-  - hyprland-guiutils
-  - hyprpaper
-  - hyprpicker
-  - hyprpolkitagent
-  - hyprshot
+  # Hyprland ecosystem (git)
+  - hypridle-git
+  - hyprland-git
+  - hyprutils-git
+  - hyprlang-git
+  - hyprgraphics-git
+  - hyprcursor-git
+  - hyprland-qt-support-git
+  - hyprland-guiutils-git
+  - hyprpaper-git
+  - hyprpicker-git
+  - hyprpolkitagent-git
+  - hyprshot-git
   - grim-hyprland-git
 
   # Sway
@@ -148,7 +149,7 @@ common_packages:
   - chafa
 
   # XDG portals
-  - xdg-desktop-portal-hyprland
+  - xdg-desktop-portal-hyprland-git
   - xdg-desktop-portal-wlr
   - xdg-desktop-portal-gtk
   - xdg-desktop-portal-kde

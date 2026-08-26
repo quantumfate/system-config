@@ -55,9 +55,9 @@
     - role: externals
       tags: [dotfiles, externals]
 
-    # Quickshell desktop shell (vendored role): runtime packages, the config
-    # symlink into ~/.config/quickshell/<name>, zsh completions. The obsidian
-    # tag store is a projection of the vault and is maintained by its own sync.
+    - role: audio
+      tags: [audio]
+
     - role: quickshell
       vars:
         quickshell_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
