@@ -63,6 +63,7 @@ roles/                   one concern each
 | `externals`        | plugins, dev checkouts, catppuccin themes |
 | `browser_profiles` | prowser profile settings                     |
 | `theming`          | rice     |
+| `yazi`          | file manager     |
 
 ## Common runs
 
