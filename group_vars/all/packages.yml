@@ -94,22 +94,6 @@ common_packages:
   - proton-vpn-gtk-app
 
   - niri
-  - sway
-  # Hyprland ecosystem (git)
-  - hypridle-git
-  - hyprland-git
-  - hyprutils-git
-  - hyprlang-git
-  - hyprgraphics-git
-  - hyprcursor-git
-  - hyprland-qt-support-git
-  - hyprland-guiutils-git
-  - hyprpaper-git
-  - hyprpicker-git
-  - hyprpolkitagent-git
-  - hyprshot-git
-  - grim-hyprland-git
-
   # Sway
   - sway
   - swaybg
@@ -148,7 +132,6 @@ common_packages:
   - chafa
 
   # XDG portals
-  - xdg-desktop-portal-hyprland-git
   - xdg-desktop-portal-wlr
   - xdg-desktop-portal-gtk
   - xdg-desktop-portal-kde

@@ -1,6 +1,4 @@
 ---
-# Single-file downloads (former type = "file" externals).
-
 - name: Ensure single-file theme destinations exist
   ansible.builtin.file:
     path: "{{ item.dest | dirname }}"

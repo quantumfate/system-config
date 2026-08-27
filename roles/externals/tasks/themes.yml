@@ -1,9 +1,4 @@
 ---
-# Catppuccin theme dirs. Each archive is downloaded to the cache (re-fetched
-# weekly, mirroring the old refreshPeriod = 168h) and the archive_subdir
-# contents are copied to the real destination, replicating the old
-# stripComponents/include pair.
-
 - name: Ensure the catppuccin cache directories exist
   ansible.builtin.file:
     path: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
@@ -21,6 +16,7 @@
     label: "{{ item.name }}"
   register: theme_cache
 
+# TODO: update cron job
 - name: Download stale theme archives
   ansible.builtin.get_url:
     url: "{{ item.item.url }}"

@@ -43,7 +43,7 @@ externals_repos:
 externals_projects:
   - name: hypr
     repo: git@codeberg.org:quantumfate/hypr.git
-    dest: "{{ target_home }}/.config/hypr"
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/hypr"
   - name: quickshell
     repo: git@codeberg.org:quantumfate/quickshell.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
@@ -128,5 +128,4 @@ externals_archives:
     dest: "{{ target_home }}/.config/wlogout/catppuccin/themes"
 
 # Single-file downloads (former type = "file")
-# ranger's catppuccin colorschemes were removed with the ranger → yazi switch.
 externals_files: []

@@ -1,10 +1,4 @@
 ---
-# Replaces chezmoi's read-source-state hook: install pass-cli and make sure a
-# session exists, so later roles can read secrets non-interactively.
-# Skipped entirely when secrets come from ansible-vault.
-
-# check_mode: false on the probes — they only read, and the tasks gated on
-# them would otherwise see an undefined rc during a dry run.
 - name: Detect pass-cli
   ansible.builtin.command: command -v pass-cli
   register: pass_cli_bin

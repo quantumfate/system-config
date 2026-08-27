@@ -1,8 +1,4 @@
 ---
-# Personal checkouts are pulled with --ff-only and only while clean, so local
-# commits or edits are never clobbered (the old externals did the same via
-# .pull.args = ["--ff-only"]).
-
 - name: Clone project checkout if missing
   ansible.builtin.git:
     repo: "{{ item.repo }}"
