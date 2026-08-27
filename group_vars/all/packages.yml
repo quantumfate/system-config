@@ -125,7 +125,6 @@ common_packages:
   - bemenu
   - bemenu-wayland
   - wmenu
-  - mako
   - wlogout
   - wl-clipboard
   - wtype

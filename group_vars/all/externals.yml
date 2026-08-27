@@ -114,10 +114,6 @@ externals_archives:
     url: https://github.com/catppuccin/zathura/archive/refs/heads/main.tar.gz
     archive_subdir: zathura-main/themes
     dest: "{{ target_home }}/.config/zathura"
-  - name: mako
-    url: https://github.com/catppuccin/mako/archive/refs/heads/main.tar.gz
-    archive_subdir: mako-main/themes
-    dest: "{{ target_home }}/.config/mako/themes"
   - name: spicetify
     url: https://github.com/catppuccin/spicetify/archive/refs/heads/main.tar.gz
     archive_subdir: spicetify-main/catppuccin
