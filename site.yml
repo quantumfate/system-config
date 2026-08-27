@@ -68,6 +68,11 @@
         hypr_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/hypr"
       tags: [dotfiles, hypr]
 
+    - role: nvim
+      vars:
+        hypr_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/nvim"
+      tags: [dotfiles, nvim]
+
     - role: browser_profiles
       tags: [dotfiles, browser]
     - role: theming

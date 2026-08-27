@@ -49,7 +49,7 @@ externals_projects:
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
   - name: nvim
     repo: git@codeberg.org:quantumfate/nvim.git
-    dest: "{{ target_home }}/.config/nvim"
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/nvim"
   - name: aiagent
     repo: git@github.com:quantumfate/aiagent.git
     dest: "{{ target_home }}/Projects/github/quantumfate/aiagent"

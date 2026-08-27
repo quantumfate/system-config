@@ -5,13 +5,13 @@ hands `$HOME` over to chezmoi.
 
 ## Separation of concerns
 
-| Scope                                   | Owner   |
-| --------------------------------------- | ------- |
-| `/etc`, system units, groups, bootloader, packages | Ansible |
-| `$HOME` dotfiles                        | chezmoi |
-| External checkouts, themes, downloads (`$HOME`) | Ansible (`roles/externals`) |
-| Quickshell desktop shell (config symlink, completions) | Ansible (`roles/quickshell`, vendored) |
-| Prompted values (profile, monitors, feature flags) | Ansible → rendered into `~/.config/chezmoi/chezmoi.toml` |
+| Scope                                                  | Owner                                                    |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| `/etc`, system units, groups, bootloader, packages     | Ansible                                                  |
+| `$HOME` dotfiles                                       | chezmoi                                                  |
+| External checkouts, themes, downloads (`$HOME`)        | Ansible (`roles/externals`)                              |
+| Quickshell desktop shell (config symlink, completions) | Ansible (`roles/quickshell`, vendored)                   |
+| Prompted values (profile, monitors, feature flags)     | Ansible → rendered into `~/.config/chezmoi/chezmoi.toml` |
 
 chezmoi no longer prompts and no longer carries `.chezmoiscripts` or
 `.chezmoiexternal`. All of it lives in `roles/`.
@@ -42,28 +42,28 @@ roles/                   one concern each
 
 ## Roles
 
-| Role               | Description          |
-| ------------------ | -------------------------------------------------- |
-| `base`             | system deps   |
-| `password_manager` | provides all secrets |
-| `secrets`          | key management                               |
-| `packages`         | system packages                                  |
-| `sudoers`          | sudo configuration                                |
-| `user_dirs`        | xdg                                             |
-| `login_shell`      | zsh primary shell                             |
-| `keyboard`         | custom-dvorak layout                                 |
-| `console`          | tty theming                                  |
-| `desktop_entries`  | sway and niri                        |
-| `display_manager`  | system configuration for display-manager                                   |
-| `docker`           | infra tools                                   |
-| `virtualization`   | vms                         |
-| `power_profile`    | performance related                        |
-| `devenv`           | neovim and dev dependencies |
-| `chezmoi`          | dotfiles clone + apply, systemd unit-reload      |
-| `externals`        | plugins, dev checkouts, catppuccin themes |
-| `browser_profiles` | prowser profile settings                     |
-| `theming`          | rice     |
-| `yazi`          | file manager     |
+| Role               | Description                                 |
+| ------------------ | ------------------------------------------- |
+| `base`             | system deps                                 |
+| `password_manager` | provides all secrets                        |
+| `secrets`          | key management                              |
+| `packages`         | system packages                             |
+| `sudoers`          | sudo configuration                          |
+| `user_dirs`        | xdg                                         |
+| `login_shell`      | zsh primary shell                           |
+| `keyboard`         | custom-dvorak layout                        |
+| `console`          | tty theming                                 |
+| `desktop_entries`  | sway and niri                               |
+| `display_manager`  | system configuration for display-manager    |
+| `docker`           | infra tools                                 |
+| `virtualization`   | vms                                         |
+| `power_profile`    | performance related                         |
+| `devenv`           | neovim and dev dependencies                 |
+| `chezmoi`          | dotfiles clone + apply, systemd unit-reload |
+| `externals`        | plugins, dev checkouts, catppuccin themes   |
+| `browser_profiles` | prowser profile settings                    |
+| `theming`          | rice                                        |
+| `yazi`             | file manager                                |
 
 ## Common runs
 
@@ -89,10 +89,9 @@ ansible-playbook site.yml --ask-become-pass --skip-tags bootstrap
 
   ```yaml
   vault_ssh_keys:
-    codeberg: {private: "-----BEGIN…", public: "ssh-ed25519 …"}
-  vault_gpg: {public: "…", private: "…", fingerprint: "…"}
+    codeberg: { private: "-----BEGIN…", public: "ssh-ed25519 …" }
+  vault_gpg: { public: "…", private: "…", fingerprint: "…" }
   ```
 
   With `vault`, `roles/password_manager` is skipped entirely — no Proton Pass
   dependency during provisioning.
-
