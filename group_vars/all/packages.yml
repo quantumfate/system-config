@@ -5,7 +5,7 @@ common_packages:
   # Core utilities
   - base-devel
   - age
-  - neovim-nightly-bin
+  - neovim-nightly
   - chezmoi
   - btop
   - glances

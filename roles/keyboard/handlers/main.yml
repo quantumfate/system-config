@@ -8,7 +8,9 @@
 - name: Rebuild TTY keymap
   become: true
   ansible.builtin.shell:
-    cmd: set -o pipefail && ckbcomp {{ keyboard_layout }} | gzip > /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
+    cmd: >-
+      set -o pipefail && ckbcomp {{ keyboard_layout }}
+      | gzip > /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
     executable: /bin/bash
   changed_when: true
 

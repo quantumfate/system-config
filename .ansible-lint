@@ -1,0 +1,22 @@
+---
+# Diagnostics surface on whichever playbook is open in the editor, so the
+# noisy stylistic rules drown out real findings. Correctness rules stay on.
+profile: moderate
+
+exclude_paths:
+  - collections/
+  - .git/
+
+skip_list:
+  # Roles here are private to this repo and never shared, so the
+  # <role>_ prefix on every var buys nothing but churn.
+  - var-naming[no-role-prefix]
+  # git/pacman/paru calls are deliberate: the modules do not cover
+  # the flags these roles need.
+  - command-instead-of-module
+  # Ansible cannot know when a wrapped command changed something.
+  # Revisit per task rather than fighting it repo-wide.
+  - no-changed-when
+
+# yamllint owns formatting; its config already sets line-length to 120.
+use_default_rules: true

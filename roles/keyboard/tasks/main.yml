@@ -65,7 +65,9 @@
 - name: Generate the TTY keymap
   become: true
   ansible.builtin.shell:
-    cmd: set -o pipefail && ckbcomp {{ keyboard_layout }} | gzip > /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
+    cmd: >-
+      set -o pipefail && ckbcomp {{ keyboard_layout }}
+      | gzip > /usr/share/kbd/keymaps/xkb/{{ keyboard_layout }}.map.gz
     executable: /bin/bash
   when: not tty_keymap.stat.exists
   changed_when: true

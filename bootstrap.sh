@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Roles come from the canonical checkouts in ~/Projects, mirroring
-# group_vars/all/externals.yml. Serving the hypr role from ~/.config/hypr would
-# let the deploy symlink that dir over the running role's own path and crash
-# ansible's role cache.
-export ANSIBLE_ROLES_PATH="./roles:$HOME/Projects/codeberg/quantumfate/quickshell/ansible/roles:$HOME/Projects/codeberg/quantumfate/hypr/ansible/roles:$HOME/Projects/codeberg/quantumfate/nvim/ansible/roles"
+role_paths=$(printf '%s:' "$HOME"/Projects/codeberg/quantumfate/{quickshell,hypr,nvim}/ansible/roles)
+export ANSIBLE_ROLES_PATH="./roles:$role_paths"
 
 usage() {
     cat <<EOF

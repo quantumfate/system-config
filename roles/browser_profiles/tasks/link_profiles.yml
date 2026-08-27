@@ -1,5 +1,5 @@
 ---
-- name: Find {{ browser.name }} profile directories
+- name: Find profile directories for browser {{ browser.name }}
   ansible.builtin.find:
     paths: "{{ browser.path }}"
     file_type: directory

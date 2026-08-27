@@ -30,5 +30,7 @@
 
 - name: Report unsupported scaling drivers
   ansible.builtin.debug:
-    msg: "EPP not supported (scaling_driver={{ scaling_driver.content | default('none') | b64decode | trim }}) — skipped."
+    msg: >-
+      EPP not supported (scaling_driver={{ scaling_driver.content | default('none') | b64decode | trim }})
+      — skipped.
   when: (scaling_driver.content | default('') | b64decode | trim) not in ['amd-pstate-epp', 'intel_pstate']
