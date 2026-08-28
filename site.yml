@@ -58,9 +58,6 @@
     - role: audio
       tags: [audio]
 
-  # Roles living in the external checkouts must be pulled in with include_role:
-  # a static `roles:` entry is resolved when the playbook is loaded, which is
-  # before the externals role has had a chance to clone them.
   tasks:
     - name: Converge roles from external checkouts
       ansible.builtin.include_role:
