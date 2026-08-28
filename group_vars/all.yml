@@ -1,0 +1,3 @@
+---
+# Variables shared by every host. Role-specific defaults belong in
+# roles/<role>/defaults/main.yml instead.

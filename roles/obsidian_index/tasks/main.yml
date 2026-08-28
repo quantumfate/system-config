@@ -1,0 +1,39 @@
+---
+# === Obsidian index-note position watcher ===
+# The normalizer and its inotify wrapper live in the scripts repo (cloned by the
+# externals role). The unit references them at the known path.
+- name: Check the Obsidian vault exists
+  ansible.builtin.stat:
+    path: "{{ obsidian_index_vault }}"
+  register: obsidian_index_vault_stat
+  when: obsidian_index_deploy_watcher | bool
+
+- name: Ensure systemd user dir exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user"
+    state: directory
+    mode: "0755"
+  when:
+    - obsidian_index_deploy_watcher | bool
+    - obsidian_index_vault_stat.stat.isdir | default(false)
+
+- name: Deploy obsidian-index-normalize user unit
+  ansible.builtin.template:
+    src: obsidian-index-normalize.service.j2
+    dest: "{{ target_home }}/.config/systemd/user/obsidian-index-normalize.service"
+    mode: "0644"
+  notify: Restart obsidian-index-normalize
+  when:
+    - obsidian_index_deploy_watcher | bool
+    - obsidian_index_vault_stat.stat.isdir | default(false)
+
+- name: Enable obsidian-index-normalize user unit
+  ansible.builtin.systemd_service:
+    name: obsidian-index-normalize.service
+    enabled: true
+    state: started
+    daemon_reload: true
+    scope: user
+  when:
+    - obsidian_index_deploy_watcher | bool
+    - obsidian_index_vault_stat.stat.isdir | default(false)

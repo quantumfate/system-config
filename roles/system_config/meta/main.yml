@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: system_config
+  namespace: local
+  author: local
+  description: system_config role
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags: []
+
+dependencies: []

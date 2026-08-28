@@ -57,6 +57,8 @@
 
     - role: audio
       tags: [audio]
+    - role: obsidian_index
+      tags: [obsidian, obsidian_index]
 
   tasks:
     - name: Converge roles from external checkouts

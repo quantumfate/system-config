@@ -66,6 +66,7 @@ common_packages:
   - s-nail
   - socat
   - scdoc
+  - inotify-tools
 
   # File systems & disk tools
   - btrfs-assistant

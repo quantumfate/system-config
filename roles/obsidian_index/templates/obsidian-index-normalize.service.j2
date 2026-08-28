@@ -1,0 +1,13 @@
+[Unit]
+Description=Pin Obsidian index-notes callouts under the note H1
+Documentation=https://codeberg.org/quantumfate/scripts
+
+[Service]
+ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/obsidian-index-watch
+Environment=OBSIDIAN_VAULT={{ obsidian_index_vault }}
+Environment=OBSIDIAN_INDEX_DEBOUNCE={{ obsidian_index_debounce }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

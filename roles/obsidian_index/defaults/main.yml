@@ -1,0 +1,11 @@
+---
+# The index-notes Obsidian plugin rewrites an index callout in place when it can
+# find the `^indexof-*` block anchor, and only appends to the end of the note
+# when it cannot. Pinning each block under the note's H1 once therefore keeps it
+# there for good. The watcher re-pins blocks the plugin appends later.
+obsidian_index_deploy_watcher: true
+
+obsidian_index_vault: "{{ target_home }}/Documents/Obsidian/Main"
+
+# Seconds of quiet before a burst of vault writes triggers one normalize pass.
+obsidian_index_debounce: 3

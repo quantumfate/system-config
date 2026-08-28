@@ -1,3 +1,32 @@
-collections/
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+.direnv/
+
+# Lua
+luac.out
+*.luac
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+
+# Nix
+result
+result-*
+
+# Ansible
 *.retry
-.vault-pass
+.vault_pass
+collections/
+*.vault
+.ansible
