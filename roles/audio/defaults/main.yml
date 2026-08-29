@@ -7,3 +7,8 @@ audio_deploy_wireplumber_hooks: true
 # Desktop notification when the default audio sink changes. Uses pactl subscribe
 # (event-driven, zero CPU idle). Requires libnotify (notify-send).
 audio_deploy_notification_service: true
+
+# Bluetooth profile policy: always expose the headset microphone, and switch the
+# card from A2DP to HSP/HFP while an app is recording (reverting afterwards).
+# Note: HFP is 16 kHz mono - playback quality drops while the mic is in use.
+audio_deploy_bluetooth_policy: true

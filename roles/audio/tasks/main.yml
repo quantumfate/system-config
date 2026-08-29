@@ -32,6 +32,24 @@
     - 90-bt-auto-switch.conf
   when: audio_deploy_wireplumber_hooks | bool
 
+# === Bluetooth profile policy ===
+# Exposes the headset mic and auto-switches A2DP <-> HSP/HFP when an app opens
+# a capture stream. Upstream defaults match, but pin them so the behaviour is
+# declared rather than inherited from the distro config.
+- name: Ensure WirePlumber config drop-in dir exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/wireplumber/wireplumber.conf.d"
+    state: directory
+    mode: "0755"
+  when: audio_deploy_bluetooth_policy | bool
+
+- name: Deploy WirePlumber Bluetooth policy
+  ansible.builtin.copy:
+    src: 50-bluetooth-policy.conf
+    dest: "{{ target_home }}/.config/wireplumber/wireplumber.conf.d/50-bluetooth-policy.conf"
+    mode: "0644"
+  when: audio_deploy_bluetooth_policy | bool
+
 # === Audio notification service ===
 # The notification script lives in the scripts repo (cloned by the externals
 # role). The systemd unit references it at the known path.
