@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# logview — open a log source in the dedicated log workspace. Rendered by roles/zsh.
+#
+# Two levels of isolation, so nothing about log-reading can disturb coding:
+#   1. its own tmux SERVER   (socket "{{ zsh_tmux_log_socket }}", config logs.conf).
+#      Separate session list, separate prefix, separate history. `tmux kill-server`
+#      in either one leaves the other untouched.
+#   2. its own kitty WINDOW  (class "{{ zsh_kitty_log_class }}") that Hyprland
+#      pins to its own workspace/scratchpad — see the windowrules in the README.
+#
+# Also its own CWD: {{ zsh_log_workdir }} on tmpfs, so a stray `ls`, a glob or a
+# fuzzy-finder in this window can never wander into a project tree.
+#
+# Usage:
+#   logview                 picker, then open in the log workspace
+#   logview <spec>          open that spec directly (see `logstream`)
+#   logview -h|--here       run in the CURRENT terminal, no kitty window
+set -uo pipefail
+
+SOCKET="{{ zsh_tmux_log_socket }}"
+CONF="{{ target_home }}/.config/tmux/logs.conf"
+WORKDIR="{{ zsh_log_workdir }}"
+CLASS="{{ zsh_kitty_log_class }}"
+SESSION="logs"
+
+mkdir -p "$WORKDIR"
+
+# The viewer window itself. ZSH_LOGVIEW keeps the shell in its quiet profile;
+# modify_font adds leading, because extra air between rows is what makes a wall
+# of log lines scannable.
+kitty_viewer() {
+  exec kitty \
+    --class "{{ zsh_kitty_log_class }}" \
+    --title "logs" \
+    --directory "$WORKDIR" \
+    -o font_size={{ zsh_log_font_size }} \
+    -o "window_padding_width={{ zsh_log_padding }}" \
+    -o "modify_font=cell_height {{ zsh_log_line_height }}%" \
+    -o tab_bar_style=hidden \
+    -o confirm_os_window_close=0 \
+    env ZSH_LOGVIEW=1 tmux -L "$SOCKET" -f "$CONF" attach -t "$SESSION"
+}
+
+here=0
+case "${1:-}" in
+  -h|--here) here=1; shift ;;
+esac
+
+spec="${1:-}"
+
+# Window name = the thing you are looking at, truncated to stay column-stable.
+wname() { printf '%s' "${1#*:}" | sed 's/\.service$//' | cut -c1-18; }
+
+session_exists() { tmux -L "$SOCKET" has-session -t "$SESSION" 2>/dev/null; }
+
+# One window per source, reused. Re-running the same spec must return to the
+# window that already shows it instead of stacking duplicates with the same name.
+ensure_window() {
+  local name="$1" cmd="$2"
+  if ! session_exists; then
+    tmux -L "$SOCKET" -f "$CONF" new-session -d -s "$SESSION" -c "$WORKDIR" -n "$name" "$cmd"
+  elif tmux -L "$SOCKET" list-windows -t "$SESSION" -F '#W' | grep -Fxq "$name"; then
+    :
+  else
+    tmux -L "$SOCKET" new-window -d -t "$SESSION" -c "$WORKDIR" -n "$name" "$cmd"
+  fi
+  tmux -L "$SOCKET" select-window -t "$SESSION:$name" 2>/dev/null
+}
+
+# Pull the viewer's window to the front of the compositor. Without this, running
+# logview while the logs workspace is NOT focused silently changes the window
+# behind your back — which reads exactly like "the keybind does nothing".
+raise() {
+  command -v hyprctl >/dev/null 2>&1 || return 0
+  hyprctl dispatch focuswindow "class:^({{ zsh_kitty_log_class }})$" >/dev/null 2>&1 || true
+}
+
+viewer_running() { pgrep -f "kitty --class {{ zsh_kitty_log_class }}" >/dev/null 2>&1; }
+
+# --- Run in the current terminal -------------------------------------------
+if [ "$here" = 1 ]; then
+  [ -n "$spec" ] || spec="$(logpick)" || exit 0
+  exec logstream "$spec"
+fi
+
+# --- Pick a source ----------------------------------------------------------
+# fzf needs a terminal. Launched from a Hyprland keybind there is none, so the
+# picker cannot run here — it runs INSIDE the viewer as its own tmux window,
+# and the chosen source replaces it in place. That is why picking silently did
+# nothing before: fzf was being started with no tty attached.
+if [ -z "$spec" ]; then
+  if [ -t 0 ] && [ -t 1 ]; then
+    spec="$(logpick)" || exit 0
+  else
+    ensure_window "pick" "logpickrun"
+    if viewer_running; then
+      raise
+      exit 0
+    fi
+    kitty_viewer
+  fi
+fi
+
+ensure_window "$(wname "$spec")" "logstream '$spec'"
+
+if viewer_running; then
+  raise
+  exit 0
+fi
+
+kitty_viewer

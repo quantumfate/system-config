@@ -1,0 +1,87 @@
+# ~/.config/tailspin/theme.toml — rendered by roles/zsh.
+#
+# Design rule: a log line has exactly THREE things worth a colour — WHEN,
+# HOW BAD, and WHAT. Everything else is structure and stays uncoloured, so
+# the eye never has to sort noise from signal.
+#
+# tspin only accepts the 16 ANSI names (no hex). That is on purpose here:
+# the terminal palette is Catppuccin Macchiato (kitty themes/macchiato.conf),
+# so `red` IS #ed8796 and `blue` IS #8aadf4. One palette, one source of truth.
+#
+#   ANSI name       Macchiato       used for
+#   red             #ed8796         error / fatal
+#   yellow          #eed49f         warn
+#   green           #a6da95         ok / success
+#   blue            #8aadf4         info, timestamps
+#   magenta         #f5bde6         date part
+#   cyan            #8bd5ca         numbers, ids
+#   bright_black    #5b6078         separators, structure
+
+# Timestamps: dim and stable. They anchor the column, they never shout.
+[dates]
+date = { fg = "bright_black" }
+time = { fg = "blue" }
+zone = { fg = "bright_black" }
+separator = { faint = true }
+
+# Numbers stay quiet — a PID is not an event.
+[numbers]
+style = { fg = "cyan", faint = true }
+
+[key_value_pairs]
+key = { faint = true }
+separator = { faint = true }
+
+[json]
+key = { faint = true }
+quote_token = { faint = true }
+curly_bracket = { faint = true }
+square_bracket = { faint = true }
+comma = { faint = true }
+colon = { faint = true }
+
+[quotes]
+quote_token = '"'
+style = { fg = "green" }
+
+[paths]
+segment = { faint = true }
+separator = { faint = true }
+
+[processes]
+name = { fg = "bright_black" }
+id = { fg = "bright_black", faint = true }
+bracket = { faint = true }
+
+# --- Severity ---------------------------------------------------------------
+# Colour carries the level; bold is reserved for the handful of words that mean
+# "drop everything" (fatal/panic/crit). Error and warning are coloured but not
+# bold: on a busy screen a page full of bold red is as unreadable as no colour
+# at all. Both syslog and systemd/journald spellings are covered.
+[[keywords]]
+words = ["FATAL", "fatal", "PANIC", "panic", "CRITICAL", "critical", "CRIT", "EMERG", "emerg", "ALERT", "alert"]
+style = { fg = "red", bold = true }
+
+[[keywords]]
+words = ["ERROR", "error", "ERR", "err", "FAIL", "Failed", "failed", "failure"]
+style = { fg = "red" }
+
+[[keywords]]
+words = ["WARN", "warn", "WARNING", "warning"]
+style = { fg = "yellow" }
+
+[[keywords]]
+words = ["INFO", "info", "NOTICE", "notice"]
+style = { fg = "blue" }
+
+[[keywords]]
+words = ["DEBUG", "debug", "TRACE", "trace"]
+style = { fg = "bright_black", faint = true }
+
+[[keywords]]
+words = ["OK", "ok", "SUCCESS", "success", "Started", "started", "Reached", "Listening", "active", "running"]
+style = { fg = "green" }
+
+[[keywords]]
+words = ["Stopped", "stopped", "Stopping", "inactive", "dead", "timeout", "denied", "refused", "unreachable"]
+style = { fg = "yellow" }

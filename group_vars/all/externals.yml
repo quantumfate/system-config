@@ -1,41 +1,12 @@
 # group_vars/externals.yml
 # External Repositories that must be present
 
-# External zsh plugins
-externals_repos:
-  - name: oh-my-zsh
-    repo: https://github.com/ohmyzsh/ohmyzsh
-    dest: "{{ target_home }}/.config/oh-my-zsh"
-  - name: zsh-ls
-    repo: https://github.com/zpm-zsh/ls
-    dest: "{{ target_home }}/.config/oh-my-zsh/custom/plugins/ls"
-  - name: zsh-autosuggestions
-    repo: https://github.com/zsh-users/zsh-autosuggestions
-    dest: "{{ target_home }}/.zsh/zsh-autosuggestions"
-  - name: zsh-autopair
-    repo: https://github.com/hlissner/zsh-autopair
-    dest: "{{ target_home }}/.zsh/zsh-autopair"
-  - name: catppuccin-fzf
-    repo: https://github.com/catppuccin/fzf
-    dest: "{{ target_home }}/.zsh/catppuccin-fzf"
-  - name: fzf-tab
-    repo: https://github.com/Aloxaf/fzf-tab
-    dest: "{{ target_home }}/.zsh/fzf-tab"
-  - name: fzf-tab-source
-    repo: https://github.com/Freed-Wu/fzf-tab-source
-    dest: "{{ target_home }}/.zsh/fzf-tab-source"
-  - name: zsh-chezmoi
-    repo: https://github.com/mass8326/zsh-chezmoi
-    dest: "{{ target_home }}/.zsh/zsh-chezmoi"
-  - name: catppuccin-zsh-syntax-highlighting
-    repo: https://github.com/catppuccin/zsh-syntax-highlighting
-    dest: "{{ target_home }}/.zsh/catppuccin-zsh-syntax-highlighting"
-  - name: zsh-syntax-highlighting
-    repo: https://github.com/zsh-users/zsh-syntax-highlighting
-    dest: "{{ target_home }}/.zsh/zsh-syntax-highlighting"
-  - name: tmux-catppuccin
-    repo: https://github.com/catppuccin/tmux
-    dest: "{{ target_home }}/.config/tmux/plugins/catppuccin"
+# External zsh plugins are owned by roles/zsh (see roles/zsh/defaults/main.yml).
+# Only non-shell checkouts remain here.
+# The tmux catppuccin plugin is gone: both tmux configs (the coding server and
+# the isolated log server, roles/zsh) hardcode the Macchiato palette instead of
+# loading a plugin at every reload.
+externals_repos: []
 
 # --- Personal checkouts ---------------------------------------------------
 # ff-only pulls: local commits and edits are never clobbered. The pull is

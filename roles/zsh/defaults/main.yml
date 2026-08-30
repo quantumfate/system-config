@@ -1,0 +1,140 @@
+---
+# Logging workspace. A calm, dedicated directory that tmux-sessionizer (tms)
+# bookmarks so a log viewer can be opened in its own tmux window/session.
+zsh_log_dir: "{{ target_home }}/.local/share/logs"
+
+# Dedicated kitty instance class for the log viewer. Hyprland binds this class
+# to its own workspace/scratchpad (windowrules live in the hypr repo, see the
+# README); this role only names the class and launches with it.
+zsh_kitty_log_class: logviewer
+
+# Reading a wall of log lines is not coding: the viewer window runs one notch
+# larger with generous padding, so the text block has air around it.
+zsh_log_font_size: "{{ zsh_terminal_font_size }}"
+# kitty window_padding_width, "top right bottom left". Extra room above so the
+# tmux status bar is not glued to the top edge of the screen.
+zsh_log_padding: "14 16 10 16"
+# Cell height as a percentage of the font's natural line box. Extra leading is
+# what turns a wall of log lines into scannable rows; 130 is roughly one third
+# of a line of air between rows.
+zsh_log_line_height: 130  # more than the everyday terminal: denser text, longer sessions
+
+# Primary accent for every terminal surface (kitty cursor, both tmux bars, the
+# fzf picker, the log prompt). Catppuccin Macchiato mauve. Severity colours are
+# NOT accent colours — they stay semantic (red/yellow/blue/green), see the
+# tailspin theme.
+zsh_log_accent: "#c6a0f6"
+
+# --- Typography -------------------------------------------------------------
+# Shared by the everyday terminal and the log viewer. Size and leading live in
+# kitty because they are properties of the cell grid: neither tmux nor neovim
+# can change how tall a text row is inside a terminal.
+zsh_terminal_font: "Hack Nerd Font Mono"
+zsh_terminal_font_size: 14
+# Cell height as a percentage of the font's natural line box. Extra leading is
+# the single highest-value readability change available in a terminal.
+zsh_terminal_line_height: 120
+# kitty window_padding_width, "top right bottom left".
+zsh_terminal_padding: "12 14 10 14"
+
+# Isolated tmux server for logs. `tmux` reaches the coding server; the log
+# server answers only on this socket, has its own config (logs.conf), its own
+# prefix and its own session list. Killing one never touches the other.
+zsh_tmux_log_socket: logs
+
+# Working directory for every log window: a runtime-tmpfs path, deliberately
+# outside the project tree. A stray glob, `ls` or fuzzy-find in a log window
+# can never wander into code.
+zsh_log_workdir: "/run/user/{{ ansible_facts.user_uid | default(1000) }}/logview"
+
+# Plugins cloned into ~/.zsh for the interactive shell. These were previously
+# owned by the externals role; they moved here so .zshrc's `source` statements
+# and the role that renders .zshrc are managed together.
+zsh_plugins:
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+  - name: zsh-autopair
+    repo: https://github.com/hlissner/zsh-autopair
+  - name: catppuccin-fzf
+    repo: https://github.com/catppuccin/fzf
+  - name: fzf-tab
+    repo: https://github.com/Aloxaf/fzf-tab
+  - name: fzf-tab-source
+    repo: https://github.com/Freed-Wu/fzf-tab-source
+  - name: catppuccin-zsh-syntax-highlighting
+    repo: https://github.com/catppuccin/zsh-syntax-highlighting
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+  - name: zsh-chezmoi
+    repo: https://github.com/mass8326/zsh-chezmoi
+
+# oh-my-zsh lives under XDG config and is sourced from .zshrc.
+zsh_omz_dest: "{{ target_home }}/.config/oh-my-zsh"
+zsh_omz_repo: https://github.com/ohmyzsh/ohmyzsh
+
+# Extra oh-my-zsh custom plugins layered onto the core clone.
+zsh_omz_custom_plugins:
+  - name: ls
+    repo: https://github.com/zpm-zsh/ls
+    dest: "{{ zsh_omz_dest }}/custom/plugins/ls"
+
+# History
+zsh_history_file: "{{ target_home }}/.zsh_history"
+zsh_history_size: "10000"
+
+# Packages backing the lessfilter dispatcher and the shell's log aliases.
+# Owned by this role (not group_vars) so the log toolchain travels with the
+# role. Installed via yay so repo and AUR names are both valid.
+zsh_log_packages:
+  # Text / log viewers
+  - bat
+  - eza
+  - tailspin
+  - python-pygments   # pygmentize text fallback
+  - jq                # json branch, hyprland alias
+  - chafa             # image terminal renderer
+  - lesspipe          # LESSOPEN driver
+  # Specific file-type branches
+  - sqlite            # vnd.sqlite3 branch
+  - poppler           # pdftotext branch
+  - perl-image-exiftool  # image metadata
+  # Heavy / binary-only viewers. Only pulled when zsh_log_binary_viewers is on.
+  - jupyter-notebook  # ipynb branch
+  - python-pandas
+  - python-numpy
+  - python-lmdb       # data.mdb branch
+  - python-plotext    # AUR: tfevents plotting
+
+# The ML/event-file viewers (tensorflow/torch) are multi-GB installs for a
+# handful of binary formats. Off by default; enable only if you actually read
+# .tfevents / .pth files.
+zsh_log_binary_viewers: false
+zsh_log_binary_packages:
+  - python-tensorboard
+  - python-tensorflow
+  - python-pytorch
+
+# tspin theme. The role renders a Catppuccin Macchiato theme to this path;
+# point the variable elsewhere to override it with your own file.
+zsh_tailspin_theme: "{{ target_home }}/.config/tailspin/theme.toml"
+
+# bat's built-in Catppuccin theme, used for every non-log file bat renders
+# (including through .lessfilter). Keeps one palette across the whole terminal.
+zsh_bat_theme: "Catppuccin Macchiato"
+
+# tmux-sessionizer (tms). The log dir is added as a bookmark so a log viewer
+# can be opened in its own tmux window/session and picked via fzf.
+zsh_tms_bookmarks:
+  - "{{ target_home }}"
+  - "{{ target_home }}/Documents/Obsidian/Main"
+  - "{{ target_home }}/.config/yazi"
+  - "{{ zsh_log_dir }}"
+
+zsh_tms_search_dirs:
+  - path: "{{ target_home }}/Projects/"
+    depth: 10
+
+zsh_tms_excluded_dirs:
+  - node_modules
+  - target
+  - .git

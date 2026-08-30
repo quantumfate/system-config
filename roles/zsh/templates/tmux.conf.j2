@@ -1,0 +1,79 @@
+# ~/.tmux.conf — the CODING tmux server. Rendered by roles/zsh.
+#
+# The log server has its own config (~/.config/tmux/logs.conf, same role) on its
+# own socket. Same visual scheme, same prefix (C-b), different socket — the two
+# share no state, and the isolation costs nothing to remember.
+#
+# tmux owns THE STATUS BAR and nothing else about the look: font size, leading
+# and window padding are cell-grid properties and live in kitty.conf; everything
+# inside a pane belongs to the program drawing there (neovim).
+
+# Options to make tmux more pleasant
+set -g mouse on
+
+# tmux's default prefix, stated explicitly: the log server sets the same one, and
+# a shared chord is only obvious when both files say so.
+set -g prefix C-b
+bind C-b send-prefix
+
+# Required for kitty graphics to survive pane resizes and redraws
+set -ga update-environment "TERM"
+set -ga update-environment "TERM_PROGRAM"
+
+# Tell programs tmux supports truecolor + kitty-ish features
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-kitty:RGB"
+set -g focus-events on
+
+# --- Look --------------------------------------------------------------------
+# Catppuccin Macchiato, accent {{ zsh_log_accent }} (mauve), hardcoded — same scheme as the
+# isolated log server (~/.config/tmux/logs.conf, owned by system-config's zsh
+# role). No plugin load: fewer moving parts, instant startup, and the bar cannot
+# change shape because a plugin dir was mid-update.
+#
+# Rules of the scheme:
+#   * one accent (mauve) and one surface; everything else is dim grey
+#   * no filled blocks — the active item is bold accented TEXT. A painted chip
+#     is a slab of colour the eye has to parse before the label inside it
+#   * no separators, no powerline glyphs — position carries the grouping
+#   * the status bar is TWO rows and the second is empty, so the bar never sits
+#     flush against the content underneath it
+set -g status 2
+set -g status-position top
+set -g status-justify left
+set -g status-interval 5
+set -g status-style "bg=default,fg=#6e738d"
+set -g 'status-format[1]' ""
+
+set -g status-left-length 100
+set -g status-right-length 100
+# Session name, so you always know which of the servers/sessions you are in.
+set -g status-left "#[fg={{ zsh_log_accent }},bold] #S #[default]"
+# Prefix pressed turns the right side red — the one state worth an alarm colour.
+set -g status-right "#{?client_prefix,#[fg=#ed8796],#[fg=#6e738d]} #(tms sessions) "
+
+setw -g window-status-format "#[fg=#6e738d] #I #W "
+setw -g window-status-current-format "#[fg={{ zsh_log_accent }},bold] #I #W "
+setw -g window-status-separator ""
+
+set -g pane-border-style "fg=#363a4f"
+set -g pane-active-border-style "fg={{ zsh_log_accent }}"
+set -g message-style "bg=#363a4f,fg=#cad3f5"
+set -g mode-style "bg=#363a4f,fg=#cad3f5"
+set -g menu-style "bg=#24273a,fg=#cad3f5"
+set -g menu-selected-style "bg=#5b6078,fg=#cad3f5,bold"
+set -g menu-border-style "fg=#363a4f"
+
+# Load plugins
+run ~/.config/tmux/plugins/tmux-cpu/cpu.tmux
+run ~/.config/tmux/plugins/tmux-battery/battery.tmux
+
+bind C-o display-popup -E "tms"
+bind C-s display-popup -E "tms switch"
+bind C-w display-popup -E "tms windows"
+bind C-e command-prompt -p "Rename active session to: " "run-shell 'tms rename %1'"
+bind C-r "run-shell 'tms refresh'"
+bind C-k confirm -p "Kill current session? (y/N):" "run-shell 'tms kill'"
+bind -r '(' switch-client -p\; refresh-client -S
+bind -r ')' switch-client -n\; refresh-client -S
+

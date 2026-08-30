@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# logstream — the ONE way a log reaches the screen. Rendered by roles/zsh.
+#
+# Why a single entrypoint: every source (journal, kernel, unit, plain file) is
+# rendered with the SAME columns, the SAME palette and the SAME pager keys.
+# Nothing shifts under you when you switch source — you learn the shape once.
+#
+# Column contract, byte-identical for every journal source:
+#
+#   YYYY-MM-DD HH:MM:SS  LEVEL    source                message…
+#   └─ 19 ─────────────┘ └─ 7 ──┘ └─ 20 ───────────────┘
+#
+# The level field is 7 wide, not 6: NOTICE is six characters, so a 6-wide field
+# leaves no gap and prints "NOTICElibddcutil".
+#
+# Fixed widths, left-aligned, no hostname, no wrapping. The eye lands on the
+# same x-position every line, so scanning costs nothing. Long lines scroll
+# sideways (← →) instead of reflowing and destroying the vertical rhythm.
+#
+# Colour contract: applied EXACTLY ONCE, by tspin, with the macchiato theme.
+# The pager runs with LESSOPEN cleared so lesspipe/.lessfilter cannot colour an
+# already-coloured stream and corrupt the escape codes.
+#
+# Usage:  logstream <spec> [extra journalctl args...]
+#   follow        live journal, all units
+#   unit:<name>   one system unit, this boot, following
+#   user:<name>   one --user unit, following
+#   kernel        kernel ring buffer, following
+#   errors        this boot, priority err and worse
+#   warnings      this boot, priority warning and worse
+#   boot          this boot, from the top
+#   prev          previous boot, from the top
+#   audit         audit / access denials
+#   file:<path>   a plain log file, following
+#   json          journalctl --output=json on stdin (used by the log* verbs)
+#   -             already-plain text on stdin
+set -uo pipefail
+
+THEME="${TAILSPIN_THEME:-{{ target_home }}/.config/tailspin/theme.toml}"
+
+# Only severity, timestamps and structure get colour. Every "smart" highlighter
+# (urls, uuids, ips, paths, pointers, processes) is off: they colour tokens that
+# carry no severity meaning and turn a log into confetti.
+TSPIN=(tspin -p --disable urls,emails,uuids,ipv4,pointers,paths,processes,numbers)
+[ -f "$THEME" ] && TSPIN+=(--theme "$THEME")
+
+# -R pass colour through   -S never wrap   -X keep the screen on exit
+PAGER_ARGS=(-R -S -X --tabs=4 --quit-if-one-screen --no-init)
+
+# journald's own field names are unstable across sources (SYSLOG_IDENTIFIER,
+# _COMM, _SYSTEMD_UNIT); collapsing them into one `source` column is what makes
+# the layout identical whether you are reading the kernel or a user service.
+JQ_FMT='
+  (.__REALTIME_TIMESTAMP | tonumber / 1000000 | strflocaltime("%Y-%m-%d %H:%M:%S")) as $ts
+  | ({"0":"EMERG","1":"ALERT","2":"CRIT","3":"ERROR","4":"WARN",
+      "5":"NOTICE","6":"INFO","7":"DEBUG"}[.PRIORITY // "6"] // "INFO") as $lvl
+  | ((.SYSLOG_IDENTIFIER // ._COMM // (._SYSTEMD_UNIT // "-") | tostring)
+      | sub(".*/"; "") | sub("\\.service$"; "")) as $src
+  | ((.MESSAGE | if type == "array" then (map([.] | implode) | join("")) else . end) // "") as $msg
+  | "\($ts)  \(($lvl + "       ")[0:7])\(($src + "                    ")[0:20])  \($msg)"'
+
+# SYSTEMD_COLORS=0 is not cosmetic: with colours forced on, journalctl emits
+# ANSI escapes INSIDE the json string values and jq dies on the control
+# characters. Colour is tspin's job further down the pipe, never journalctl's.
+journal() { SYSTEMD_COLORS=0 journalctl --output=json --no-hostname "$@"; }
+
+fmt_journal() { jq -r --unbuffered "$JQ_FMT"; }
+fmt_plain()   { cat; }
+
+page() {
+  local args=("${PAGER_ARGS[@]}")
+  [ "${1:-0}" = 1 ] && args+=(+F)   # start in follow mode
+  LESSOPEN= LESSCLOSE= less "${args[@]}"
+}
+
+spec="${1:-boot}"; shift || true
+target="${spec#*:}"
+
+# follow=1 for live sources, 0 for bounded history: a finished, scrollable
+# buffer is calmer than a stream that keeps moving while you read it.
+follow=1
+fmt=fmt_journal
+
+case "$spec" in
+  # stdin modes: the log* shell verbs build their own journalctl query and hand
+  # it here, so the columns and the palette stay defined in exactly one place.
+  json)      src() { cat; };                    follow=0 ;;
+  -)         src() { cat; }; fmt=fmt_plain;     follow=0 ;;
+  follow)    src() { journal -b -f -n 200; } ;;
+  unit:*)    src() { journal -b -f -n 500 -u "$target"; } ;;
+  user:*)    src() { journal --user -b -f -n 500 -u "$target"; } ;;
+  kernel)    src() { journal -k -b -f -n 500; } ;;
+  errors)    src() { journal -b -p err; };      follow=0 ;;
+  warnings)  src() { journal -b -p warning; };  follow=0 ;;
+  boot)      src() { journal -b; };             follow=0 ;;
+  prev)      src() { journal -b -1; };          follow=0 ;;
+  audit)     src() { journal -b _TRANSPORT=audit; }; follow=0 ;;
+  file:*)    src() { tail -n 2000 -F "$target"; }; fmt=fmt_plain ;;
+  *)         if [ -f "$spec" ]; then
+               src() { tail -n 2000 -F "$spec"; }; fmt=fmt_plain
+             else
+               src() { journal -b -f -n 500 -u "$spec"; }
+             fi ;;
+esac
+
+src "$@" 2>&1 | "$fmt" | "${TSPIN[@]}" | page "$follow"

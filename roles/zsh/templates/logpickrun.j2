@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# logpickrun — the picker, running inside a tmux window of the log server.
+#
+# fzf needs a terminal. Started from a Hyprland keybind there is none, so the
+# picker cannot run at the launch site; `logview` opens this in the viewer
+# instead, where a tty exists. The window renames itself after the chosen
+# source and then becomes the stream, so the window bar stays a readable table
+# of contents instead of a row of "pick" entries.
+set -uo pipefail
+
+spec="$(logpick)" || exit 0
+[ -n "$spec" ] || exit 0
+
+name="$(printf '%s' "${spec#*:}" | sed 's/\.service$//' | cut -c1-18)"
+[ -n "${TMUX:-}" ] && tmux rename-window "$name"
+
+exec logstream "$spec"

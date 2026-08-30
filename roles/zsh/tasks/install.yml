@@ -1,0 +1,19 @@
+---
+# The lessfilter/alias toolchain. Installed through yay so both repo and AUR
+# names resolve; see zsh_log_packages / zsh_log_binary_packages in defaults.
+
+- name: Install the log-viewing toolchain
+  kewlfft.aur.aur:
+    name: "{{ zsh_log_packages }}"
+    use: yay
+    state: present
+  become: false
+  when: zsh_log_packages | length > 0
+
+- name: Install the heavy binary-viewer toolchain
+  kewlfft.aur.aur:
+    name: "{{ zsh_log_binary_packages }}"
+    use: yay
+    state: present
+  become: false
+  when: zsh_log_binary_viewers and (zsh_log_binary_packages | length > 0)

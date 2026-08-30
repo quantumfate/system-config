@@ -54,6 +54,8 @@
       tags: [dotfiles, yazi]
     - role: externals
       tags: [dotfiles, externals]
+    - role: zsh
+      tags: [dotfiles, zsh, shell]
 
     - role: audio
       tags: [audio]

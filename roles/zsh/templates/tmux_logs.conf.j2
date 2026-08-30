@@ -1,0 +1,76 @@
+# ~/.config/tmux/logs.conf — rendered by roles/zsh.
+#
+# Config for the ISOLATED log tmux server (socket "{{ zsh_tmux_log_socket }}").
+# It shares no server, no session list and no key muscle-memory collisions with
+# the coding server: `tmux` reaches the coding one, `tmux -L {{ zsh_tmux_log_socket }}`
+# reaches this one. Killing one never touches the other.
+#
+# Everything here is tuned for reading, not editing: no mouse-driven surprises,
+# no blinking, no status noise. One bar, one colour per meaning.
+
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-kitty:RGB"
+set -g focus-events on
+set -g mouse on
+set -g history-limit 200000
+set -g escape-time 0
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+
+# Same prefix as the coding server (tmux's default C-b) on purpose: the two
+# servers are isolated by SOCKET, not by muscle memory. One chord to learn,
+# and no pause to remember which window you are in.
+set -g prefix C-b
+bind C-b send-prefix
+
+# --- Look -------------------------------------------------------------------
+# Catppuccin Macchiato, accent {{ zsh_log_accent }} (mauve), hardcoded (no plugin
+# load: this server must start fast and stay predictable even if the plugin dir
+# is mid-update).
+#
+# No filled blocks: the current window is bold accented text, not a painted
+# chip. The status bar is TWO rows and the second is empty. That blank row is the gap
+# between the bar and the first log line — without it the newest line sits
+# flush against the chrome and the eye cannot tell where the log starts.
+set -g status 2
+set -g status-position top
+set -g status-justify left
+set -g status-interval 5
+set -g status-style "bg=default,fg=#6e738d"
+set -g status-left "#[fg={{ zsh_log_accent }},bold] logs #[default]"
+set -g status-left-length 20
+set -g status-right "#[fg=#6e738d]#(uptime -p | sed 's/^up //') "
+set -g status-right-length 40
+set -g 'status-format[1]' ""
+
+setw -g window-status-format "#[fg=#6e738d] #I #W "
+setw -g window-status-current-format "#[fg={{ zsh_log_accent }},bold] #I #W "
+setw -g window-status-separator ""
+
+set -g pane-border-style "fg=#363a4f"
+set -g pane-active-border-style "fg={{ zsh_log_accent }}"
+set -g message-style "bg=#363a4f,fg=#cad3f5"
+set -g mode-style "bg=#363a4f,fg=#cad3f5"
+
+# --- Reading keys -----------------------------------------------------------
+setw -g mode-keys vi
+bind -T copy-mode-vi v send -X begin-selection
+bind -T copy-mode-vi y send -X copy-pipe-and-cancel "wl-copy"
+bind / copy-mode \; send -X search-backward ""
+bind -n M-Up copy-mode
+
+# Panes/windows, mnemonic and few.
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+bind r source-file "{{ target_home }}/.config/tmux/logs.conf" \; display "logs.conf reloaded"
+bind -r h select-pane -L
+bind -r j select-pane -D
+bind -r k select-pane -U
+bind -r l select-pane -R
+
+# Nudge the pane's pager back into follow mode (less: shift-F).
+bind f send-keys "F"
+
+# New windows open in the log workspace, never in a project directory.
+bind c new-window -c "{{ zsh_log_workdir }}"

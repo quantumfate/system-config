@@ -1,0 +1,6 @@
+---
+- name: Kill the tmux validation server
+  ansible.builtin.command:
+    cmd: tmux -L ansible-validate kill-server
+  changed_when: false
+  failed_when: false

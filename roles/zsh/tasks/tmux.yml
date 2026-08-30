@@ -1,0 +1,15 @@
+---
+# Logging workspace discoverability. Turns ~/.config/tms into a template so the
+# log dir is always bookmarked and reachable from a tmux-sessionizer popup.
+
+- name: Ensure the tms config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/tms"
+    state: directory
+    mode: "0755"
+
+- name: Render the tms config with the logging workspace bookmarked
+  ansible.builtin.template:
+    src: tms_config.j2
+    dest: "{{ target_home }}/.config/tms/config.toml"
+    mode: "0644"

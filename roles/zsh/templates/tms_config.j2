@@ -1,0 +1,21 @@
+default_session = "default"
+display_full_path = true
+excluded_dirs = [
+{% for d in zsh_tms_excluded_dirs %}    "{{ d }}",
+{% endfor %}]
+
+bookmarks = [
+{% for b in zsh_tms_bookmarks %}    "{{ b }}",
+{% endfor %}]
+
+[popup]
+width = "95%"
+height = "95%"
+
+{% for dir in zsh_tms_search_dirs %}[[search_dirs]]
+path = "{{ dir.path }}"
+depth = {{ dir.depth }}
+
+{% endfor %}[shortcuts]
+"tab" = "move_down"
+"shift-backtab" = "move_up"

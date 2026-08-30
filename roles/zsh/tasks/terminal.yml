@@ -1,0 +1,36 @@
+---
+# The everyday terminal surface, split by what each layer can actually control:
+#
+#   kitty.conf   typography and space — font, size, cell height, padding, cursor
+#   .tmux.conf   the status bar of the coding server
+#
+# Both were chezmoi dotfiles; they moved here so they share one accent and one
+# set of typography variables with the log viewer (see defaults/main.yml).
+
+- name: Ensure the kitty config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/kitty"
+    state: directory
+    mode: "0755"
+
+- name: Render kitty.conf
+  ansible.builtin.template:
+    src: kitty.conf.j2
+    dest: "{{ target_home }}/.config/kitty/kitty.conf"
+    mode: "0644"
+
+- name: Render the coding server's .tmux.conf
+  ansible.builtin.template:
+    src: tmux.conf.j2
+    dest: "{{ target_home }}/.tmux.conf"
+    mode: "0644"
+
+# tmux parses the file the same way `source-file` would; a typo here would
+# otherwise only surface at the next server start.
+- name: Validate the tmux config
+  ansible.builtin.command:
+    cmd: tmux -L ansible-validate -f "{{ target_home }}/.tmux.conf" new-session -d -s validate true
+  changed_when: false
+  register: tmux_validate
+  failed_when: tmux_validate.rc != 0
+  notify: Kill the tmux validation server

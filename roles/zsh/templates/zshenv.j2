@@ -1,0 +1,16 @@
+typeset -U path
+path=( "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin" $path )
+path=( "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy/bin/" $path )
+path=( "{{ target_home }}/.local/bin" $path )
+path=( "/usr/bin/obsidian" $path )
+{%- if devenv %}
+path=( "{{ target_home }}/go/bin" $path )
+path=( "{{ target_home }}/.luarocks/bin" $path )
+path=( "{{ target_home }}/.cargo/bin" $path )
+{%- endif %}
+
+export ESO_USER_DIR="{{ target_home }}/Games/the-elder-scrolls-online/drive_c/users/quantum/My Documents/Elder Scrolls Online"
+export ESO_LIVE_ADDONS_DIR="$ESO_USER_DIR/live/AddOns"
+export ESO_LIVE_SV_DIR="$ESO_USER_DIR/live/SavedVariables"
+export ESO_PTS_ADDONS_DIR="$ESO_USER_DIR/pts/AddOns"
+export ESO_PTS_SV_DIR="$ESO_USER_DIR/pts/SavedVariables"

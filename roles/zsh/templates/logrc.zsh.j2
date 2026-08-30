@@ -1,0 +1,93 @@
+## ---------------------------------------------------------------------------
+## Logging workspace — sourced from .zshrc. Rendered by roles/zsh.
+## ---------------------------------------------------------------------------
+# Everything log-shaped lives here, one file, so the shell config stays small
+# and this can be read top to bottom in one sitting.
+#
+# The rendering pipeline has exactly one shape and one owner:
+#
+#   source ──▶ logstream ──▶ tspin (macchiato theme) ──▶ less -RS
+#              (columns)     (colour, applied ONCE)      (no wrap)
+#
+# Never pipe a coloured stream into `less` yourself: LESSOPEN would hand it to
+# lesspipe → ~/.lessfilter, which would colour it a second time and corrupt the
+# escape codes. `logstream` clears LESSOPEN for exactly this reason.
+
+export ZSH_LOG_DIR="{{ zsh_log_dir }}"
+export ZSH_LOG_WORKDIR="{{ zsh_log_workdir }}"
+{% if zsh_tailspin_theme %}export TAILSPIN_THEME="{{ zsh_tailspin_theme }}"
+{% endif %}
+# One palette everywhere bat is reachable — direct calls, man pages, .lessfilter.
+export BAT_THEME="{{ zsh_bat_theme }}"
+# systemd's own pager (systemctl status, journalctl without a pipe) obeys the
+# same no-wrap, keep-the-screen rules as ours.
+export SYSTEMD_LESS="FRSXMK"
+
+# --- Verbs ------------------------------------------------------------------
+# Deliberately few, all starting with `log`, all doing the same thing to a
+# different source. Tab through them instead of remembering journalctl flags.
+
+# log            pick a source (fzf), open it in the dedicated log window
+# log <spec>     open that source directly
+log()      { logview "$@" }
+# logh           same, but in the current terminal (no separate window)
+logh()     { logview --here "$@" }
+# logu <unit>    one systemd unit, live
+logu()     { logview "unit:$1" }
+# loguu <unit>   one --user unit, live
+loguu()    { logview "user:$1" }
+# logf <file>    a plain file, live
+logf()     { logview "file:$(realpath "$1")" }
+
+alias logerr='logview errors'      # this boot, err and worse
+alias logwarn='logview warnings'   # this boot, warning and worse
+alias logk='logview kernel'        # kernel ring buffer
+alias logboot='logview boot'       # this boot, from the top
+alias logprev='logview prev'       # previous boot, from the top
+alias logaudit='logview audit'     # denials
+
+# ls the workspace, same columns as everywhere else
+alias logs='eza -1 --color=always --icons=never "$ZSH_LOG_DIR"'
+
+# logwhy <unit> — the three questions you always ask about a broken unit,
+# answered on one screen: is it up, why did it stop, what did it say last.
+logwhy() {
+  local unit="${1:?usage: logwhy <unit>}"
+  {
+    print -r -- "── state ─────────────────────────────────────────────"
+    systemctl status --no-pager --lines=0 "$unit" 2>&1
+    print -r -- ""
+    print -r -- "── last 50 lines ─────────────────────────────────────"
+    journalctl --output=short-iso --no-hostname -b -u "$unit" -n 50 --no-pager 2>&1
+  } | logstream -
+}
+
+# loggrep <pattern> [journalctl args…] — search instead of scroll. The query is
+# built here, the rendering is still logstream's job, so the result looks
+# exactly like every other log screen.
+loggrep() {
+  local pat="${1:?usage: loggrep <pattern> [journalctl args…]}"; shift
+  SYSTEMD_COLORS=0 journalctl --output=json --no-hostname -b --no-pager "$@" \
+    | rg --color=never -i -- "$pat" \
+    | logstream json
+}
+
+# logsince <when> [unit] — a bounded window. Bounded beats infinite scroll:
+#   logsince '15 min ago'      logsince today sshd      logsince '09:00'
+logsince() {
+  local when="${1:?usage: logsince <when> [unit]}"; shift
+  SYSTEMD_COLORS=0 journalctl --output=json --no-hostname --no-pager --since="$when" ${1:+-u "$1"} \
+    | logstream json
+}
+
+# --- Inside the log window --------------------------------------------------
+# ZSH_LOGVIEW is set by `logview`. In that window the shell drops to a one-glyph
+# prompt: no git status, no path, no time, no autosuggestions ghost-text. The
+# only moving text on screen should be the log itself.
+if [[ -n "${ZSH_LOGVIEW:-}" ]]; then
+  unset ZSH_AUTOSUGGEST_STRATEGY
+  ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+  PROMPT='%F{{ '{' }}{{ zsh_log_accent }}}▌%f '
+  RPROMPT=''
+  cd "$ZSH_LOG_WORKDIR" 2>/dev/null
+fi

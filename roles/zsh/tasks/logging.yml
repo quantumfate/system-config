@@ -1,0 +1,62 @@
+---
+# The logging workspace: one palette, one pipeline, one isolated tmux server.
+#
+#   ~/.config/tailspin/theme.toml   severity colours (macchiato via ANSI 16)
+#   ~/.config/tmux/logs.conf        config for the isolated log tmux server
+#   ~/.config/zsh/logrc.zsh         the `log*` verbs, sourced by .zshrc
+#   ~/.local/bin/logstream          source -> columns -> colour -> pager
+#   ~/.local/bin/logpick            fzf source picker
+#   ~/.local/bin/logpickrun         the picker, run inside the viewer
+#   ~/.local/bin/logview            window/session orchestration
+
+- name: Ensure the logging config directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ target_home }}/.config/tailspin"
+    - "{{ target_home }}/.config/tmux"
+    - "{{ target_home }}/.config/zsh"
+    - "{{ target_home }}/.local/bin"
+    - "{{ zsh_log_dir }}"
+
+- name: Render the tailspin severity theme
+  ansible.builtin.template:
+    src: tailspin_theme.toml.j2
+    dest: "{{ zsh_tailspin_theme }}"
+    mode: "0644"
+  when: zsh_tailspin_theme | length > 0
+
+- name: Render the isolated log tmux server config
+  ansible.builtin.template:
+    src: tmux_logs.conf.j2
+    dest: "{{ target_home }}/.config/tmux/logs.conf"
+    mode: "0644"
+
+- name: Render the logging shell profile
+  ansible.builtin.template:
+    src: logrc.zsh.j2
+    dest: "{{ target_home }}/.config/zsh/logrc.zsh"
+    mode: "0644"
+
+- name: Install the logging commands
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ target_home }}/.local/bin/{{ item }}"
+    mode: "0755"
+  loop:
+    - logstream
+    - logpick
+    - logpickrun
+    - logview
+
+- name: Validate the logging commands
+  ansible.builtin.command:
+    cmd: bash -n "{{ target_home }}/.local/bin/{{ item }}"
+  loop:
+    - logstream
+    - logpick
+    - logpickrun
+    - logview
+  changed_when: false

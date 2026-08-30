@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: zsh
+  namespace: local
+  author: local
+  description: >-
+    Templates the zsh interactive shell, its plugins, the lessfilter
+    dispatcher, and the logging workspace.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - shell
+    - zsh
+    - logging
+
+dependencies: []

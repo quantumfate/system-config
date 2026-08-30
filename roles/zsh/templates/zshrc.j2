@@ -1,0 +1,309 @@
+{% raw %}if [ "$TERM" = "xterm-kitty" ] && [ -z "$ZSH_LOGVIEW" ]; then
+  fastfetch
+fi
+{% endraw %}export LESS="-R"
+{% if devenv %}eval "$(luarocks --local --lua-version 5.1 path)"
+{% endif %}eval "$(zoxide init zsh)"
+
+typeset -U path cdpath fpath manpath
+fpath+=(/usr/share/zsh/site-functions /usr/share/zsh/$ZSH_VERSION/functions /usr/share/zsh/vendor-completions)
+
+HELPDIR="/usr/share/zsh/$ZSH_VERSION/help"
+
+feh_scaled() {
+  local width=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .width')
+  local height=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .height')
+  command feh --geometry $((width*80/100))x$((height*80/100)) --scale-down "$@"
+}
+
+## Plugins
+# oh-my-zsh
+export ZSH="{{ zsh_omz_dest }}"
+ZSH_THEME="eastwood"
+
+if [ -f "${HOME}/.config/oh-my-zsh/themes/catppuccin.zsh-theme" ]; then
+  ZSH_THEME="catppuccin"
+  CATPPUCCIN_FLAVOR="mocha" # Required! Options: mocha, flappe, macchiato, latte
+  CATPPUCCIN_SHOW_TIME=true  # Optional! If set to true, this will add the current time to the prompt
+fi
+
+ZSH_LS_BACKEND="eza"
+plugins=(
+  aliases
+  git
+  ls
+  ufw
+  thefuck
+  systemd
+  systemadmin
+  rust
+  per-directory-history
+  golang
+  extract
+  colorize
+  colored-man-pages
+)
+source $ZSH/oh-my-zsh.sh
+
+# zsh-autosuggestions
+if [ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh" ]; then
+  source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
+  ZSH_AUTOSUGGEST_STRATEGY=(history)
+  # Ghost text sits on surface2 — present when you look for it, invisible when
+  # you don't. Suggestion text that competes with real text is noise.
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#5b6078'
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=40
+fi
+
+# zsh-autopair
+if [ -f "$HOME/.zsh/zsh-autopair/zsh-autopair.plugin.zsh" ]; then
+  source "$HOME/.zsh/zsh-autopair/zsh-autopair.plugin.zsh"
+fi
+
+# Tab completion
+autoload -Uz compinit
+compinit
+
+if [ -f "$HOME/.zsh/catppuccin-fzf/themes/catppuccin-fzf-macchiato.sh" ]; then
+  source "$HOME/.zsh/catppuccin-fzf/themes/catppuccin-fzf-macchiato.sh"
+fi
+
+if [ -f "$HOME/.zsh/fzf-tab/fzf-tab.plugin.zsh" ]; then
+  source "$HOME/.zsh/fzf-tab/fzf-tab.plugin.zsh"
+  source /usr/share/fzf/key-bindings.zsh
+  source /usr/share/fzf/completion.zsh
+fi
+
+if [ -f "$HOME/.zsh/fzf-tab-source/fzf-tab-source.plugin.zsh" ]; then
+  source "$HOME/.zsh/fzf-tab-source/fzf-tab-source.plugin.zsh"
+  export LESSOPEN="|-/usr/bin/lesspipe.sh %s"
+  chmod +x ~/.lessfilter
+fi
+
+if [ -f "$HOME/.zsh/zsh-chezmoi/chezmoi.plugin.zsh" ]; then
+  source "$HOME/.zsh/zsh-chezmoi/chezmoi.plugin.zsh"
+fi
+
+zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:*' fzf-flags --bind=tab:down,shift-tab:up,enter:accept,right:accept
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:*' popup-min-width 300
+zstyle ':fzf-tab:*' popup-pad 600 0
+zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
+zstyle ':fzf-tab:*' fzf-tab-group-order \
+  alias \
+  directory \
+  file \
+  command \
+  external command
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-tab-group-order \
+  directory \
+  alias
+
+source <(COMPLETE=zsh tms)
+
+## History
+HISTSIZE="{{ zsh_history_size }}"
+SAVEHIST="{{ zsh_history_size }}"
+
+HISTFILE="{{ zsh_history_file }}"
+mkdir -p "$(dirname "$HISTFILE")"
+
+setopt HIST_FCNTL_LOCK
+
+# Enabled history options
+enabled_opts=(
+  HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY
+)
+for opt in "${enabled_opts[@]}"; do
+  setopt "$opt"
+done
+unset opt enabled_opts
+
+# Disabled history options
+disabled_opts=(
+  APPEND_HISTORY EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS
+  HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
+)
+for opt in "${disabled_opts[@]}"; do
+  unsetopt "$opt"
+done
+unset opt disabled_opts
+
+## Misc
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line
+
+function auto_venv() {
+  if [[ -n "$VIRTUAL_ENV" && "$PWD" != *"${VIRTUAL_ENV:h}"* ]]; then
+    deactivate
+    return
+  fi
+
+  [[ -n "$VIRTUAL_ENV" ]] && return
+
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/.venv/bin/activate" ]]; then
+      source "$dir/.venv/bin/activate"
+      return
+    fi
+    dir="${dir:h}"
+  done
+}
+function auto_nvm() {
+  [[ -f .nvmrc ]] && nvm use
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd auto_venv
+add-zsh-hook chpwd auto_nvm
+
+[[ -n "$TMUX" ]] && auto_venv
+[[ -n "$TMUX" ]] && auto_nvm
+
+## LF
+lfcd () {
+    cd "$(command lf -print-last-dir "$@")" && zoxide add "$PWD"
+}
+alias lf=lfcd
+
+if test -n "$KITTY_INSTALLATION_DIR"; then
+  export KITTY_SHELL_INTEGRATION="no-rc"
+  autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+  kitty-integration
+  unfunction kitty-integration
+fi
+
+## Binds
+bindkey ' ' magic-space
+
+## Useful aliases
+alias -- feh=feh_scaled
+alias -- ranger=ranger-cd
+
+# Hyprland
+alias hyprclients="hyprctl -j clients | jq -r '.[]' | jless"
+
+# Common use
+alias grubup="sudo grub-mkconfig -o /boot/grub/grub.cfg"
+alias fixpacman="sudo rm /var/lib/pacman/db.lck"
+alias tarnow='tar -acf '
+alias untar='tar -zxvf '
+alias wget='wget -c '
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+alias dir='dir --color=auto'
+alias vdir='vdir --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias hw='hwinfo --short'
+alias big="expac -H M '%m\t%n' | sort -h | nl"
+alias gitpkg='pacman -Q | grep -i "\-git" | wc -l'
+alias update='sudo pacman -Syu'
+
+alias mirror="sudo cachyos-rate-mirrors"
+
+# Git specific aliases
+alias gl="git log --oneline"
+alias glmerge="git log --oneline --decorate --graph --parents"
+alias glreverse="git --no-pager log --reverse"
+
+# Help people new to Arch
+alias apt='man pacman'
+alias apt-get='man pacman'
+alias please='sudo'
+alias tb='nc termbin.com 9999'
+
+alias cleanup='sudo pacman -Rns (pacman -Qtdq)'
+
+# Get the error messages from journalctl
+alias jctl="journalctl -p 3 -xb"
+
+# Recent installed packages
+alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
+
+## ---------------------------------------------------------------------------
+## One palette: Catppuccin Macchiato, everywhere text is coloured
+## ---------------------------------------------------------------------------
+# The terminal's ANSI 16 are the macchiato hexes (kitty themes/macchiato.conf),
+# so tools that only speak ANSI names (tspin, grep, ls) land on the same palette
+# as tools that speak hex (fzf, bat, delta). Nothing here re-defines a colour;
+# it only points each tool at the palette that is already there.
+export BAT_THEME="{{ zsh_bat_theme }}"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
+
+# eza: structure faint, permissions and sizes readable, nothing shouting.
+export EZA_COLORS="da=38;2;110;115;141:uu=38;2;110;115;141:gu=38;2;110;115;141:ur=38;2;198;160;246:uw=38;2;238;212;159:ux=38;2;166;218;149:sn=38;2;139;213;202:sb=38;2;110;115;141:xx=38;2;73;77;100:di=38;2;198;160;246"
+
+# fzf: one accent (mauve), one surface. No borders, no scrollbar, no gutter —
+# the list is the interface.
+export FZF_DEFAULT_OPTS="\
+  --bind 'tab:down,shift-tab:up' \
+  --layout=reverse --info=inline --border=none --pointer='▌' --marker='▌' \
+  --color=bg+:#363a4f,fg:#cad3f5,fg+:#cad3f5,hl:{{ zsh_log_accent }},hl+:{{ zsh_log_accent }} \
+  --color=pointer:{{ zsh_log_accent }},prompt:{{ zsh_log_accent }},marker:#a6da95,spinner:{{ zsh_log_accent }} \
+  --color=info:#6e738d,header:#6e738d,gutter:-1,border:#363a4f"
+export SKIM_DEFAULT_OPTIONS="--bind 'tab:down,shift-tab:up'" # for tms
+
+# Must be at the end
+if [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  if [ -f "$HOME/.zsh/catppuccin-zsh-syntax-highlighting/themes/catppuccin_macchiato-zsh-syntax-highlighting.zsh" ]; then
+    source "$HOME/.zsh/catppuccin-zsh-syntax-highlighting/themes/catppuccin_macchiato-zsh-syntax-highlighting.zsh"
+  fi
+  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets cursor)
+  ZSH_HIGHLIGHT_STYLES[cursor]='fg=blue'
+fi
+
+## Logging workspace. Aliases, verbs and the log-window shell profile all live
+## in one file so this config stays readable.
+source "$HOME/.config/zsh/logrc.zsh"
+
+## Suffix aliases
+alias -s md="bat"
+alias -s mov="open"
+alias -s png="feh_scaled"
+alias -s mp4="open"
+alias -s go="$EDITOR"
+alias -s rs="$EDITOR"
+alias -s c="$EDITOR"
+alias -s h="$EDITOR"
+alias -s cpp="$EDITOR"
+alias -s hpp="$EDITOR"
+alias -s js="$EDITOR"
+alias -s ts="$EDITOR"
+alias -s rb="$EDITOR"
+alias -s txt="$EDITOR"
+alias -s yaml="bat -l yaml"
+alias -s json="jless"
+
+## Global aliases
+alias -g NE='2>/dev/null'
+alias -g DN='> /dev/null'
+alias -g NUL='>/dev/null 2>&1'
+
+## Widgets
+clear-keep-buffer() {
+  zle clear-screen
+}
+zle -N clear-keep-buffer
+bindkey '^Xl' clear-keep-buffer
+
+## Hotkey Insertion
+bindkey -s '^Xgc' 'git commit -m ""\C-b'

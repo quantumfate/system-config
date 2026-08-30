@@ -1,0 +1,72 @@
+---
+# The interactive shell pipeline. Everything the bootstrap needs at login time
+# is created here: plugins, oh-my-zsh, the handful of rendered dotfiles, the
+# logging workspace, and the packages that back the log toolchain.
+
+- name: Install the log-viewing toolchain
+  ansible.builtin.include_tasks: install.yml
+
+- name: Clone the zsh plugin set
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ target_home }}/.zsh/{{ item.name }}"
+    version: HEAD
+    update: true
+    force: true
+  loop: "{{ zsh_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Clone oh-my-zsh
+  ansible.builtin.git:
+    repo: "{{ zsh_omz_repo }}"
+    dest: "{{ zsh_omz_dest }}"
+    version: HEAD
+    update: true
+    force: true
+
+- name: Clone oh-my-zsh custom plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+    version: HEAD
+    update: true
+    force: true
+  loop: "{{ zsh_omz_custom_plugins }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Build the logging workspace
+  ansible.builtin.include_tasks: logging.yml
+
+- name: Include tmux-sessionizer helpers
+  ansible.builtin.include_tasks: tmux.yml
+  when: profile == 'desktop' or profile == 'laptop'
+
+- name: Render the terminal surface (kitty + the coding tmux server)
+  ansible.builtin.include_tasks: terminal.yml
+
+- name: Render .zshenv
+  ansible.builtin.template:
+    src: zshenv.j2
+    dest: "{{ target_home }}/.zshenv"
+    mode: "0644"
+
+- name: Render .zshrc
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "{{ target_home }}/.zshrc"
+    mode: "0644"
+
+- name: Deploy the lessfilter dispatcher
+  ansible.builtin.template:
+    src: lessfilter.j2
+    dest: "{{ target_home }}/.lessfilter"
+    mode: "0755"
+
+- name: Validate .zshrc syntax
+  ansible.builtin.command:
+    cmd: zsh -n "{{ target_home }}/.zshrc"
+  register: zsh_n
+  changed_when: false
+  failed_when: zsh_n.rc != 0

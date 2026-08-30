@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# logpick — fuzzy-pick a log source, print its logstream spec. Rendered by roles/zsh.
+#
+# One list, one keystroke, no memorising unit names. The list is deliberately
+# ordered by how often it is needed, not alphabetically: fixed positions mean
+# the top entries become muscle memory instead of a re-read every time.
+set -uo pipefail
+
+WORKDIR="${ZSH_LOG_DIR:-{{ zsh_log_dir }}}"
+
+sources() {
+  printf '%s\n' \
+    "follow      live journal, all units" \
+    "errors      this boot, priority err and worse" \
+    "warnings    this boot, priority warning and worse" \
+    "kernel      kernel ring buffer" \
+    "boot        this boot, from the top" \
+    "prev        previous boot, from the top" \
+    "audit       audit / access denials"
+
+  systemctl list-units --type=service --state=running --no-legend --plain 2>/dev/null \
+    | awk '{printf "unit:%-32s system service (running)\n", $1}'
+  systemctl --user list-units --type=service --state=running --no-legend --plain 2>/dev/null \
+    | awk '{printf "user:%-32s user service (running)\n", $1}'
+
+  if [ -d "$WORKDIR" ]; then
+    find -L "$WORKDIR" -maxdepth 3 -type f \( -name '*.log' -o -name '*.txt' -o -name '*.json' \) 2>/dev/null \
+      | sed "s|^|file:|" | awk '{printf "%-38s workspace file\n", $1}'
+  fi
+}
+
+choice=$(sources | fzf \
+  --prompt='log ❯ ' \
+  --height='100%' \
+  --layout=reverse \
+  --info=inline \
+  --no-multi \
+  --no-scrollbar \
+  --border=none \
+  --pointer='▌' \
+  --color='bg+:#363a4f,fg+:#cad3f5,hl:{{ zsh_log_accent }},hl+:{{ zsh_log_accent }},pointer:{{ zsh_log_accent }},prompt:{{ zsh_log_accent }},info:#6e738d,border:#363a4f,gutter:-1' \
+  --header='enter open   esc cancel' \
+  --header-first)
+
+[ -z "${choice:-}" ] && exit 1
+printf '%s\n' "${choice%% *}"

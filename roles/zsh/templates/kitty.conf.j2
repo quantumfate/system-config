@@ -1,0 +1,60 @@
+# ~/.config/kitty/kitty.conf — rendered by roles/zsh.
+#
+# kitty owns TYPOGRAPHY AND SPACE — the things only the terminal can decide:
+# how big a glyph is, how tall a text row is, how much air surrounds the grid.
+# tmux cannot change them (it draws inside cells) and neither can neovim.
+#
+# Division of labour across the three configs:
+#   kitty  — font, font size, line height (cell_height), window padding, cursor
+#   tmux   — the status bar: layout, palette, the blank row under it
+#   neovim — everything inside the viewport: gutters, float borders, statusline
+
+font_family      {{ zsh_terminal_font }}
+bold_font        {{ zsh_terminal_font }} Bold
+italic_font      {{ zsh_terminal_font }} Italic
+bold_italic_font {{ zsh_terminal_font }} Bold Italic
+font_size {{ zsh_terminal_font_size }}
+
+# Leading. A terminal packs rows at the font's natural line box, which is tight
+# for long reading sessions; {{ zsh_terminal_line_height }}% adds roughly a
+# fifth of a row of air between lines without changing glyph size. This is what
+# makes neovim, tmux and the shell all breathe — none of them can do it alone.
+modify_font cell_height {{ zsh_terminal_line_height }}%
+
+# Air around the grid, "top right bottom left". Slightly more on top so a tmux
+# status bar is not glued to the window edge.
+window_padding_width {{ zsh_terminal_padding }}
+background_opacity 1.0
+background_blur 32
+hide_window_decorations yes
+confirm_os_window_close 0
+
+# Cursor on the shared accent, no blinking: a blinking cursor is motion in the
+# corner of the eye for the entire time you are reading something else.
+cursor {{ zsh_log_accent }}
+cursor_shape block
+cursor_blink_interval 0
+
+scrollback_lines 10000
+scrollbar never
+
+copy_on_select yes
+strip_trailing_spaces smart
+enable_audio_bell no
+allow_remote_control no
+
+# Tab bar off: tmux already owns windows and sessions. Two window bars stacked
+# on each other is duplicated chrome that costs attention for nothing.
+tab_bar_style hidden
+
+map ctrl+plus change_font_size all +1.0
+map ctrl+minus change_font_size all -1.0
+map ctrl+0 change_font_size all 0
+
+shell_integration enabled
+
+# Dank colour generation and the Catppuccin Macchiato palette (themes/ comes
+# from the externals role). That palette is the source of truth for the ANSI 16
+# that tspin, grep and ls colour against — see templates/tailspin_theme.toml.j2.
+include dank-tabs.conf
+include themes/macchiato.conf
