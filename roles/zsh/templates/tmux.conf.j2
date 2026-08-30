@@ -41,7 +41,10 @@ set -g focus-events on
 set -g status 2
 set -g status-position top
 set -g status-justify left
-set -g status-interval 5
+# No #() shell hooks live in the bar, so nothing needs polling. A long interval
+# keeps tmux from redrawing the client on a timer — a redraw repaints the grid
+# under a display-popup and makes the tms picker flicker.
+set -g status-interval 60
 set -g status-style "bg=default,fg=#6e738d"
 set -g 'status-format[1]' ""
 
@@ -50,11 +53,22 @@ set -g status-right-length 100
 # Session name, so you always know which of the servers/sessions you are in.
 set -g status-left "#[fg={{ zsh_log_accent }},bold] #S #[default]"
 # Prefix pressed turns the right side red — the one state worth an alarm colour.
-set -g status-right "#{?client_prefix,#[fg=#ed8796],#[fg=#6e738d]} #(tms sessions) "
+# Deliberately no #(tms sessions) here: a #() runs on every status refresh and
+# each result redraws the client, which flickers any open tmux popup. Session
+# count comes from tmux's own format, evaluated in-process with no fork.
+set -g status-right "#{?client_prefix,#[fg=#ed8796],#[fg=#6e738d]} #{session_windows}w "
 
 setw -g window-status-format "#[fg=#6e738d] #I #W "
 setw -g window-status-current-format "#[fg={{ zsh_log_accent }},bold] #I #W "
 setw -g window-status-separator ""
+
+# Popups (tms) get an explicit opaque background. With bg=default the popup
+# cells inherit the terminal default, and any row the picker does not paint
+# itself lets the pane underneath show through — text bleeding into the top of
+# the tms list. A concrete colour makes tmux repaint every cell of the overlay.
+set -g popup-style "bg=#24273a"
+set -g popup-border-style "fg=#363a4f,bg=#24273a"
+set -g popup-border-lines rounded
 
 set -g pane-border-style "fg=#363a4f"
 set -g pane-active-border-style "fg={{ zsh_log_accent }}"
@@ -68,9 +82,21 @@ set -g menu-border-style "fg=#363a4f"
 run ~/.config/tmux/plugins/tmux-cpu/cpu.tmux
 run ~/.config/tmux/plugins/tmux-battery/battery.tmux
 
-bind C-o display-popup -E "tms"
-bind C-s display-popup -E "tms switch"
-bind C-w display-popup -E "tms windows"
+# tms runs in a throwaway window, not a display-popup. A popup is an overlay:
+# when the pane underneath keeps drawing (a spinner, nvim redrawing), tmux
+# repaints that region and the overlay is only restored once the picker itself
+# goes dirty — so rows of the pane bleed through the list until you type. A
+# real window has no such race. The window closes as soon as tms exits.
+bind C-o new-window -n tms "tms"
+# `tms switch` and `tms windows` force a preview pane that cannot be turned off,
+# and a preview of a session is noise next to the one thing being picked: its
+# name. Plain fzf over tmux's own lists instead. Run through `zsh -ic` so the
+# fzf theme from .zshrc applies.
+# No #{...} formats in these commands: tmux expands formats in a shell-command
+# string, so a -F template would be substituted before the shell ever sees it.
+# `cut` off tmux's default listing does the same job.
+bind C-s new-window -n tms "zsh -ic \"tmux list-sessions | cut -d: -f1 | fzf --reverse --no-preview | xargs -r tms open-session\""
+bind C-w new-window -n tms "zsh -ic \"tmux list-windows | cut -d: -f1 | fzf --reverse --no-preview | xargs -r tmux select-window -t\""
 bind C-e command-prompt -p "Rename active session to: " "run-shell 'tms rename %1'"
 bind C-r "run-shell 'tms refresh'"
 bind C-k confirm -p "Kill current session? (y/N):" "run-shell 'tms kill'"
