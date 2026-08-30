@@ -1,16 +1,128 @@
 ---
-# Catppuccin finishing touches that no package or dotfile can do: icon folder
-# recolouring, the oh-my-zsh theme checkout, and applying GTK settings.
+# Desktop theming: one flavour (macchiato), one accent (mauve), one type scale.
+#
+# Four toolkits have to be told the same thing in four different dialects, and
+# a fifth — the XDG portals — reads none of those files but dconf instead:
+#
+#   GTK2   ~/.gtkrc-2.0
+#   GTK3   ~/.config/gtk-3.0/settings.ini
+#   GTK4   settings.ini for font/icons/cursor, but libadwaita only obeys
+#          ~/.config/gtk-4.0/gtk.css, so the theme's stylesheet is linked in
+#   Qt     qt6ct/qt5ct (fonts + palette) with Kvantum drawing the widgets
+#   X11    xsettingsd, for XWayland clients
+#   dconf  what xdg-desktop-portal-gtk reports to Flatpaks and file dialogs
+#
+# Miss one and exactly one class of window comes out wrong — usually a file
+# picker, which is why "everything is themed except the save dialog" happens.
 
+# Repo and AUR in one transaction, like roles/packages. Needs a warm sudo
+# timestamp, which the `base` dependency (meta/main.yml) provides.
+- name: Install the theme assets
+  kewlfft.aur.aur:
+    name: "{{ theme_packages }}"
+    use: yay
+    state: present
+  become: false
+  when: theme_packages | length > 0
+  tags: [privileged]
+
+- name: Ensure the theming config directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ target_home }}/.config/gtk-3.0"
+    - "{{ target_home }}/.config/gtk-4.0"
+    - "{{ target_home }}/.config/qt5ct"
+    - "{{ target_home }}/.config/qt6ct"
+    - "{{ target_home }}/.config/Kvantum"
+    - "{{ target_home }}/.config/xsettingsd"
+    - "{{ target_home }}/.config/environment.d"
+    - "{{ target_home }}/.icons/default"
+    - "{{ target_home }}/.local/share/nwg-look"
+
+- name: Render the toolkit settings
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - {src: gtkrc-2.0.j2, dest: "{{ target_home }}/.gtkrc-2.0.mine"}
+    - {src: gtk3-settings.ini.j2, dest: "{{ target_home }}/.config/gtk-3.0/settings.ini"}
+    - {src: gtk4-settings.ini.j2, dest: "{{ target_home }}/.config/gtk-4.0/settings.ini"}
+    - {src: qt5ct.conf.j2, dest: "{{ target_home }}/.config/qt5ct/qt5ct.conf"}
+    - {src: qt6ct.conf.j2, dest: "{{ target_home }}/.config/qt6ct/qt6ct.conf"}
+    - {src: kvantum.kvconfig.j2, dest: "{{ target_home }}/.config/Kvantum/kvantum.kvconfig"}
+    - {src: xsettingsd.conf.j2, dest: "{{ target_home }}/.config/xsettingsd/xsettingsd.conf"}
+    - {src: cursor-index.theme.j2, dest: "{{ target_home }}/.icons/default/index.theme"}
+    - {src: nwg-look-gsettings.j2, dest: "{{ target_home }}/.local/share/nwg-look/gsettings"}
+    - {src: environment.d-theming.conf.j2, dest: "{{ target_home }}/.config/environment.d/50-theming.conf"}
+  loop_control:
+    label: "{{ item.dest | basename }}"
+  notify: Reload xsettingsd
+
+# libadwaita ignores gtk-theme-name entirely: a GTK4 app is themed only if the
+# theme's own stylesheet is present under ~/.config/gtk-4.0. Symlinks (not
+# copies) so a theme package update lands without re-running this role.
+- name: Link the GTK4 stylesheets from the installed theme
+  ansible.builtin.file:
+    src: "/usr/share/themes/{{ theme_gtk }}/gtk-4.0/{{ item }}"
+    dest: "{{ target_home }}/.config/gtk-4.0/{{ item }}"
+    state: link
+    force: true
+  loop:
+    - gtk.css
+    - gtk-dark.css
+    - assets
+
+# Portals and Flatpaks do not read settings.ini — they ask the GSettings
+# desktop-interface schema. Without this the app is themed and its file chooser
+# is not, which is the single most common "half-themed desktop" symptom.
+- name: Publish the theme to dconf for the portals
+  community.general.dconf:
+    key: "/org/gnome/desktop/interface/{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - {key: gtk-theme, value: "'{{ theme_gtk }}'"}
+    - {key: icon-theme, value: "'{{ theme_icons }}'"}
+    - {key: cursor-theme, value: "'{{ theme_cursor }}'"}
+    - {key: cursor-size, value: "{{ theme_cursor_size }}"}
+    - {key: font-name, value: "'{{ theme_ui_font }} {{ theme_ui_font_size }}'"}
+    - {key: monospace-font-name, value: "'{{ theme_mono_font }} {{ theme_mono_font_size }}'"}
+    - {key: document-font-name, value: "'{{ theme_ui_font }} {{ theme_ui_font_size }}'"}
+    - {key: color-scheme, value: "'prefer-dark'"}
+    - {key: font-antialiasing, value: "'rgba'"}
+    - {key: font-hinting, value: "'slight'"}
+  loop_control:
+    label: "{{ item.key }}"
+
+# Left over from the DankMaterialShell/matugen setup, which this machine no
+# longer runs. They are user-level overrides layered ON TOP of the theme, so
+# while they exist the catppuccin colours are only half visible.
+- name: Remove the matugen leftovers
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ theme_stale_files }}"
+
+# Writes into /usr/share/icons, so it needs root. `become` rather than letting
+# the script re-exec itself under sudo: papirus-folders only calls sudo when it
+# is not already root (see its _is_root_user check), and that internal sudo has
+# no tty during a play — the same failure mode as running yay for repo packages.
 - name: Recolour Papirus folders
+  become: true
   ansible.builtin.command: papirus-folders -C {{ gtk_icon_theme_flavour }} --theme Papirus-Dark
   register: papirus
   changed_when: "'already' not in papirus.stdout"
+  tags: [privileged]
 
-- name: Apply GTK settings from the chezmoi-managed config
-  ansible.builtin.command: nwg-look -a
-  changed_when: true
-  failed_when: false
+- name: Render the shared browser prefs
+  ansible.builtin.template:
+    src: zen-user.js.j2
+    dest: "{{ browser_config_src }}/user.js"
+    mode: "0644"
 
 - name: Clone the Catppuccin oh-my-zsh theme
   ansible.builtin.git:

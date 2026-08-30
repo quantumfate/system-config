@@ -53,8 +53,9 @@ map ctrl+0 change_font_size all 0
 
 shell_integration enabled
 
-# Dank colour generation and the Catppuccin Macchiato palette (themes/ comes
-# from the externals role). That palette is the source of truth for the ANSI 16
-# that tspin, grep and ls colour against — see templates/tailspin_theme.toml.j2.
-include dank-tabs.conf
+# The Catppuccin Macchiato palette (themes/ comes from the externals role). It
+# is the source of truth for the ANSI 16 that tspin, grep and ls colour against
+# — see templates/tailspin_theme.toml.j2. The old `include dank-tabs.conf` is
+# gone with the rest of the matugen leftovers (roles/theming removes them); a
+# missing include is a hard error at kitty startup, not a warning.
 include themes/macchiato.conf

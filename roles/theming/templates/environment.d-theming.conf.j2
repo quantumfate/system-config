@@ -1,0 +1,15 @@
+# ~/.config/environment.d/50-theming.conf — rendered by roles/theming.
+#
+# systemd's user manager reads environment.d, and uwsm imports it into the
+# session, so these reach EVERY user unit — including xdg-desktop-portal-gtk
+# and the file-chooser popups it spawns, which are otherwise started without a
+# shell and inherit nothing from ~/.zshenv or a compositor exec line. That is
+# the difference between "my apps are themed" and "every last dialog is themed".
+#
+# Deliberately NOT set here:
+#   QT_STYLE_OVERRIDE — qt6ct.conf already selects Kvantum, and the environment
+#   variable overrides whatever qt6ct decides, so setting both means the config
+#   file silently stops mattering.
+QT_QPA_PLATFORMTHEME=qt6ct
+XCURSOR_THEME={{ theme_cursor }}
+XCURSOR_SIZE={{ theme_cursor_size }}

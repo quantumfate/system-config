@@ -1,0 +1,20 @@
+# ~/.gtkrc-2.0.mine — rendered by roles/theming.
+#
+# GTK2 survives in a handful of dialogs (some file pickers, older tray apps).
+# It cannot use the catppuccin GTK3 theme, but it can at least match the font
+# and the icon set so those windows are not the odd ones out.
+#
+# This is the .mine file, not ~/.gtkrc-2.0 itself: that one carries a "DO NOT
+# EDIT — nwg-look overwrites this" banner and ends with an include of this file,
+# so writing here survives anyone pressing Apply in the GUI.
+gtk-theme-name="{{ theme_gtk }}"
+gtk-icon-theme-name="{{ theme_icons }}"
+gtk-cursor-theme-name="{{ theme_cursor }}"
+gtk-cursor-theme-size={{ theme_cursor_size }}
+gtk-font-name="{{ theme_ui_font }} {{ theme_ui_font_size }}"
+gtk-button-images=0
+gtk-menu-images=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle="hintslight"
+gtk-xft-rgba="rgb"

@@ -1,0 +1,18 @@
+# ~/.config/xsettingsd/xsettingsd.conf — rendered by roles/theming.
+# XSettings is how XWayland clients (and anything still speaking X11) learn the
+# theme. Same values as the GTK files, or an X11 app becomes the one window on
+# screen with a different font and cursor.
+Net/ThemeName "{{ theme_gtk }}"
+Net/IconThemeName "{{ theme_icons }}"
+Gtk/CursorThemeName "{{ theme_cursor }}"
+Gtk/CursorThemeSize {{ theme_cursor_size }}
+Gtk/FontName "{{ theme_ui_font }} {{ theme_ui_font_size }}"
+Gtk/MonospaceFontName "{{ theme_mono_font }} {{ theme_mono_font_size }}"
+Gtk/ButtonImages 0
+Gtk/MenuImages 0
+Net/EnableEventSounds 1
+Net/EnableInputFeedbackSounds 0
+Xft/Antialias 1
+Xft/Hinting 1
+Xft/HintStyle "hintslight"
+Xft/RGBA "rgb"

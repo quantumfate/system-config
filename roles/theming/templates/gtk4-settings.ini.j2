@@ -1,0 +1,16 @@
+# ~/.config/gtk-4.0/settings.ini — rendered by roles/theming.
+#
+# GTK4 honours the font, icon and cursor keys here; the WIDGET theme it does not
+# — libadwaita apps only follow ~/.config/gtk-4.0/gtk.css, which tasks/main.yml
+# symlinks to the installed catppuccin theme's own gtk-4.0 stylesheet.
+[Settings]
+gtk-theme-name={{ theme_gtk }}
+gtk-icon-theme-name={{ theme_icons }}
+gtk-cursor-theme-name={{ theme_cursor }}
+gtk-cursor-theme-size={{ theme_cursor_size }}
+gtk-font-name={{ theme_ui_font }} {{ theme_ui_font_size }}
+gtk-application-prefer-dark-theme=1
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb

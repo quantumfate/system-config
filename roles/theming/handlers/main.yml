@@ -1,0 +1,7 @@
+---
+# xsettingsd re-reads its config on SIGHUP; without it XWayland apps keep the
+# old font and cursor until the next login.
+- name: Reload xsettingsd
+  ansible.builtin.command: pkill -HUP xsettingsd
+  changed_when: false
+  failed_when: false

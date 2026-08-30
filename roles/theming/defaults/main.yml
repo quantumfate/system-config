@@ -1,0 +1,62 @@
+---
+# One flavour, one accent, everywhere. Catppuccin Macchiato + mauve is the same
+# palette the terminal surface uses (roles/zsh) and the same one quickshell
+# reads from its assets/theme.default.json, so nothing on screen disagrees.
+theme_flavour: macchiato
+theme_accent: mauve
+
+# Derived names. All three packages ship one directory per flavour+accent pair,
+# so the names are mechanical — never hand-write them.
+theme_gtk: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}-standard+default"
+theme_cursor: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}-cursors"
+theme_kvantum: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
+theme_qt_colors: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
+theme_icons: Papirus-Dark
+
+# The accent as a hex value, for the surfaces that want a colour rather than a
+# theme name (Zen, and anything else that takes one). Catppuccin Macchiato.
+theme_accent_hex: "#c6a0f6"
+
+# --- Type and space ---------------------------------------------------------
+# Same principle as the terminal: larger text, more room around it. 12pt is one
+# notch up from GTK's 11 / Qt's 10 — noticeably roomier without reflowing app
+# layouts. The monospace font is the terminal's, so a file listing in a GTK
+# dialog and the same listing in kitty are the same shape.
+theme_ui_font: "Adwaita Sans"
+theme_ui_font_size: 12
+theme_mono_font: "Hack Nerd Font Mono"
+theme_mono_font_size: 12
+
+# 28 rather than 24: the pointer is the one UI element that is never scaled by
+# the app, and a bigger one is easier to reacquire after looking away.
+theme_cursor_size: 28
+
+# Packages that own the theme assets. Kept here rather than in group_vars so the
+# look travels with the role that configures it.
+#
+# One list through yay, repo and AUR alike — the same pattern as roles/packages.
+#
+# yay calls sudo itself and a play has no tty, so it needs a sudo timestamp that
+# is already valid. That is what the `base` dependency in meta/main.yml is for:
+# its pacman tasks run under ansible's own become, which refreshes the user-wide
+# timestamp (roles/sudoers sets timestamp_type=global) before yay is reached.
+theme_packages:
+  - catppuccin-gtk-theme-{{ theme_flavour }}
+  - catppuccin-cursors-{{ theme_flavour }}
+  - papirus-icon-theme
+  - papirus-folders
+  - kvantum
+  - qt6ct
+  - qt5ct
+  - xsettingsd
+  - adwaita-fonts
+
+# Leftovers from the DankMaterialShell/matugen experiment. They are user-level
+# overrides that win over the GTK theme and the Qt colour scheme, so as long as
+# they exist the catppuccin theming below is only half applied.
+theme_stale_files:
+  - "{{ target_home }}/.config/gtk-3.0/gtk.css"
+  - "{{ target_home }}/.config/gtk-3.0/dank-colors.css"
+  - "{{ target_home }}/.config/gtk-4.0/dank-colors.css"
+  - "{{ target_home }}/.config/kitty/dank-tabs.conf"
+  - "{{ target_home }}/.config/kitty/dank-theme.conf"

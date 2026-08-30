@@ -1,0 +1,30 @@
+---
+galaxy_info:
+  role_name: theming
+  namespace: local
+  author: local
+  description: >-
+    GTK, Qt, cursor and browser theming — one flavour, one accent, one type
+    scale, published to every toolkit and to the XDG portals.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - theming
+    - gtk
+    - qt
+
+# `base` is a hard requirement, not a convenience. This role installs its theme
+# packages through yay, and yay shells out to sudo on its own — a play has no
+# tty, so that only works while a sudo timestamp is already valid. base's pacman
+# tasks run under ansible's own become, which refreshes the user-wide timestamp
+# (roles/sudoers: timestamp_type=global) before yay is ever reached.
+#
+# Without this, a full converge worked (base runs first anyway) while a tagged
+# `-t theming` run failed with "sudo: a terminal is required" — the dependency
+# makes the tagged run behave like the full one.
+dependencies:
+  - role: base

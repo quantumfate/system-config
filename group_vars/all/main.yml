@@ -38,3 +38,9 @@ keyboard_layout: dvorak-custom
 console_font: ter-v32n
 sddm_theme_package: catppuccin-sddm-theme-macchiato
 gtk_icon_theme_flavour: cat-macchiato-mauve
+
+# Shared browser prefs directory. Two roles touch it: `theming` renders user.js
+# into it, `browser_profiles` symlinks that (and the chrome assets) into every
+# Zen/Firefox profile. Role defaults are only in scope during their own role, so
+# a path two roles share belongs here.
+browser_config_src: "{{ target_home }}/.config/zen-chezmoi"

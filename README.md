@@ -64,7 +64,7 @@ roles/                   one concern each
 | `externals`        | plugins, dev checkouts, catppuccin themes                                                                                                                                                       |
 | `zsh`              | terminal surface: shell config, plugins, lessfilter, kitty, both tmux servers, logging workspace (templated; supersedes chezmoi for `.zshrc`/`.zshenv`/`.lessfilter`/`.tmux.conf`/`kitty.conf`) |
 | `browser_profiles` | prowser profile settings                                                                                                                                                                        |
-| `theming`          | rice                                                                                                                                                                                            |
+| `theming`          | GTK/Qt/cursor/browser theming — one flavour, one accent, one type scale (templated; supersedes chezmoi for the GTK, Qt, Kvantum, xsettingsd and Zen `user.js` files) |
 | `yazi`             | file manager                                                                                                                                                                                    |
 
 ## Logging workspace
@@ -198,6 +198,40 @@ Leading is the highest-value change of the three: `cell_height 120%` (130% in
 the log viewer) adds a fifth of a row of air between every line, everywhere,
 without changing glyph size. Both tmux bars are flat and hardcoded — the
 catppuccin tmux plugin is gone, along with its `externals_repos` entry.
+
+## Desktop theming
+
+`roles/theming` owns the look outside the terminal: Catppuccin **Macchiato**,
+accent **mauve**, UI at **12pt**, cursor **28** — the same palette and the same
+"bigger text, more space, no filled chrome" rules as the terminal surface.
+
+Four toolkits need telling in four dialects, and the portals read none of those
+files:
+
+| Layer | File | Note |
+| ----- | ---- | ---- |
+| GTK2 | `~/.gtkrc-2.0.mine` | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0` |
+| GTK3 | `~/.config/gtk-3.0/settings.ini` | |
+| GTK4 | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely |
+| Qt | `qt6ct.conf` / `qt5ct.conf` + Kvantum | fonts are QDataStream blobs, see `templates/_qtfont.j2` |
+| X11 | `xsettingsd.conf` | XWayland clients |
+| Portals | **dconf** `/org/gnome/desktop/interface/*` | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not |
+| Session | `~/.config/environment.d/50-theming.conf` | reaches every systemd user unit, which is how portal popups spawned without a shell get `XCURSOR_*` |
+
+`nwg-look -a` is **not** run: it re-exports `settings.ini`, `.gtkrc-2.0`,
+`index.theme`, `xsettingsd` and the GTK4 symlinks from its own store, so it
+would overwrite the templates. The role renders that store instead, so opening
+the GUI shows the truth.
+
+The browser follows the same rules: `templates/zen-user.js.j2` sets the mauve
+accent, 4px radius, wider content separation, no dimming of unfocused windows,
+and reduced motion.
+
+```sh
+ansible-playbook site.yml -t theming --ask-become-pass              # repo packages via pacman + become
+sudo -v && ansible-playbook site.yml -t theming --ask-become-pass   # ...plus AUR, on a fresh machine
+ansible-playbook site.yml -t theming --skip-tags privileged        # dotfiles only, no sudo at all
+```
 
 ## Common runs
 

@@ -1,0 +1,33 @@
+# ~/.config/gtk-3.0/settings.ini — rendered by roles/theming.
+#
+# GTK3 reads this directly. GTK4/libadwaita ignores most of it (see the gtk-4.0
+# symlinks in tasks/main.yml) and portals read the gsettings/dconf copies of the
+# same values, so all three are written from the variables in defaults/main.yml.
+[Settings]
+gtk-theme-name={{ theme_gtk }}
+gtk-icon-theme-name={{ theme_icons }}
+gtk-cursor-theme-name={{ theme_cursor }}
+gtk-cursor-theme-size={{ theme_cursor_size }}
+gtk-font-name={{ theme_ui_font }} {{ theme_ui_font_size }}
+gtk-application-prefer-dark-theme=1
+
+# Minimal chrome, same rule as the terminal and the editor: no icon next to
+# every label, no duplicated affordance. Icons stay where they carry meaning on
+# their own (toolbars), and disappear where a word already says it (menus,
+# buttons).
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=0
+gtk-enable-animations=1
+gtk-primary-button-warps-slider=1
+
+# hintslight + rgb is the modern pairing for subpixel-rendered LCDs: hintmedium
+# distorts glyph shapes at the larger sizes we now use.
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0

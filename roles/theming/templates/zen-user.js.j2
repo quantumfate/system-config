@@ -1,0 +1,432 @@
+// ~/.config/zen-chezmoi/user.js — rendered by roles/theming.
+//
+// Betterfox base (see the banner below) plus this machine's privacy and design
+// prefs. Fonts and the design section at the end come from the role's variables
+// in defaults/main.yml, so the browser moves with the rest of the desktop.
+//
+/* You may copy+paste this file and use it as it is.
+ *
+ * If you make changes to your about:config while the program is running, the
+ * changes will be overwritten by the user.js when the application restarts.
+ *
+ * To make lasting changes to preferences, you will have to edit the user.js.
+ */
+
+/****************************************************************************
+ * Betterfox                                                                *
+ * "Ad meliora"                                                             *
+ * version: 146                                                             *
+ * url: https://github.com/yokoffing/Betterfox                              *
+ ****************************************************************************/
+
+/****************************************************************************
+ * SECTION: FASTFOX                                                         *
+ ****************************************************************************/
+/** GENERAL ***/
+user_pref("gfx.content.skia-font-cache-size", 32);
+
+/** GFX ***/
+user_pref("gfx.webrender.layer-compositor", false);
+user_pref("gfx.canvas.accelerated.cache-items", 32768);
+user_pref("gfx.canvas.accelerated.cache-size", 4096);
+user_pref("webgl.max-size", 16384);
+user_pref("gfx.webrender.quality.force-subpixel-aa-where-possible", true);
+// user_pref("gfx.webrender.software", true); // disabled: mesa update broke llvmpipe -> GPU channel error
+
+/** DISK CACHE ***/
+//user_pref("browser.cache.disk.enable", false);
+
+/** MEMORY CACHE ***/
+user_pref("browser.cache.memory.capacity", 131072);
+user_pref("browser.cache.memory.max_entry_size", 20480);
+user_pref("browser.sessionhistory.max_total_viewers", 4);
+user_pref("browser.sessionstore.max_tabs_undo", 10);
+
+/** MEDIA CACHE ***/
+user_pref("media.memory_cache_max_size", 262144);
+user_pref("media.memory_caches_combined_limit_kb", 1048576);
+user_pref("media.cache_readahead_limit", 600);
+user_pref("media.cache_resume_threshold", 300);
+
+/** IMAGE CACHE ***/
+user_pref("image.cache.size", 10485760);
+user_pref("image.mem.decode_bytes_at_a_time", 65536);
+
+/** NETWORK ***/
+user_pref("network.http.max-connections", 1800);
+user_pref("network.http.max-persistent-connections-per-server", 10);
+user_pref("network.http.max-urgent-start-excessive-connections-per-host", 5);
+user_pref("network.http.request.max-start-delay", 5);
+user_pref("network.http.pacing.requests.enabled", false);
+user_pref("network.dnsCacheEntries", 10000);
+user_pref("network.dnsCacheExpiration", 3600);
+user_pref("network.ssl_tokens_cache_capacity", 10240);
+
+/** SPECULATIVE LOADING ***/
+// user_pref("network.http.speculative-parallel-limit", 0);
+// user_pref("network.dns.disablePrefetch", true);
+// user_pref("network.dns.disablePrefetchFromHTTPS", true);
+// user_pref("browser.urlbar.speculativeConnect.enabled", false);
+user_pref("browser.places.speculativeConnect.enabled", false);
+user_pref("network.prefetch-next", false);
+
+/****************************************************************************
+ * SECTION: SECUREFOX                                                       *
+ ****************************************************************************/
+/** TRACKING PROTECTION ***/
+user_pref("browser.contentblocking.category", "strict");
+user_pref("browser.download.start_downloads_in_tmp_dir", true);
+user_pref("browser.uitour.enabled", false);
+user_pref("privacy.globalprivacycontrol.enabled", true);
+
+/** OCSP & CERTS / HPKP ***/
+user_pref("security.OCSP.enabled", 1);
+user_pref("security.OCSP.require", false);
+user_pref("privacy.antitracking.isolateContentScriptResources", true);
+user_pref("security.csp.reporting.enabled", false);
+
+/** SSL / TLS ***/
+user_pref("security.ssl.treat_unsafe_negotiation_as_broken", true);
+user_pref("browser.xul.error_pages.expert_bad_cert", true);
+user_pref("security.tls.enable_0rtt_data", false);
+
+/** DISK AVOIDANCE ***/
+user_pref("browser.privatebrowsing.forceMediaMemoryCache", true);
+user_pref("browser.sessionstore.interval", 60000);
+
+/** SHUTDOWN & SANITIZING ***/
+user_pref("privacy.history.custom", true);
+user_pref("browser.privatebrowsing.resetPBM.enabled", true);
+
+/** SEARCH / URL BAR ***/
+user_pref("browser.urlbar.trimHttps", true);
+user_pref("browser.urlbar.untrimOnUserInteraction.featureGate", true);
+user_pref("browser.search.separatePrivateDefault.ui.enabled", true);
+user_pref("browser.search.suggest.enabled", false);
+user_pref("browser.urlbar.quicksuggest.enabled", false);
+user_pref("browser.urlbar.groupLabels.enabled", false);
+user_pref("browser.formfill.enable", false);
+user_pref("network.IDN_show_punycode", true);
+
+/** HTTPS-ONLY MODE ***/
+user_pref("dom.security.https_only_mode", true);
+user_pref("dom.security.https_only_mode_error_page_user_suggestions", true);
+
+/** PASSWORDS ***/
+user_pref("signon.formlessCapture.enabled", false);
+user_pref("signon.privateBrowsingCapture.enabled", false);
+user_pref("network.auth.subresource-http-auth-allow", 1);
+user_pref("editor.truncate_user_pastes", false);
+
+/** EXTENSIONS ***/
+user_pref("extensions.enabledScopes", 5);
+
+/** HEADERS / REFERERS ***/
+user_pref("network.http.referer.XOriginTrimmingPolicy", 2);
+
+/** CONTAINERS ***/
+user_pref("privacy.userContext.ui.enabled", true);
+
+/** VARIOUS ***/
+user_pref("pdfjs.enableScripting", false);
+
+/** SAFE BROWSING ***/
+user_pref("browser.safebrowsing.downloads.remote.enabled", false);
+
+/** MOZILLA ***/
+user_pref("permissions.default.desktop-notification", 2);
+user_pref("permissions.default.geo", 2);
+user_pref("geo.provider.network.url", "https://beacondb.net/v1/geolocate");
+user_pref("browser.search.update", false);
+user_pref("permissions.manager.defaultsUrl", "");
+user_pref("extensions.getAddons.cache.enabled", false);
+
+/** TELEMETRY ***/
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+user_pref("datareporting.healthreport.uploadEnabled", false);
+user_pref("toolkit.telemetry.unified", false);
+user_pref("toolkit.telemetry.enabled", false);
+user_pref("toolkit.telemetry.server", "data:,");
+user_pref("toolkit.telemetry.archive.enabled", false);
+user_pref("toolkit.telemetry.newProfilePing.enabled", false);
+user_pref("toolkit.telemetry.shutdownPingSender.enabled", false);
+user_pref("toolkit.telemetry.updatePing.enabled", false);
+user_pref("toolkit.telemetry.bhrPing.enabled", false);
+user_pref("toolkit.telemetry.firstShutdownPing.enabled", false);
+user_pref("toolkit.telemetry.coverage.opt-out", true);
+user_pref("toolkit.coverage.opt-out", true);
+user_pref("toolkit.coverage.endpoint.base", "");
+user_pref("browser.newtabpage.activity-stream.feeds.telemetry", false);
+user_pref("browser.newtabpage.activity-stream.telemetry", false);
+user_pref("datareporting.usage.uploadEnabled", false);
+
+/** EXPERIMENTS ***/
+user_pref("app.shield.optoutstudies.enabled", false);
+user_pref("app.normandy.enabled", false);
+user_pref("app.normandy.api_url", "");
+
+/** CRASH REPORTS ***/
+user_pref("breakpad.reportURL", "");
+user_pref("browser.tabs.crashReporting.sendReport", false);
+
+/****************************************************************************
+ * SECTION: PESKYFOX                                                        *
+ ****************************************************************************/
+/** MOZILLA UI ***/
+user_pref("extensions.getAddons.showPane", true);
+user_pref("extensions.htmlaboutaddons.recommendations.enabled", false);
+user_pref("browser.discovery.enabled", false);
+user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons", false);
+user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features", false);
+user_pref("browser.preferences.moreFromMozilla", false);
+user_pref("browser.aboutConfig.showWarning", false);
+user_pref("browser.startup.homepage_override.mstone", "ignore");
+user_pref("browser.aboutwelcome.enabled", false);
+user_pref("browser.profiles.enabled", true);
+
+/** THEME ADJUSTMENTS ***/
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+user_pref("browser.compactmode.show", true);
+user_pref("browser.privateWindowSeparation.enabled", false); // WINDOWS
+
+/** AI ***/
+user_pref("browser.ml.enable", true);
+user_pref("browser.translations.enable", true);
+user_pref("browser.translations.autoTranslate", false);
+user_pref("browser.ml.chat.enabled", true);
+user_pref("browser.ml.chat.menu", true);
+user_pref("browser.tabs.groups.smart.enabled", true);
+user_pref("browser.ml.linkPreview.enabled", true);
+
+/** FULLSCREEN NOTICE ***/
+user_pref("full-screen-api.transition-duration.enter", "0 0");
+user_pref("full-screen-api.transition-duration.leave", "0 0");
+user_pref("full-screen-api.warning.timeout", 0);
+
+/** URL BAR ***/
+user_pref("browser.urlbar.trending.featureGate", false);
+
+/** NEW TAB PAGE ***/
+user_pref("browser.newtabpage.activity-stream.default.sites", "");
+user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
+user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
+user_pref("browser.newtabpage.activity-stream.showSponsored", false);
+user_pref("browser.newtabpage.activity-stream.showSponsoredCheckboxes", false);
+
+/** DOWNLOADS ***/
+user_pref("browser.download.manager.addToRecentDocs", false);
+
+/** PDF ***/
+user_pref("browser.download.open_pdf_attachments_inline", true);
+
+/** TAB BEHAVIOR ***/
+user_pref("browser.bookmarks.openInTabClosesMenu", false);
+user_pref("browser.menu.showViewImageInfo", true);
+user_pref("findbar.highlightAll", true);
+user_pref("layout.word_select.eat_space_to_next_word", false);
+
+/****************************************************************************
+ * START: MY OVERRIDES                                                      *
+ ****************************************************************************/
+// visit https://github.com/yokoffing/Betterfox/wiki/Common-Overrides
+// visit https://github.com/yokoffing/Betterfox/wiki/Optional-Hardening
+// Enter your personal overrides below this line:
+
+user_pref("network.http.speculative-parallel-limit", 0);
+user_pref("network.dns.disablePrefetch", true);
+user_pref("network.dns.disablePrefetchFromHTTPS", true);
+user_pref("browser.urlbar.speculativeConnect.enabled", false);
+// user_pref("gfx.webrender.precache-shaders", true); // disabled: shader precompile crashes compositor after mesa update
+user_pref("browser.cache.disk.enable", false);
+user_pref("gfx.webrender.max-shared-surface-size", 2048);
+
+user_pref("network.proxy.type", 0);
+user_pref("extensions.webextensions.restrictedDomains", "");
+
+// Additional overrides extracted from about:config
+// Only includes intentional settings not already in Betterfox
+
+// === UI / UX ===
+user_pref("accessibility.typeaheadfind.flashBar", 0);
+user_pref("browser.bookmarks.defaultLocation", "toolbar_____");
+user_pref("browser.bookmarks.editDialog.firstEditField", "tagsField");
+user_pref("browser.ctrlTab.sortByRecentlyUsed", true);
+user_pref("browser.download.useDownloadDir", false); // always ask where to save
+user_pref("browser.tabs.loadInBackground", false); // switch to new tabs immediately
+user_pref("browser.toolbars.bookmarks.visibility", "always");
+user_pref("browser.startup.homepage", "about:blank");
+user_pref("browser.startup.page", 1);
+
+// === Privacy extras (beyond Betterfox) ===
+user_pref("browser.safebrowsing.downloads.enabled", false);
+user_pref("browser.safebrowsing.downloads.remote.block_potentially_unwanted", false);
+user_pref("privacy.clearOnShutdown_v2.formdata", true);
+user_pref("privacy.fingerprintingProtection", true);
+user_pref("privacy.query_stripping.enabled", true);
+user_pref("privacy.query_stripping.enabled.pbmode", true);
+user_pref("privacy.bounceTrackingProtection.mode", 1);
+user_pref("privacy.trackingprotection.emailtracking.enabled", true);
+user_pref("privacy.trackingprotection.socialtracking.enabled", true);
+
+// === WebRTC leak prevention ===
+user_pref("media.peerconnection.ice.default_address_only", true);
+user_pref("media.peerconnection.ice.no_host", true);
+user_pref("media.peerconnection.ice.proxy_only_if_behind_proxy", true);
+
+// === Fonts ===
+// UI font (chrome/interface)
+user_pref("font.name.serif.x-western", "Roboto");
+// Default webpage font
+user_pref("font.name.sans-serif.x-western", "Roboto");
+user_pref("font.name.monospace.x-western", "{{ theme_mono_font }}");
+// Minimum font size
+user_pref("font.minimum-size.x-western", {{ theme_ui_font_size }});
+// Default font size
+user_pref("font.size.variable.x-western", {{ theme_ui_font_size + 5 }});
+user_pref("font.size.monospace.x-western", {{ theme_mono_font_size + 1 }});
+user_pref("browser.display.use_document_fonts", 0);
+// === Dark mode ===
+user_pref("layout.css.prefers-color-scheme.content-override", 0); // dark
+
+// === Passwords / autofill (all disabled) ===
+user_pref("signon.autofillForms", false);
+user_pref("signon.generation.enabled", false);
+user_pref("signon.management.page.breach-alerts.enabled", false);
+user_pref("signon.rememberSignons", false);
+user_pref("dom.forms.autocomplete.formautofill", true); // address autofill only
+
+// === AI blocking (Zen-specific) ===
+user_pref("browser.ai.control.default", "enabled");
+user_pref("browser.ai.control.linkPreviewKeyPoints", "enabled");
+user_pref("browser.ai.control.pdfjsAltText", "enabled");
+user_pref("browser.ai.control.sidebarChatbot", "enabled");
+user_pref("browser.ai.control.smartTabGroups", "enabled");
+user_pref("browser.ai.control.translations", "enabled");
+user_pref("pdfjs.enableAltText", true);
+
+// === Zen-specific ===
+user_pref("browser.link.open_newwindow.override.external", 7);
+user_pref("zen.pinned-tab-manager.restore-pinned-tabs-to-pinned-url", true);
+user_pref("zen.view.compact.enable-at-startup", true);
+user_pref("zen.view.window.scheme", 0);
+user_pref("zen.workspaces.force-container-workspace", true);
+
+// === Sync exclusions ===
+user_pref("services.sync.engine.passwords", false);
+user_pref("services.sync.declinedEngines", "workspaces");
+
+// === Sidebar ===
+user_pref("sidebar.visibility", "hide-sidebar");
+
+/****************************************************************************
+ * SECTION: SMOOTHFOX                                                       *
+ ****************************************************************************/
+// visit https://github.com/yokoffing/Betterfox/blob/main/Smoothfox.js
+// Enter your scrolling overrides below this line:
+
+// only sharpen scrolling
+user_pref("apz.overscroll.enabled", true); // DEFAULT NON-LINUX
+user_pref("general.smoothScroll", true); // DEFAULT
+user_pref("mousewheel.min_line_scroll_amount", 10); // adjust this number to your liking; default=5
+user_pref("general.smoothScroll.mouseWheel.durationMinMS", 80); // default=50
+user_pref("general.smoothScroll.currentVelocityWeighting", "0.15"); // default=.25
+user_pref("general.smoothScroll.stopDecelerationWeighting", "0.6"); // default=.4
+
+/****************************************************************************
+ * END: BETTERFOX                                                           *
+ ****************************************************************************/
+
+// theming
+
+user_pref("widget.use-xdg-desktop-portal.color-scheme", true);
+user_pref("widget.use-xdg-desktop-portal.file-picker", true);
+
+// Zen-Mods
+
+user_pref("uc.fixcontext.applyzenaccent", true);
+user_pref("uc.fixcontext.applyzengradient", true);
+user_pref("uc.fixcontext.ergonomicsfortabs", false);
+user_pref("uc.fixcontext.restoreicons", false);
+
+user_pref("uc.hidecontext.askchatbot", true);
+user_pref("uc.hidecontext.bookmark", false);
+user_pref("uc.hidecontext.copylink", true);
+user_pref("uc.hidecontext.duplicatetab", false);
+user_pref("uc.hidecontext.icons", true);
+user_pref("uc.hidecontext.mutetab", false);
+user_pref("uc.hidecontext.newcontainer", false);
+user_pref("uc.hidecontext.printselection", true);
+user_pref("uc.hidecontext.reloadtab", true);
+user_pref("uc.hidecontext.searchinpriv", true);
+user_pref("uc.hidecontext.selectalltabs", true);
+user_pref("uc.hidecontext.selectalltext", true);
+user_pref("uc.hidecontext.sendtodevice", true);
+user_pref("uc.hidecontext.separators", false);
+
+user_pref("mod.lean.bottom-buttons", true);
+user_pref("mod.lean.hide-zoom", true);
+user_pref("mod.lean.pinned-ext", false);
+user_pref("mod.lean.pinned-ext.workspaces", false);
+user_pref("mod.lean.show-pageactions", false);
+user_pref("mod.lean.show-translation", true);
+
+user_pref("theme-better_find_bar-enable_custom_background", true);
+user_pref("theme.better_find_bar.custom_background", "#363a4f");
+user_pref("theme.better_find_bar.hide_find_status", false);
+user_pref("theme.better_find_bar.hide_found_matches", false);
+user_pref("theme.better_find_bar.hide_highlight", "not_hide");
+user_pref("theme.better_find_bar.hide_match_case", "not_hide");
+user_pref("theme.better_find_bar.hide_match_diacritics", "not_hide");
+user_pref("theme.better_find_bar.hide_whole_words", "not_hide");
+user_pref("theme.better_find_bar.horizontal_position", "default");
+user_pref("theme.better_find_bar.instant_animations", false);
+user_pref("theme.better_find_bar.textbox_width", 800);
+user_pref("theme.better_find_bar.transparent_background", true);
+user_pref("theme.better_find_bar.vertical_position", "top");
+
+user_pref("theme.better_uniextbtn.custom", "url(chrome://branding/content/icon32.png)");
+user_pref("theme.better_uniextbtn.default", "Default");
+
+user_pref("mod.ivaon.urlbar.hide_results", 2);
+
+/****************************************************************************
+ * SECTION: DESIGN                                                          *
+ * The same rules as the terminal, the editor and the desktop: one accent,   *
+ * no dimming, more space, less motion.                                      *
+ ****************************************************************************/
+
+// One accent, everywhere. Mauve is the tmux current window, the nvim mode
+// indicator, the kitty cursor and the GTK/Qt accent — the browser is not an
+// exception to the palette.
+user_pref("zen.theme.accent-color", "{{ theme_accent_hex }}");
+
+// Corner radius matches Hyprland's windows and neovim's floats, so a browser
+// window sitting next to a terminal has the same silhouette.
+user_pref("zen.theme.border-radius", 4);
+
+// More air between the chrome and the page (default 8). Space is what makes a
+// dense interface readable; this is the browser's version of kitty's padding.
+user_pref("zen.theme.content-element-separation", 12);
+
+// No dimming of unfocused windows. Same decision as the snacks backdrop in
+// neovim and the inactive-opacity override on the log viewer: a wall of text
+// you are still reading must not lose contrast because focus moved.
+user_pref("zen.view.grey-out-inactive-windows", false);
+
+// Normal toolbar density. Compact density buys a few pixels and costs every
+// click target; Zen's compact MODE (which hides the chrome entirely, set above)
+// is the right way to reclaim that space.
+user_pref("browser.uidensity", 0);
+
+// The UI one notch larger, matching GTK/Qt going from 11/10pt to {{ theme_ui_font_size }}pt.
+// Firefox has no chrome-font-size pref; scaling device pixels is the only lever.
+user_pref("layout.css.devPixelsPerPx", "1.1");
+
+// Less motion. Sidebar slides, cosmetic animations and the fullscreen
+// transition are movement in the periphery that carries no information; the
+// reduced-motion flag also tells websites to stop their own.
+user_pref("ui.prefersReducedMotion", 1);
+user_pref("toolkit.cosmeticAnimations.enabled", false);
+user_pref("zen.view.compact.animate-sidebar", false);
+user_pref("zen.downloads.download-animation", false);

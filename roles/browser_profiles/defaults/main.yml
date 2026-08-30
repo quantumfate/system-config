@@ -1,6 +1,6 @@
 ---
-# Source of the shared prefs, written by chezmoi.
-browser_config_src: "{{ target_home }}/.config/zen-chezmoi"
+# browser_config_src lives in group_vars/all/main.yml: roles/theming renders
+# user.js into it and this role links it into the profiles.
 
 # Profile dirs to skip when symlinking — not real browser profiles.
 browser_profile_excludes:
