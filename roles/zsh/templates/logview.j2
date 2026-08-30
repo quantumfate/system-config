@@ -49,7 +49,24 @@ esac
 spec="${1:-}"
 
 # Window name = the thing you are looking at, truncated to stay column-stable.
-wname() { printf '%s' "${1#*:}" | sed 's/\.service$//' | cut -c1-18; }
+# uwsm app scopes carry their launcher's bookkeeping in the unit name
+# (`app-Hyprland-kitty-ecc85322.scope`, `app-md.obsidian.Obsidian-1943.scope`);
+# none of that identifies the window for a reader, so strip it down to the app.
+wname() {
+  local n="${1#*:}"
+  n="${n%.service}"
+  case "$n" in
+    app-*.scope)
+      n="${n%.scope}"
+      n="${n#app-}"
+      n="${n%-*}"        # trailing pid / random id
+      n="${n##*-}"       # the compositor prefix uwsm adds
+      n="${n##*.}"       # reverse-DNS ids: keep the last component
+      n="${n//\\x2d/-}"
+      ;;
+  esac
+  printf '%s' "$n" | cut -c1-18
+}
 
 session_exists() { tmux -L "$SOCKET" has-session -t "$SESSION" 2>/dev/null; }
 

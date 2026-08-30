@@ -43,29 +43,29 @@ roles/                   one concern each
 
 ## Roles
 
-| Role               | Description                                 |
-| ------------------ | ------------------------------------------- |
-| `base`             | system deps                                 |
-| `password_manager` | provides all secrets                        |
-| `secrets`          | key management                              |
-| `packages`         | system packages                             |
-| `sudoers`          | sudo configuration                          |
-| `user_dirs`        | xdg                                         |
-| `login_shell`      | zsh primary shell                           |
-| `keyboard`         | custom-dvorak layout                        |
-| `console`          | tty theming                                 |
-| `desktop_entries`  | sway and niri                               |
-| `display_manager`  | system configuration for display-manager    |
-| `docker`           | infra tools                                 |
-| `virtualization`   | vms                                         |
-| `power_profile`    | performance related                         |
-| `devenv`           | neovim and dev dependencies                 |
-| `chezmoi`          | dotfiles clone + apply, systemd unit-reload |
-| `externals`        | plugins, dev checkouts, catppuccin themes   |
+| Role               | Description                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `base`             | system deps                                                                                                                                                                                     |
+| `password_manager` | provides all secrets                                                                                                                                                                            |
+| `secrets`          | key management                                                                                                                                                                                  |
+| `packages`         | system packages                                                                                                                                                                                 |
+| `sudoers`          | sudo configuration                                                                                                                                                                              |
+| `user_dirs`        | xdg                                                                                                                                                                                             |
+| `login_shell`      | zsh primary shell                                                                                                                                                                               |
+| `keyboard`         | custom-dvorak layout                                                                                                                                                                            |
+| `console`          | tty theming                                                                                                                                                                                     |
+| `desktop_entries`  | sway and niri                                                                                                                                                                                   |
+| `display_manager`  | system configuration for display-manager                                                                                                                                                        |
+| `docker`           | infra tools                                                                                                                                                                                     |
+| `virtualization`   | vms                                                                                                                                                                                             |
+| `power_profile`    | performance related                                                                                                                                                                             |
+| `devenv`           | neovim and dev dependencies                                                                                                                                                                     |
+| `chezmoi`          | dotfiles clone + apply, systemd unit-reload                                                                                                                                                     |
+| `externals`        | plugins, dev checkouts, catppuccin themes                                                                                                                                                       |
 | `zsh`              | terminal surface: shell config, plugins, lessfilter, kitty, both tmux servers, logging workspace (templated; supersedes chezmoi for `.zshrc`/`.zshenv`/`.lessfilter`/`.tmux.conf`/`kitty.conf`) |
-| `browser_profiles` | prowser profile settings                    |
-| `theming`          | rice                                        |
-| `yazi`             | file manager                                |
+| `browser_profiles` | prowser profile settings                                                                                                                                                                        |
+| `theming`          | rice                                                                                                                                                                                            |
+| `yazi`             | file manager                                                                                                                                                                                    |
 
 ## Logging workspace
 
@@ -99,21 +99,27 @@ text. Colour carries the level; **bold is reserved for fatal/panic/crit**.
 
 ### Commands
 
-| Command            | Source                                     |
-| ------------------ | ------------------------------------------ |
-| `log`              | fzf picker over live units, files, presets |
-| `log <spec>`       | open one source directly                   |
-| `logh <spec>`      | same, in the current terminal (no window)  |
-| `logu <unit>`      | one system unit, following                 |
-| `loguu <unit>`     | one `--user` unit, following               |
-| `logf <file>`      | a plain file, following                    |
-| `logerr` / `logwarn` | this boot, by priority                   |
-| `logk`             | kernel ring buffer                         |
-| `logboot` / `logprev` | this boot / previous boot, from the top |
-| `logaudit`         | audit and access denials                   |
-| `logwhy <unit>`    | state + last 50 lines, one screen          |
-| `loggrep <pat>`    | search this boot, same columns             |
-| `logsince <when>`  | a bounded window (`'15 min ago'`, `today`) |
+| Command               | Source                                                      |
+| --------------------- | ----------------------------------------------------------- |
+| `log`                 | fzf picker: presets, uwsm apps, live units, workspace files |
+| `log <spec>`          | open one source directly                                    |
+| `logh <spec>`         | same, in the current terminal (no window)                   |
+| `logu <unit>`         | one system unit, following                                  |
+| `loguu <unit>`        | one `--user` unit, following                                |
+| `logf <file>`         | a plain file, following                                     |
+| `logerr` / `logwarn`  | this boot, by priority                                      |
+| `logk`                | kernel ring buffer                                          |
+| `logboot` / `logprev` | this boot / previous boot, from the top                     |
+| `logaudit`            | audit and access denials                                    |
+| `logwhy <unit>`       | state + last 50 lines, one screen                           |
+| `loggrep <pat>`       | search this boot, same columns                              |
+| `logsince <when>`     | a bounded window (`'15 min ago'`, `today`)                  |
+
+The picker lists **uwsm apps** alongside services. Anything launched through
+uwsm (every GUI program started from Hyprland) lives in the user manager as an
+`app-*.scope`, not a service, so a `--type=service` listing never showed them.
+They are labelled by app name, and window names are stripped of uwsm's
+bookkeeping — `app-Hyprland-kitty-ecc85322.scope` opens as `kitty`.
 
 Picking a source needs a terminal, and a Hyprland keybind has none. `logview`
 detects that: with a tty it runs the picker inline, without one it opens the
@@ -143,7 +149,7 @@ through `hypr.lib.windowrule`, keys through `hypr.lib.submap`):
 - **Window rule** — `initial_class = logviewer` is tagged `+logs`: assigned to
   that workspace, tiled, `rounding = 0`, and `opacity = 1 override 1 override`
   so log text is never dimmed by the global inactive opacity.
-- **Keys** — every entry focuses the logs workspace *before* it opens the
+- **Keys** — every entry focuses the logs workspace _before_ it opens the
   source, so an action never lands on a workspace you cannot see. `SUPER+e`
   opens the `logs` submap, one letter per source, mirroring
   the shell verbs: `l` pick · `e` errors · `w` warnings · `k` kernel · `f` live
@@ -165,7 +171,7 @@ All in `roles/zsh/defaults/main.yml`: `zsh_kitty_log_class`,
 `zsh_log_accent` (chrome accent — mauve; severity colours stay semantic and are
 never themed with it), `zsh_tailspin_theme`, `zsh_bat_theme`. Severity colours
 live in `roles/zsh/templates/tailspin_theme.toml.j2`; it uses the 16 ANSI
-names on purpose, because the terminal palette already *is* Macchiato — one
+names on purpose, because the terminal palette already _is_ Macchiato — one
 palette, one source of truth.
 
 ## Terminal surface
@@ -174,15 +180,15 @@ One aesthetic across kitty, both tmux servers and neovim: Catppuccin Macchiato,
 a single mauve accent (`zsh_log_accent`), flat chrome, generous space. Each
 layer owns only what it alone can control:
 
-| Layer | Owns | Why there |
-| ----- | ---- | --------- |
-| `kitty.conf` | font, font size, **line height** (`modify_font cell_height`), window padding, cursor | cell-grid properties — neither tmux nor neovim can change how tall a text row is |
-| `.tmux.conf` / `logs.conf` | the status bar: layout, palette, the blank second row | tmux draws inside cells; the bar is all it owns visually |
-| neovim | inside the viewport: gutters (`numberwidth`, `signcolumn=yes:2`), float borders, flat statusline | the terminal cannot reach in there |
+| Layer                      | Owns                                                                                             | Why there                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `kitty.conf`               | font, font size, **line height** (`modify_font cell_height`), window padding, cursor             | cell-grid properties — neither tmux nor neovim can change how tall a text row is |
+| `.tmux.conf` / `logs.conf` | the status bar: layout, palette, the blank second row                                            | tmux draws inside cells; the bar is all it owns visually                         |
+| neovim                     | inside the viewport: gutters (`numberwidth`, `signcolumn=yes:2`), float borders, flat statusline | the terminal cannot reach in there                                               |
 
 Three rules hold across all of them, which is what makes the boundary between
 kitty, tmux and neovim invisible: **no filled blocks** (the active item is bold
-accented *text*, never a painted chip), **borders one step off the background**
+accented _text_, never a painted chip), **borders one step off the background**
 (`surface1`) rather than accent-coloured frames, and **separation by whitespace**
 — tmux's blank status row, kitty's window padding, and neovim's blank
 `fillchars` where a split rule would be. Mauve marks exactly one thing at a

@@ -17,7 +17,7 @@ zsh_log_padding: "14 16 10 16"
 # Cell height as a percentage of the font's natural line box. Extra leading is
 # what turns a wall of log lines into scannable rows; 130 is roughly one third
 # of a line of air between rows.
-zsh_log_line_height: 130  # more than the everyday terminal: denser text, longer sessions
+zsh_log_line_height: 138  # more than the everyday terminal: denser text, longer sessions
 
 # Primary accent for every terminal surface (kitty cursor, both tmux bars, the
 # fzf picker, the log prompt). Catppuccin Macchiato mauve. Severity colours are
@@ -32,8 +32,10 @@ zsh_log_accent: "#c6a0f6"
 zsh_terminal_font: "Hack Nerd Font Mono"
 zsh_terminal_font_size: 14
 # Cell height as a percentage of the font's natural line box. Extra leading is
-# the single highest-value readability change available in a terminal.
-zsh_terminal_line_height: 120
+# the single highest-value readability change available in a terminal — and the
+# ONLY way to loosen the gap between a TUI's bottom bar and the content above
+# it, since a terminal grid has no sub-row spacing to give.
+zsh_terminal_line_height: 130
 # kitty window_padding_width, "top right bottom left".
 zsh_terminal_padding: "12 14 10 14"
 
