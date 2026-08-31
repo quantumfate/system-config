@@ -1,0 +1,29 @@
+---
+galaxy_info:
+  role_name: packages
+  namespace: local
+  author: local
+  description: Installs the system package set (repo + AUR) through yay.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - packages
+    - yay
+    - aur
+
+# `base` is a hard requirement, not a convenience. This role installs every
+# package through yay (`kewlfft.aur.aur`), and yay shells out to sudo on its
+# own for the pacman step — a play has no tty, so that only works while a sudo
+# timestamp is already valid. base's pacman tasks run under ansible's own
+# become, refreshing the user-wide timestamp (roles/sudoers:
+# timestamp_type=global) before yay is ever reached.
+#
+# Without this, a full converge worked (base runs first anyway) while a tagged
+# `-t packages` or `-t zsh` run failed with "sudo: a terminal is required" — the
+# dependency makes those tagged runs behave like the full one.
+dependencies:
+  - role: base

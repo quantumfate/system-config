@@ -17,3 +17,31 @@
     state: present
   become: false
   when: zsh_log_binary_viewers and (zsh_log_binary_packages | length > 0)
+
+- name: Install the everyday CLI toolchain
+  kewlfft.aur.aur:
+    name: "{{ zsh_cli_packages }}"
+    use: yay
+    state: present
+  become: false
+  when: zsh_cli_packages | length > 0
+
+# pkgfile answers "command not found" with the package that provides it, but
+# only once its file database exists; the hook in .zshrc is inert until then.
+- name: Seed the pkgfile database
+  ansible.builtin.command:
+    cmd: pkgfile --update
+  args:
+    creates: /var/cache/pkgfile/core.files
+  become: true
+
+# oh-my-zsh is gone: the plugin set moved to antidote and the prompt is written
+# out in .zshrc. The clone is a few thousand files that nothing sources any
+# more, and leaving it invites a stray `source $ZSH/oh-my-zsh.sh` back in.
+- name: Remove the oh-my-zsh install
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ target_home }}/.config/oh-my-zsh"
+    - "{{ target_home }}/.cache/catppuccin-ohmyzsh"

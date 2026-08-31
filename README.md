@@ -64,7 +64,7 @@ roles/                   one concern each
 | `externals`        | plugins, dev checkouts, catppuccin themes                                                                                                                                                       |
 | `zsh`              | terminal surface: shell config, plugins, lessfilter, kitty, both tmux servers, logging workspace (templated; supersedes chezmoi for `.zshrc`/`.zshenv`/`.lessfilter`/`.tmux.conf`/`kitty.conf`) |
 | `browser_profiles` | prowser profile settings                                                                                                                                                                        |
-| `theming`          | GTK/Qt/cursor/browser theming — one flavour, one accent, one type scale (templated; supersedes chezmoi for the GTK, Qt, Kvantum, xsettingsd and Zen `user.js` files) |
+| `theming`          | GTK/Qt/cursor/browser theming — one flavour, one accent, one type scale (templated; supersedes chezmoi for the GTK, Qt, Kvantum, xsettingsd and Zen `user.js` files)                            |
 | `yazi`             | file manager                                                                                                                                                                                    |
 
 ## Logging workspace
@@ -194,10 +194,97 @@ accented _text_, never a painted chip), **borders one step off the background**
 `fillchars` where a split rule would be. Mauve marks exactly one thing at a
 time: the focused window, the cursor's line number, the current mode.
 
+The one deliberate exception is the coding server's **prefix indicator**: while
+`C-b` is held, the session chip in `status-left` inverts to a filled mauve
+block. A modifier state is the one thing that must be unmissable in peripheral
+vision, and it lasts a fraction of a second — the block never competes with
+anything because it is never on screen while you are reading. It replaced a
+`⚑PREFIX` label, which was permanent visual weight for a transient fact.
+
+The session list in `status-right` is built with tmux's own `#{S:fmt,cur-fmt}`
+loop, not a `#()` shell hook. A hook there is wrong twice over: it polls (every
+redraw is a subprocess, and a timed redraw flickers popups), and `#S` inside its
+command string is expanded by tmux _before_ the shell runs — so the old bar
+printed the current session's name once per open session instead of listing them.
+
+The bar carries the session chip, the window list and that session list —
+nothing else. The active pane's directory was dropped because tms names sessions
+after their project directory, so it repeated the chip in a second colour, and
+the clock with it: tmux sits inside a terminal, inside a compositor with a bar,
+and both already answer that question.
+
 Leading is the highest-value change of the three: `cell_height 120%` (130% in
 the log viewer) adds a fifth of a row of air between every line, everywhere,
 without changing glyph size. Both tmux bars are flat and hardcoded — the
 catppuccin tmux plugin is gone, along with its `externals_repos` entry.
+
+## Interactive shell
+
+Day-to-day usage — prompt, keys, aliases — is a one-page cheatsheet in
+[`roles/zsh/README.md`](roles/zsh/README.md). This section is the design.
+
+`roles/zsh` renders `.zshrc` from one template; `zsh_plugins` in the role
+defaults is the whole plugin set, and **its order is load order** (zsh-defer
+first, syntax-highlighting near the end, history-substring-search after it).
+
+Startup cost is kept off the critical path: every `eval "$(tool init)"`
+(zoxide, thefuck, direnv, the `tms` completion) runs through `zsh-defer -c`,
+after the first prompt paints. The `-c` is load-bearing — without it the
+`$(...)` is substituted immediately and nothing is deferred.
+
+### Prompt
+
+Three rows — blank, context, input — and no framework behind it.
+
+```
+~/P/c/q/system-config/roles/zsh  main ⇡2 +1 !8 ?2  1&  4.2s  ✗1
+❯
+```
+
+The shape is the argument. A one-line prompt with an `RPROMPT` loses exactly the
+information you wanted during a long pipeline, because a long command line
+overwrites it. Putting context on its own row above gives it the full width,
+leaves the command a clean line starting at a fixed column, and puts the blank
+row where every other surface here puts one.
+
+Long paths are shortened by abbreviating components, never with an ellipsis:
+`~/…/system-config` is shorter but it throws away which tree you are in and
+hands back a character meaning "something was here". Two components are always
+spelled out — the last one, and the root of the repo you are in, which is bold,
+so "which project" is answerable without reading the path.
+
+The row is dim by design: it is reference material, glanced at. Only the path
+tail is at full text brightness and only the chevron is accented; everything else earns
+colour by meaning something — teal divergence, green staged, yellow modified,
+grey untracked, red conflicted or failed, peach for an interrupted rebase or
+merge. Every segment after the cwd is conditional, so a clean directory outside
+a repo prints one path and nothing else.
+
+**Vi mode lives in the chevron**, not in a word on the far right: `❯` mauve in
+insert, `❮` blue in normal, and the terminal cursor switches beam/block with it
+the way it does in nvim. A mode is something you need to know _before_ the next
+keystroke, so it belongs where the cursor already is.
+
+`vcs_info` is gone. One `git status --porcelain=v2 --branch` answers branch,
+ahead/behind and all four path counts in a single fork — vcs_info needed four or
+five for strictly less (no divergence, no counts). The git dir is cached per
+directory and flushed on `chpwd`; `--no-optional-locks` keeps the prompt from
+rewriting the index behind a running editor.
+
+Two conventions make the alias set navigable rather than merely large:
+
+- **`f`-prefixed = interactive.** `fa`, `fdi`, `flog`, `fco`, `frb`, `fcf` are
+  forgit's fzf pickers; the prefix promises the command shows you a list and a
+  preview before it acts. forgit loads with `FORGIT_NO_ALIASES=1` so its own
+  `ga`/`gd`/`gi` cannot shadow the plain git aliases.
+- **Global aliases are pipeline punctuation.** `G L H T WC J S U X CP` expand
+  anywhere on the line, so `rg TODO G test CP` reads left to right.
+
+`du`, `df`, `ps` and `top` are aliased to `dust`, `duf`, `procs` and `btop`.
+`command du` (or `\du`) still reaches the original — worth remembering when
+copying an invocation out of a manpage. `zsh-you-should-use` reports the alias
+you could have typed _after_ the command runs, which is the only way a set this
+size enters muscle memory.
 
 ## Desktop theming
 
@@ -208,15 +295,15 @@ accent **mauve**, UI at **12pt**, cursor **28** — the same palette and the sam
 Four toolkits need telling in four dialects, and the portals read none of those
 files:
 
-| Layer | File | Note |
-| ----- | ---- | ---- |
-| GTK2 | `~/.gtkrc-2.0.mine` | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0` |
-| GTK3 | `~/.config/gtk-3.0/settings.ini` | |
-| GTK4 | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely |
-| Qt | `qt6ct.conf` / `qt5ct.conf` + Kvantum | fonts are QDataStream blobs, see `templates/_qtfont.j2` |
-| X11 | `xsettingsd.conf` | XWayland clients |
-| Portals | **dconf** `/org/gnome/desktop/interface/*` | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not |
-| Session | `~/.config/environment.d/50-theming.conf` | reaches every systemd user unit, which is how portal popups spawned without a shell get `XCURSOR_*` |
+| Layer   | File                                                             | Note                                                                                                |
+| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| GTK2    | `~/.gtkrc-2.0.mine`                                              | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0`                                              |
+| GTK3    | `~/.config/gtk-3.0/settings.ini`                                 |                                                                                                     |
+| GTK4    | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely                                                        |
+| Qt      | `qt6ct.conf` / `qt5ct.conf` + Kvantum                            | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                             |
+| X11     | `xsettingsd.conf`                                                | XWayland clients                                                                                    |
+| Portals | **dconf** `/org/gnome/desktop/interface/*`                       | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not |
+| Session | `~/.config/environment.d/50-theming.conf`                        | reaches every systemd user unit, which is how portal popups spawned without a shell get `XCURSOR_*` |
 
 `nwg-look -a` is **not** run: it re-exports `settings.ini`, `.gtkrc-2.0`,
 `index.theme`, `xsettingsd` and the GTK4 symlinks from its own store, so it

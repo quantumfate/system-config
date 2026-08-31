@@ -49,36 +49,49 @@ zsh_tmux_log_socket: logs
 # can never wander into code.
 zsh_log_workdir: "/run/user/{{ ansible_facts.user_uid | default(1000) }}/logview"
 
-# Plugins cloned into ~/.zsh for the interactive shell. These were previously
-# owned by the externals role; they moved here so .zshrc's `source` statements
-# and the role that renders .zshrc are managed together.
+# Plugins loaded for the interactive shell via antidote. Each line is a bundle
+# spec exactly as antidote expects in ~/.zsh_plugins.txt (repo[/path] with
+# optional annotations). Managed here so .zshrc, the bundle file and the role
+# that renders both stay in one place. Updates: `antidote update`.
+#
+# ORDER IS LOAD ORDER and two constraints are real:
+#   * zsh-defer must be first — later entries and .zshrc call it.
+#   * zsh-syntax-highlighting hooks the ZLE widgets it finds at load time, so it
+#     goes near the end, and history-substring-search must come *after* it or
+#     its own highlighting is silently overwritten.
 zsh_plugins:
-  - name: zsh-autosuggestions
-    repo: https://github.com/zsh-users/zsh-autosuggestions
-  - name: zsh-autopair
-    repo: https://github.com/hlissner/zsh-autopair
-  - name: catppuccin-fzf
-    repo: https://github.com/catppuccin/fzf
-  - name: fzf-tab
-    repo: https://github.com/Aloxaf/fzf-tab
-  - name: fzf-tab-source
-    repo: https://github.com/Freed-Wu/fzf-tab-source
-  - name: catppuccin-zsh-syntax-highlighting
-    repo: https://github.com/catppuccin/zsh-syntax-highlighting
-  - name: zsh-syntax-highlighting
-    repo: https://github.com/zsh-users/zsh-syntax-highlighting
-  - name: zsh-chezmoi
-    repo: https://github.com/mass8326/zsh-chezmoi
+  # Deferred loading. `zsh-defer <cmd>` runs cmd after the first prompt paints,
+  # which is where every slow `eval "$(tool init)"` belongs.
+  - romkatv/zsh-defer
 
-# oh-my-zsh lives under XDG config and is sourced from .zshrc.
-zsh_omz_dest: "{{ target_home }}/.config/oh-my-zsh"
-zsh_omz_repo: https://github.com/ohmyzsh/ohmyzsh
+  - zsh-users/zsh-autosuggestions
+  - zsh-users/zsh-completions
+  - Aloxaf/fzf-tab
+  - Freed-Wu/fzf-tab-source
+  - hlissner/zsh-autopair
+  - marlonrichert/zsh-edit
+  - mass8326/zsh-chezmoi
 
-# Extra oh-my-zsh custom plugins layered onto the core clone.
-zsh_omz_custom_plugins:
-  - name: ls
-    repo: https://github.com/zpm-zsh/ls
-    dest: "{{ zsh_omz_dest }}/custom/plugins/ls"
+  # fzf over git: interactive add/diff/log/stash/checkout with previews. The
+  # `f`-prefixed wrappers in .zshrc are the entry points (FORGIT_NO_ALIASES).
+  - wfxr/forgit
+  # ^Z is a toggle, not a one-way trip: suspends, and resumes on an empty line.
+  # Worth more than any other single binding when $EDITOR is a full-screen nvim.
+  - mdumitru/fancy-ctrl-z
+  # `bd <dir>` — jump straight up to a named ancestor, no counting of `..`.
+  - Tarrasch/zsh-bd
+  # Types out the alias you forgot you wrote. The only way a large alias set
+  # actually enters muscle memory instead of rotting in .zshrc.
+  - MichaelAquilina/zsh-you-should-use
+
+  - zsh-users/zsh-syntax-highlighting
+  - zsh-users/zsh-history-substring-search
+
+# Paths on the host where antidote stores the plugin clones and the rendered
+# static load file. .zshrc sources the static file; only the bundle file drives
+# regeneration.
+zsh_plugins_file: "{{ target_home }}/.zsh_plugins.txt"
+zsh_plugins_static: "{{ target_home }}/.zsh_plugins.zsh"
 
 # History
 zsh_history_file: "{{ target_home }}/.zsh_history"
@@ -106,6 +119,24 @@ zsh_log_packages:
   - python-numpy
   - python-lmdb       # data.mdb branch
   - python-plotext    # AUR: tfevents plotting
+
+# Everyday CLI tooling the aliases and functions in .zshrc assume. Separate from
+# zsh_log_packages because these back the *shell*, not the log pipeline: nothing
+# here is optional once an alias points at it.
+zsh_cli_packages:
+  - git-delta          # side-by-side, syntax-aware git pager
+  - difftastic         # structural diff — `gdt`, ignores pure reformatting
+  - git-absorb         # auto-fixup a change into the commit that introduced it
+  - direnv             # per-directory env, loaded on cd
+  - pkgfile            # command-not-found: names the package for a missing binary
+  - watchexec          # re-run a command when files change
+  - entr               # the same, fed from a pipe of paths
+  - hyperfine          # statistically honest command benchmarks
+  - tokei              # lines of code by language
+  - dust               # du that sorts and draws
+  - procs              # ps with a readable table and tree
+  - sd                 # sed for the 90% case, no regex dialect surprises
+  - just               # project-local command runner (justfile)
 
 # The ML/event-file viewers (tensorflow/torch) are multi-GB installs for a
 # handful of binary formats. Off by default; enable only if you actually read

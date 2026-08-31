@@ -1,40 +1,32 @@
 ---
 # The interactive shell pipeline. Everything the bootstrap needs at login time
-# is created here: plugins, oh-my-zsh, the handful of rendered dotfiles, the
-# logging workspace, and the packages that back the log toolchain.
+# is created here: the antidote-bundled plugin set, the handful of rendered
+# dotfiles, the logging workspace, and the packages that back the log toolchain.
 
 - name: Install the log-viewing toolchain
   ansible.builtin.include_tasks: install.yml
 
-- name: Clone the zsh plugin set
-  ansible.builtin.git:
-    repo: "{{ item.repo }}"
-    dest: "{{ target_home }}/.zsh/{{ item.name }}"
-    version: HEAD
-    update: true
-    force: true
-  loop: "{{ zsh_plugins }}"
-  loop_control:
-    label: "{{ item.name }}"
+- name: Render the antidote bundle file
+  ansible.builtin.template:
+    src: zsh_plugins.txt.j2
+    dest: "{{ zsh_plugins_file }}"
+    mode: "0644"
 
-- name: Clone oh-my-zsh
-  ansible.builtin.git:
-    repo: "{{ zsh_omz_repo }}"
-    dest: "{{ zsh_omz_dest }}"
-    version: HEAD
-    update: true
-    force: true
-
-- name: Clone oh-my-zsh custom plugins
-  ansible.builtin.git:
-    repo: "{{ item.repo }}"
-    dest: "{{ item.dest }}"
-    version: HEAD
-    update: true
-    force: true
-  loop: "{{ zsh_omz_custom_plugins }}"
-  loop_control:
-    label: "{{ item.name }}"
+- name: Clone/update plugins with antidote and render the static load file
+  ansible.builtin.command:
+    cmd: >-
+      zsh -c 'source /usr/share/zsh-antidote/antidote.zsh &&
+      antidote bundle < "{{ zsh_plugins_file }}" > "{{ zsh_plugins_static }}"'
+  environment:
+    # https://github.com/zsh-users/zsh-syntax-highlighting's HTTPS clone fails
+    # under HTTP/2 in this network (git asks for a Username then errors); HTTP/1.1
+    # is stable. Scoped here so the user's own git config stays untouched.
+    GIT_CONFIG_COUNT: "1"
+    GIT_CONFIG_KEY_0: "http.version"
+    GIT_CONFIG_VALUE_0: "HTTP/1.1"
+  register: antidote_bundle
+  changed_when: antidote_bundle.rc == 0
+  failed_when: antidote_bundle.rc != 0
 
 - name: Build the logging workspace
   ansible.builtin.include_tasks: logging.yml

@@ -1,71 +1,59 @@
-# ~/.tmux.conf — the CODING tmux server. Rendered by roles/zsh.
-#
-# The log server has its own config (~/.config/tmux/logs.conf, same role) on its
-# own socket. Same visual scheme, same prefix (C-b), different socket — the two
-# share no state, and the isolation costs nothing to remember.
-#
-# tmux owns THE STATUS BAR and nothing else about the look: font size, leading
-# and window padding are cell-grid properties and live in kitty.conf; everything
-# inside a pane belongs to the program drawing there (neovim).
+# ~/.tmux.conf — CODING tmux server. Rendered by roles/zsh.
+# The log server lives on its own socket (~/.config/tmux/logs.conf, same role).
+# Same scheme, same C-b prefix, different socket: no shared state between them.
 
-# Options to make tmux more pleasant
 set -g mouse on
-
-# tmux's default prefix, stated explicitly: the log server sets the same one, and
-# a shared chord is only obvious when both files say so.
 set -g prefix C-b
 bind C-b send-prefix
 
-# Required for kitty graphics to survive pane resizes and redraws
 set -ga update-environment "TERM"
 set -ga update-environment "TERM_PROGRAM"
-
-# Tell programs tmux supports truecolor + kitty-ish features
 set -g default-terminal "tmux-256color"
 set -ag terminal-overrides ",xterm-kitty:RGB"
 set -g focus-events on
 
-# --- Look --------------------------------------------------------------------
-# Catppuccin Macchiato, accent {{ zsh_log_accent }} (mauve), hardcoded — same scheme as the
-# isolated log server (~/.config/tmux/logs.conf, owned by system-config's zsh
-# role). No plugin load: fewer moving parts, instant startup, and the bar cannot
-# change shape because a plugin dir was mid-update.
-#
-# Rules of the scheme:
-#   * one accent (mauve) and one surface; everything else is dim grey
-#   * no filled blocks — the active item is bold accented TEXT. A painted chip
-#     is a slab of colour the eye has to parse before the label inside it
-#   * no separators, no powerline glyphs — position carries the grouping
-#   * the status bar is TWO rows and the second is empty, so the bar never sits
-#     flush against the content underneath it
+# --- Look: Catppuccin Macchiato, accent {{ zsh_log_accent }} (mauve), hardcoded.
+# One accent, one surface, dim grey elsewhere; active item is bold accented text,
+# not a filled block. The bar is two rows and the second is empty (a gap so the
+# newest content never sits flush against the chrome). No #() shell hooks in the
+# bar — nothing polls, so tmux never redraws on a timer (which would flicker
+# popups) and the bar cannot lie about state between ticks.
 set -g status 2
 set -g status-position top
 set -g status-justify left
-# No #() shell hooks live in the bar, so nothing needs polling. A long interval
-# keeps tmux from redrawing the client on a timer — a redraw repaints the grid
-# under a display-popup and makes the tms picker flicker.
 set -g status-interval 60
 set -g status-style "bg=default,fg=#6e738d"
 set -g 'status-format[1]' ""
 
-set -g status-left-length 100
-set -g status-right-length 100
-# Session name, so you always know which of the servers/sessions you are in.
-set -g status-left "#[fg={{ zsh_log_accent }},bold] #S #[default]"
-# Prefix pressed turns the right side red — the one state worth an alarm colour.
-# Deliberately no #(tms sessions) here: a #() runs on every status refresh and
-# each result redraws the client, which flickers any open tmux popup. Session
-# count comes from tmux's own format, evaluated in-process with no fork.
-set -g status-right "#{?client_prefix,#[fg=#ed8796],#[fg=#6e738d]} #{session_windows}w "
+# The two lengths are a budget: left + windows + right must fit the terminal or
+# tmux silently drops the window list (which is what hid it before). The right
+# side is only the session list now, so it stays well inside 80.
+set -g status-left-length 60
+set -g status-right-length 80
 
-setw -g window-status-format "#[fg=#6e738d] #I #W "
-setw -g window-status-current-format "#[fg={{ zsh_log_accent }},bold] #I #W "
+# status-left is the session chip AND the prefix indicator: while the prefix is
+# held the chip inverts to a filled accent block. A whole extra "PREFIX" word is
+# noise — the state only has to be unmissable, not spelled out. Commas inside
+# #[...] are escaped as #, because #{?...} splits its arms on commas.
+set -g status-left "#{?client_prefix,#[bg={{ zsh_log_accent }}#,fg=#24273a#,bold],#[fg={{ zsh_log_accent }}#,bold]} #S #[default] "
+
+# status-right is the session list and nothing else: where you can jump to.
+# #{S:fmt,current-fmt} is tmux's own loop over it — the previous #() shell hook
+# expanded #S in the *outer* format before the shell ever ran, so it printed the
+# current session's name once per session ("system-config system-config").
+# nobold on the separator matters: a style tag that only sets fg leaves bold on.
+#
+# The active pane's directory used to sit here and was dropped: tms names a
+# session after its project directory, so it printed the session chip's text a
+# second time, in a second colour. The clock went with it — tmux is inside a
+# terminal, inside a bar-having compositor, both of which already have one.
+set -g status-right "#[fg=#6e738d]#{S:#{session_name} ,#[fg={{ zsh_log_accent }}#,bold]#{session_name}#[fg=#6e738d#,nobold] }"
+
+setw -g window-status-format "#[fg=#6e738d] #I #W#{?window_bell_flag, !,} "
+setw -g window-status-current-format "#[fg={{ zsh_log_accent }},bold] #I #W#{?window_zoomed_flag, +,} "
 setw -g window-status-separator ""
 
-# Popups (tms) get an explicit opaque background. With bg=default the popup
-# cells inherit the terminal default, and any row the picker does not paint
-# itself lets the pane underneath show through — text bleeding into the top of
-# the tms list. A concrete colour makes tmux repaint every cell of the overlay.
+# Opaque popup bg: a concrete colour prevents pane content bleeding through.
 set -g popup-style "bg=#24273a"
 set -g popup-border-style "fg=#363a4f,bg=#24273a"
 set -g popup-border-lines rounded
@@ -78,28 +66,18 @@ set -g menu-style "bg=#24273a,fg=#cad3f5"
 set -g menu-selected-style "bg=#5b6078,fg=#cad3f5,bold"
 set -g menu-border-style "fg=#363a4f"
 
-# Load plugins
 run ~/.config/tmux/plugins/tmux-cpu/cpu.tmux
 run ~/.config/tmux/plugins/tmux-battery/battery.tmux
 
-# tms runs in a throwaway window, not a display-popup. A popup is an overlay:
-# when the pane underneath keeps drawing (a spinner, nvim redrawing), tmux
-# repaints that region and the overlay is only restored once the picker itself
-# goes dirty — so rows of the pane bleed through the list until you type. A
-# real window has no such race. The window closes as soon as tms exits.
+# tms pickers run in a throwaway window (not a popup — a popup bleeds the pane
+# beneath through until the picker repaints). Fzf over tmux's own lists, with the
+# fzf theme from .zshrc. No #{...} formats in the shell strings: tmux would
+# expand them before the shell runs. C-s switches to a listed session.
 bind C-o new-window -n tms "tms"
-# `tms switch` and `tms windows` force a preview pane that cannot be turned off,
-# and a preview of a session is noise next to the one thing being picked: its
-# name. Plain fzf over tmux's own lists instead. Run through `zsh -ic` so the
-# fzf theme from .zshrc applies.
-# No #{...} formats in these commands: tmux expands formats in a shell-command
-# string, so a -F template would be substituted before the shell ever sees it.
-# `cut` off tmux's default listing does the same job.
-bind C-s new-window -n tms "zsh -ic \"tmux list-sessions | cut -d: -f1 | fzf --reverse --no-preview | xargs -r tms open-session\""
-bind C-w new-window -n tms "zsh -ic \"tmux list-windows | cut -d: -f1 | fzf --reverse --no-preview | xargs -r tmux select-window -t\""
+bind C-s new-window -n tms "zsh -ic \"tmux list-sessions -F '#S' | fzf --reverse --no-preview | xargs -r tmux switch-client -t\""
+bind C-w new-window -n tms "zsh -ic \"tmux list-windows -a -F '#{session_name}:#{window_index} #{window_name}' | fzf --reverse --no-preview | cut -d' ' -f1 | xargs -r tmux select-window -t\""
 bind C-e command-prompt -p "Rename active session to: " "run-shell 'tms rename %1'"
 bind C-r "run-shell 'tms refresh'"
 bind C-k confirm -p "Kill current session? (y/N):" "run-shell 'tms kill'"
 bind -r '(' switch-client -p\; refresh-client -S
 bind -r ')' switch-client -n\; refresh-client -S
-

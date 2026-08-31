@@ -2,283 +2,729 @@
   fastfetch
 fi
 {% endraw %}export LESS="-R"
-{% if devenv %}eval "$(luarocks --local --lua-version 5.1 path)"
-{% endif %}eval "$(zoxide init zsh)"
-
 typeset -U path cdpath fpath manpath
 fpath+=(/usr/share/zsh/site-functions /usr/share/zsh/$ZSH_VERSION/functions /usr/share/zsh/vendor-completions)
-
 HELPDIR="/usr/share/zsh/$ZSH_VERSION/help"
 
+## Completion: compinit must run before plugins are sourced — fzf-tab and friends
+## call `compdef` at load time, and `compdef` is defined by compinit.
+autoload -Uz compinit && compinit -i
+
+# ---------------- Plugin configuration --------------------------------------
+# Anything a plugin reads at *load* time has to be set before it is sourced.
+# forgit binds its own ga/gd/gi/gcf aliases on load and would shadow the git
+# aliases below; the f-prefixed wrappers further down replace them.
+export FORGIT_NO_ALIASES=1
+export FORGIT_FZF_DEFAULT_OPTS="--height=90% --preview-window=right:60%"
+
+# you-should-use prints the alias you could have typed, after the command has
+# already run — a reminder, never a block, and quiet enough to ignore mid-flow.
+export YSU_MESSAGE_POSITION=after
+export YSU_MODE=BESTMATCH
+export YSU_HARDCORE=0
+
+# ---------------- Plugins (antidote) ----------------------------------------
+# Static load file rendered from ~/.zsh_plugins.txt by the role. `antidote update`
+# refreshes plugins; the role (or `antidote bundle < .zsh_plugins.txt > .zsh_plugins.zsh`)
+# regenerates this file.
+if [[ -f {{ zsh_plugins_static }} ]]; then
+  source {{ zsh_plugins_static }}
+fi
+
+{% raw %}
+## Syntax highlighting, Catppuccin Macchiato (upstream zsh-syntax-highlighting
+## loaded via antidote; these styles set the palette).
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main cursor)
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#5b6078'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[command]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#a6da95,italic'
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#f5a97f,italic'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#f5a97f'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#f5a97f'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#c6a0f6'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#a6da95'
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#ed8796'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-unquoted]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[process-substitution-delimiter]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-delimiter]='fg=#ed8796'
+ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=#ed8796'
+ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]='fg=#ed8796'
+ZSH_HIGHLIGHT_STYLES[command-substitution-quoted]='fg=#eed49f'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter-quoted]='fg=#eed49f'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#eed49f'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument-unclosed]='fg=#ee99a0'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#eed49f'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument-unclosed]='fg=#ee99a0'
+ZSH_HIGHLIGHT_STYLES[rc-quote]='fg=#eed49f'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument-unclosed]='fg=#ee99a0'
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[assign]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[named-fd]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[numeric-fd]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ee99a0'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#cad3f5,underline'
+ZSH_HIGHLIGHT_STYLES[path_pathseparator]='fg=#ed8796,underline'
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=#cad3f5,underline'
+ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]='fg=#ed8796,underline'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#c6a0f6'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument-unclosed]='fg=#ee99a0'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[default]='fg=#cad3f5'
+ZSH_HIGHLIGHT_STYLES[cursor]='fg=#cad3f5'
+
+## Shell options. Each one removes a class of keystroke rather than adding a
+## feature: `cd` becomes optional, every directory you visit stays reachable by
+## number, and globs stop needing `find`.
+setopt AUTO_CD                 # `../src` is a cd
+setopt AUTO_PUSHD              # every cd pushes the old dir — see `d`, 1..9
+setopt PUSHD_IGNORE_DUPS PUSHD_SILENT
+setopt EXTENDED_GLOB           # ^, ~, #, and qualifiers: **/*.go~*_test.go(.)
+setopt GLOB_DOTS               # dotfiles match without a leading .
+setopt NUMERIC_GLOB_SORT       # log2 sorts before log10
+setopt INTERACTIVE_COMMENTS    # # comments in an interactive line (pasted cmds)
+setopt LONG_LIST_JOBS NOTIFY   # job state changes reported at once, in full
+setopt NO_BEEP NO_FLOW_CONTROL # ^S/^Q are bindable keys, not terminal freezes
+setopt MULTIOS                 # cmd >out >&2 — write to several targets at once
+
+## vi mode: the whole line editor speaks nvim. hjkl, b/f/w, ciw, dd, and `v`
+## in normal mode opens the buffer in $EDITOR (nvim) for a full round-trip.
+## (zsh-edit provides the improved nvim edit widget; `^X^E` and `v` trigger it.)
+set -o vi
+export KEYTIMEOUT=10
+
+# History substring search (vi-aware): j/k, ^P/^N.
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+bindkey '^p' history-substring-search-up
+bindkey '^n' history-substring-search-down
+
+# vi insert mode drops every emacs editing key, which is the one place vi mode
+# is a straight downgrade: those keys are muscle memory *while typing*, and the
+# modal keys live one Escape away regardless. Put the useful ones back.
+bindkey -M viins '^a' beginning-of-line
+bindkey -M viins '^e' end-of-line
+bindkey -M viins '^k' kill-line
+bindkey -M viins '^u' backward-kill-line
+bindkey -M viins '^w' backward-kill-word
+bindkey -M viins '^y' yank
+bindkey -M viins '^?' backward-delete-char   # backspace past the insert point
+bindkey -M viins '^h' backward-delete-char
+
+# Accept the autosuggestion with ^Space. The default (right-arrow / End) means
+# leaving the home row for the single most frequent completion there is; ^F
+# takes the next word only, for when the tail of the suggestion is wrong.
+bindkey '^ ' autosuggest-accept
+bindkey '^f' forward-word
+
+# Search the history for what is already typed, in either mode.
+bindkey -M vicmd '/' history-incremental-search-backward
+bindkey -M vicmd '?' history-incremental-search-forward
+
+# In vicmd, jump to the ends of the *buffer*, not the line — multi-line commands
+# (a heredoc, a long pipeline) are where this matters.
+bindkey -M vicmd 'gg' beginning-of-buffer-or-history
+bindkey -M vicmd 'G' end-of-buffer-or-history
+
+## Completion: fzf-tab.
+zstyle ':completion:*' menu no
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:git-checkout:*' sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':fzf-tab:*' fzf-flags --bind=tab:down,shift-tab:up,enter:accept,right:accept
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+# Popup size. ftb-tmux-popup sizes itself to the *content*:
+#   width  = min(max(longest candidate + 5 + pad, min-width),  window width)
+#   height = min(max(line count   + 4 + pad, min-height), room above the cursor)
+# so without a floor a short list gets a popup too narrow to read — the names
+# truncate to "browse··" and the group column eats what is left. `popup-pad`
+# buys room for the group column and the preview; `popup-min-size` is the floor.
+# (`popup-min-width` is not a real style — fzf-tab ignored it silently.)
+zstyle ':fzf-tab:*' popup-min-size 100 25
+zstyle ':fzf-tab:*' popup-pad 30 0
+zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:*' fzf-tab-group-order alias directory file command 'external command'
+
+# fzf keybindings + completion (^T file, ^R history, Alt-C cd). Needs
+# $FZF_DEFAULT_OPTS (below) set first, so they load later; sourced here after
+# compinit so the completions they provide are registered.
+[[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+[[ -f /usr/share/fzf/completion.zsh ]]   && source /usr/share/fzf/completion.zsh
+
+# Fallback for the first run of a fresh machine, where .zshrc exists but the
+# plugin clones do not yet: run the command now rather than dropping it on the
+# floor with a "command not found".
+(( $+functions[zsh-defer] )) || zsh-defer() { [[ $1 == -c ]] && shift; eval "$@" }
+
+## Slow initialisers, deferred. zsh-defer queues these to run after the first
+## prompt is painted, so an interactive shell is usable immediately instead of
+## waiting on a python start-up (thefuck) and three subprocesses. The `-c` form
+## matters: without it the $(...) would still be substituted *now*.
+zsh-defer -c 'eval "$(zoxide init zsh)"'          # `z` — jump by frecency
+zsh-defer -c 'eval "$(thefuck --alias)"'          # `fuck` — fix the last command
+zsh-defer -c 'eval "$(direnv hook zsh)"'          # per-directory env on cd
+
+## ---------------------------------------------------------------------------
+## Prompt. Three rows: a blank one, a dim context row, and the input row.
+##
+## The shape is the point. A right-hand RPROMPT on a one-line prompt is a trap —
+## a long command overwrites it, so the information you most want during a long
+## pipeline is exactly the information that disappears. Moving context *above*
+## the input gives it the full terminal width, leaves the command a clean line
+## that always starts at column 3, and puts the blank row where every other
+## surface here puts one (tmux's empty status row, kitty's padding).
+##
+## The context row is dim on purpose: it is reference material, glanced at, not
+## read. Only the cwd is at full text brightness, and only the chevron is
+## accented — the rest earns colour solely by meaning something (red failed,
+## yellow dirty, green staged).
+##
+## Everything is computed in precmd from two forks at most, never a subshell in
+## the prompt string itself. No prompt framework, no dependency.
+zmodload zsh/datetime   # $EPOCHREALTIME — a parameter, so no `date` fork
+zmodload zsh/parameter  # $jobstates — the job table, without forking `jobs`
+autoload -Uz add-zsh-hook
+
+# Palette, named once so the segments below read as intent rather than hex.
+typeset -gA _p=(
+  text    '#cad3f5'  dim     '#6e738d'  faint '#5b6078'
+  mauve   '#c6a0f6'  blue    '#8aadf4'  green '#a6da95'
+  yellow  '#eed49f'  peach   '#f5a97f'  red   '#ed8796'
+  teal    '#8bd5ca'  flamingo '#f0c6c6'
+)
+
+## --- git ---------------------------------------------------------------------
+## One `git status --porcelain=v2 --branch` call answers everything the prompt
+## asks: branch, upstream divergence, and how many paths are staged, modified,
+## conflicted or untracked. vcs_info needed four or five forks for strictly less
+## (it has no ahead/behind and no counts), which is why it is gone.
+##
+## --no-optional-locks keeps the prompt from refreshing (and rewriting) the index
+## behind a running editor or a git command in another pane.
+typeset -gA _p_repo=()
+_prompt_repo() {
+  # Neither the git dir nor the toplevel can change while $PWD does not, so ask
+  # once per directory and answer from the cache after that. One fork returns
+  # both. A directory outside any repo caches the empty string just as usefully.
+  if [[ -z ${_p_repo[$PWD]+x} ]]; then
+    _p_repo[$PWD]=${(pj:\n:)${(f)"$(git rev-parse --absolute-git-dir --show-toplevel 2>/dev/null)"}}
+  fi
+  print -r -- $_p_repo[$PWD]
+}
+_prompt_repo_flush() { _p_repo=() }
+add-zsh-hook chpwd _prompt_repo_flush
+
+_prompt_git() {
+  _PROMPT_GIT=''
+  local gitdir=${${(f)"$(_prompt_repo)"}[1]}
+  [[ -n $gitdir ]] || return
+
+  local -a out
+  out=(${(f)"$(git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null)"})
+  (( $#out )) || return
+
+  local head='' ahead=0 behind=0
+  local -i staged=0 dirty=0 conflict=0 untracked=0
+  local line
+  for line in $out; do
+    case $line in
+      '# branch.head '*) head=${line#\# branch.head } ;;
+      '# branch.ab '*)
+        local ab=${line#\# branch.ab }
+        ahead=${${ab%% *}#+} behind=${${ab##* }#-}
+        ;;
+      # "1 XY ..." / "2 XY ..." — X is the staged column, Y the worktree column.
+      # A path can be both, and counting it twice is correct: they are two
+      # different pieces of work you still have to do.
+      [12]' '*)
+        local xy=${line[3,4]}
+        [[ ${xy[1]} != '.' ]] && (( staged++ ))
+        [[ ${xy[2]} != '.' ]] && (( dirty++ ))
+        ;;
+      'u '*) (( conflict++ )) ;;
+      '? '*) (( untracked++ )) ;;
+    esac
+  done
+
+  # Detached HEAD: show the short oid, marked, so it never reads as a branch.
+  [[ $head == '(detached)' ]] && head="@${$(git rev-parse --short HEAD 2>/dev/null)}"
+
+  # An interrupted operation outranks everything else on the row: until it is
+  # finished or aborted, no other git command will do what you expect.
+  local action=''
+  if [[ -d $gitdir/rebase-merge ]]; then
+    action="rebase ${$(<$gitdir/rebase-merge/msgnum 2>/dev/null)}/${$(<$gitdir/rebase-merge/end 2>/dev/null)}"
+  elif [[ -d $gitdir/rebase-apply ]]; then
+    action=rebase
+  elif [[ -f $gitdir/MERGE_HEAD ]]; then
+    action=merge
+  elif [[ -f $gitdir/CHERRY_PICK_HEAD ]]; then
+    action=cherry-pick
+  elif [[ -f $gitdir/BISECT_LOG ]]; then
+    action=bisect
+  fi
+
+  local seg="%F{$_p[blue]}$head%f"
+  [[ -n $action ]]     && seg+=" %F{$_p[peach]}$action%f"
+  (( ahead ))          && seg+=" %F{$_p[teal]}⇡$ahead%f"
+  (( behind ))         && seg+=" %F{$_p[teal]}⇣$behind%f"
+  (( staged ))         && seg+=" %F{$_p[green]}+$staged%f"
+  (( dirty ))          && seg+=" %F{$_p[yellow]}!$dirty%f"
+  (( untracked ))      && seg+=" %F{$_p[dim]}?$untracked%f"
+  (( conflict ))       && seg+=" %F{$_p[red]}✗$conflict%f"
+  _PROMPT_GIT=$seg
+}
+
+## --- how long the last command took ------------------------------------------
+## Wall time is only interesting once it is long enough to have cost you the
+## context switch, so nothing under 3s is printed. $EPOCHREALTIME is a parameter,
+## not a `date` fork.
+_prompt_timer_start() { _p_t0=$EPOCHREALTIME }
+_prompt_timer_stop() {
+  _PROMPT_TIME=''
+  [[ -n $_p_t0 ]] || return
+  local -F elapsed=$(( EPOCHREALTIME - _p_t0 ))
+  unset _p_t0
+  (( elapsed < 3 )) && return
+  if (( elapsed >= 3600 )); then
+    _PROMPT_TIME=$(printf '%dh%02dm' $(( elapsed / 3600 )) $(( (elapsed % 3600) / 60 )))
+  elif (( elapsed >= 60 )); then
+    _PROMPT_TIME=$(printf '%dm%02ds' $(( elapsed / 60 )) $(( elapsed % 60 )))
+  else
+    # LC_NUMERIC or the separator follows the locale: "3,2s" in de_DE.
+    _PROMPT_TIME=$(LC_NUMERIC=C printf '%.1fs' $elapsed)
+  fi
+}
+add-zsh-hook preexec _prompt_timer_start
+
+## --- where you are -----------------------------------------------------------
+## Long paths are shortened by *abbreviating* the components you already know,
+## never by replacing them with an ellipsis. `~/…/quantumfate/system-config` is
+## shorter but it is also a worse answer: it throws away which tree you are in
+## and gives back a character that means "something was here". `~/P/c/q/…`
+## keeps the shape of the path, stays sortable by eye, and is still unambiguous
+## in practice — you know your own directories by their first letter.
+##
+## Two components are always spelled out in full: the last one, and the root of
+## the repo you are in. Those are the two names you actually read. The repo root
+## is bold, so "which project" is answerable without parsing the path at all.
+_prompt_path() {
+  local -a parts=(${(s:/:)${(D)PWD}})
+  local lead=''
+  [[ ${(D)PWD} == /* ]] && lead='/'
+
+  # The repo root's position in the path, so it can be exempted from shortening.
+  local root=${${(f)"$(_prompt_repo)"}[2]}
+  local -i rootidx=0
+  [[ -n $root ]] && rootidx=${#${(s:/:)${(D)root}}}
+
+  local -i i keep=2 n=$#parts
+  for (( i = 1; i <= n - keep; i++ )); do
+    (( i == rootidx )) && continue
+    [[ $parts[i] == '~'* ]] && continue          # ~ and ~named are already short
+    # A leading dot carries no identity on its own, so .config shortens to .c.
+    [[ $parts[i] == .* ]] && parts[i]=${parts[i][1,2]} || parts[i]=${parts[i][1,1]}
+  done
+
+  # Dim for the abbreviated head, full brightness for what is spelled out.
+  local out=''
+  for (( i = 1; i <= n; i++ )); do
+    if (( i == rootidx )); then
+      out+="%F{$_p[text]}%B$parts[i]%b%f"
+    elif (( i > n - keep )); then
+      out+="%F{$_p[text]}$parts[i]%f"
+    else
+      out+="%F{$_p[dim]}$parts[i]%f"
+    fi
+    (( i < n )) && out+="%F{$_p[faint]}/%f"
+  done
+  print -r -- "$lead$out"
+}
+
+## --- the context row ---------------------------------------------------------
+## Order is by how often it changes your next keystroke: where you are, what the
+## repo is doing, what environment is active, what is still running, and how the
+## last command ended. Every segment after the cwd is conditional — an empty
+## repo-less directory with a clean exit prints one path and nothing else.
+_prompt_context() {
+  local -i last=$_p_status
+  local -a seg
+
+  # Identity, but only when it is not the obvious one. On your own machine as
+  # yourself this is noise; over ssh or as root it is the whole story.
+  if [[ -n $SSH_CONNECTION ]]; then
+    seg+="%F{$_p[peach]}%n@%m%f"
+  elif (( EUID == 0 )); then
+    seg+="%F{$_p[red]}%B root %b%f"
+  fi
+
+  seg+=$(_prompt_path)
+
+  [[ -n $_PROMPT_GIT ]] && seg+=$_PROMPT_GIT
+
+  # The shell activates venvs on cd (auto_venv); a prompt that does not say so
+  # leaves you guessing which python `python` is.
+  if [[ -n $VIRTUAL_ENV ]]; then
+    local venv=${VIRTUAL_ENV:t}
+    [[ $venv == (.venv|venv|env) ]] && venv=${VIRTUAL_ENV:h:t}
+    seg+="%F{$_p[flamingo]}$venv%f"
+  fi
+  # direnv loaded something here: the environment is not the one in .zshrc.
+  [[ -n $DIRENV_DIR ]] && seg+="%F{$_p[flamingo]}env%f"
+
+  # Background jobs are easy to forget and expensive to lose. Counted rather
+  # than tested with %(1j.), which would still contribute an empty field to the
+  # join below and leave the row with trailing whitespace.
+  (( $#jobstates )) && seg+="%F{$_p[yellow]}$#jobstates&%f"
+
+  [[ -n $_PROMPT_TIME ]] && seg+="%F{$_p[dim]}$_PROMPT_TIME%f"
+  # The failure sits directly above the next prompt and directly below the
+  # output that explains it. 130 is a ^C and is dimmed: you meant that one.
+  if (( last )); then
+    if (( last == 130 )); then
+      seg+="%F{$_p[dim]}^C%f"
+    else
+      seg+="%F{$_p[red]}✗$last%f"
+    fi
+  fi
+
+  # Two spaces between segments: enough to read as separate fields without
+  # needing a separator glyph to say so.
+  print -r -- ${(j:  :)seg}
+}
+
+## --- vi mode -----------------------------------------------------------------
+## The mode lives in the chevron, where the cursor already is. A word ("NORMAL")
+## on the far right of the line is the wrong place to say something you need to
+## know before you press the next key — you would have to look away from the
+## text you are editing to read it.
+##
+## Shape carries it, colour confirms it: ❯ insert (mauve), ❮ normal (blue). The
+## cursor changes with it, the way it does in nvim, so the two halves of the
+## editing surface agree.
+_prompt_mode() {
+  case $KEYMAP in
+    vicmd)  _PROMPT_CHAR="%F{$_p[blue]}❮%f";  print -n '\e[2 q' ;;  # block
+    *)      _PROMPT_CHAR="%F{$_p[mauve]}❯%f"; print -n '\e[6 q' ;;  # beam
+  esac
+}
+zle-keymap-select() { _prompt_mode; zle reset-prompt }
+zle-line-init()     { _prompt_mode; zle reset-prompt }
+zle -N zle-keymap-select
+zle -N zle-line-init
+# Hand a normal block cursor back to whatever runs next; a beam is a line-editor
+# convention and nvim/less will set their own anyway.
+_prompt_cursor_reset() { print -n '\e[2 q' }
+add-zsh-hook preexec _prompt_cursor_reset
+
+## --- assembly ----------------------------------------------------------------
+## precmd captures $? first (any command run inside a later hook would clobber
+## it), then fills the three variables the prompt string interpolates.
+_prompt_precmd() {
+  _p_status=$?
+  _prompt_timer_stop
+  _prompt_git
+  _PROMPT_INFO=$(_prompt_context)
+  _PROMPT_CHAR="%F{$_p[mauve]}❯%f"
+}
+add-zsh-hook precmd _prompt_precmd
+
+setopt PROMPT_SUBST
+PROMPT='
+${_PROMPT_INFO}
+${_PROMPT_CHAR} '
+# Nothing on the right. The context row above already has the full width, and
+# an RPROMPT would only be there to be overwritten by a long command line.
+RPROMPT=''
+{% endraw %}
+## History — shared, deduped, persisted, locked against concurrent shells.
+HISTSIZE="{{ zsh_history_size }}"
+SAVEHIST="{{ zsh_history_size }}"
+HISTFILE="{{ zsh_history_file }}"
+mkdir -p "$(dirname "$HISTFILE")"
+setopt HIST_FCNTL_LOCK HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY
+unsetopt APPEND_HISTORY EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS \
+  HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
+
+## Auto-workflows on directory change.
+function auto_venv() {
+  if [[ -n "$VIRTUAL_ENV" && "$PWD" != *"${VIRTUAL_ENV:h}"* ]]; then
+    deactivate; return
+  fi
+  [[ -n "$VIRTUAL_ENV" ]] && return
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/.venv/bin/activate" ]]; then source "$dir/.venv/bin/activate"; return; fi
+    dir="${dir:h}"
+  done
+}
+function auto_nvm() { [[ -f .nvmrc ]] && nvm use }
+add-zsh-hook chpwd auto_venv
+add-zsh-hook chpwd auto_nvm
+[[ -n "$TMUX" ]] && auto_venv
+[[ -n "$TMUX" ]] && auto_nvm
+
+## File manager: yazi as the primary — `ya` opens yazi, then cds into whatever
+## directory you left it in and records it in zoxide for `z` jumps.
+ya() {
+  local tmp="$(mktemp)"
+  yazi "$@" --cwd-file="$tmp"
+  if [[ -s "$tmp" ]]; then
+    local cwd="$(cat "$tmp")"
+    builtin cd -- "$cwd" && zoxide add -- "$cwd"
+  fi
+  rm -f "$tmp"
+}
+
+## Common aliases (the subset that earns its keep; dropped the OMZ bloat).
+alias ls='eza --group-directories-first'
+alias ll='eza -l --group-directories-first --time-style=long-iso'
+alias la='eza -la --group-directories-first --time-style=long-iso'
+alias lt='eza --tree --level=2 --group-directories-first'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias mv='mv -i'
+alias cp='cp -i'
+alias rm='rm -i'
+alias mkdir='mkdir -p'
+alias v='$EDITOR'
+alias vi='vim'
+alias open='xdg-open'
+alias cl='clear'
+alias reload='exec zsh'          # re-read this file from scratch, not `source`
+alias path='print -l -- $path'   # $PATH as a readable list
+
+## Directory stack. AUTO_PUSHD makes every cd a push, so `d` is a visited-dir
+## history and 1..9 jump into it — cheaper than retyping a path or reaching for
+## zoxide when the target is somewhere you were a minute ago.
+alias d='dirs -v'
+for i in {1..9}; do alias "$i"="cd +$i"; done; unset i
+
+## Search and replace. rg/fd honour .gitignore by default, which is right until
+## it isn't — the `!` variants turn that off in one keystroke.
+alias rg='rg --smart-case'
+alias rg!='rg --smart-case --hidden --no-ignore'
+alias fd!='fd --hidden --no-ignore'
+
+## Disk, processes, sizes — the modern replacements, aliased over the names the
+## fingers already know. `command du` still reaches the real one.
+alias du='dust'
+alias df='duf'
+alias ps='procs'
+alias top='btop'
+
+## Modern-tool escape hatches. `\du` (or `command du`) is the POSIX original —
+## worth remembering when copying a command out of a manpage or a bug report.
+alias ports='ss -tulpn'
+alias myip='curl -fsS https://ifconfig.me; echo'
+alias serve='python -m http.server'
+alias timer='hyperfine'
+alias loc='tokei'
+alias watch-run='watchexec --clear --restart'
+
+## systemd. `sc`/`scu` are the two verbs; the rest are the queries worth naming.
+alias sc='systemctl'
+alias scu='systemctl --user'
+alias jf='journalctl -f'
+alias jfu='journalctl --user -f'
+alias failed='systemctl --failed'
+
+## tmux — the coding server. `tm` attaches to the last session or creates one.
+alias t='tmux'
+alias tl='tmux list-sessions'
+alias tm='tmux attach || tmux new'
+alias tk='tmux kill-session -t'
+
+## trash-cli. `rm` stays `rm -i` on purpose: a command that deletes should look
+## like one. `tp` is the recoverable path, for when you are not sure.
+alias tp='trash-put'
+alias tls='trash-list'
+alias tre='trash-restore'
+
+## Git — tight, ergonomic set.
+alias g='git'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit -m'
+alias gca='git commit -am'
+alias gcm='git commit --amend'
+alias gs='git status -sb'
+alias gl='git log --oneline --decorate'
+alias gll='git log --oneline --decorate --graph'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gb='git branch -vv'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gp='git push'
+alias gpl='git pull --ff-only'
+alias grh='git reset --hard'
+alias grs='git reset --soft'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias glg='git log --stat'
+alias glp='git log -p'
+alias gf='git fetch --all --prune'
+alias gsw='git switch'           # switch/restore: the unambiguous half of checkout
+alias gswc='git switch -c'
+alias grst='git restore'
+alias grss='git restore --staged'
+alias gcp='git cherry-pick'
+alias gsl='git stash list'
+alias gsu='git stash push --keep-index'   # stash only what is NOT staged
+alias gwt='git worktree'
+alias lg='lazygit'
+
+## Rewriting history without thinking about SHAs. `gfx` picks the commit to fix
+## up interactively; `gabs` lets git-absorb find it from the diff itself, which
+## is right far more often than a human guess. `gri` then squashes them.
+alias gri='git rebase -i --autosquash'
+alias gfx='git commit --fixup'
+alias gabs='git absorb --and-rebase'
+alias gundo='git reset --soft HEAD~1'     # uncommit, keep the changes staged
+alias gwip='git commit --no-verify -m "wip"'
+
+## Reading history. `gbl` ignores whitespace and follows code across files and
+## commits — the difference between blaming the author and blaming whoever last
+## ran the formatter. `gdt` diffs syntax trees, so reindentation shows as empty.
+alias gbl='git blame -w -C -C -C'
+alias gdt='git -c diff.external=difft diff'
+alias gsh='git show'
+alias grl='git reflog --date=relative'    # the undo log for everything above
+
+## Branch hygiene: list branches whose commits are already in HEAD, then delete
+## exactly those. Never touches the current branch or main/master.
+gbclean() {
+  local merged
+  merged=(${(f)"$(git branch --merged | sed 's/^[* ] //' | grep -Ev '^(main|master|develop)$')"})
+  (( $#merged )) || { print 'no merged branches'; return 0 }
+  print -l -- $merged
+  read -q "REPLY?delete these $#merged branches? [y/N] " || { print; return 1 }
+  print; git branch -d $merged
+}
+
+## Repo root, for `cd $(groot)` or `groot`-relative paths in a deep tree.
+groot() { cd "$(git rev-parse --show-toplevel)" }
+
+## forgit: fzf pickers over git, with previews. FORGIT_NO_ALIASES (set before the
+## plugin loads, above) keeps its own `ga`/`gd`/`gi` from silently shadowing the
+## aliases above — everything interactive is `f`-prefixed, so the prefix tells
+## you the command will ask before it acts.
+alias fa='forgit::add'            # pick hunks/files to stage
+alias fdi='forgit::diff'          # pick a file, then a revision, to diff
+alias flog='forgit::log'          # browse commits with the patch in the preview
+alias fco='forgit::checkout::branch'
+alias fst='forgit::stash::show'
+alias frb='forgit::rebase'
+alias fcf='forgit::checkout::file' # discard a file's changes, after seeing them
+
+# System/package management (Arch).
+alias update='sudo pacman -Syu'
+alias mirror='sudo cachyos-rate-mirrors'
+alias fixpacman='sudo rm /var/lib/pacman/db.lck'
+alias cleanup='sudo pacman -Rns $(pacman -Qtdq)'
+alias rip='expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
+alias big='expac -H M "%m\t%n" | sort -h | nl'
+alias psme='command ps auxf | sort -nr -k 4'
+alias psme10='command ps auxf | sort -nr -k 4 | head -10'
+alias grubup='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+alias jctl="journalctl -p 3 -xb"
+alias hw='hwinfo --short'
+alias tb='nc termbin.com 9999'
+alias please='sudo'
+alias apt='man pacman'
+alias apt-get='man pacman'
+
+# Hyprland.
+alias hyprclients='hyprctl -j clients | jq -r ".[]" | jless'
+
+## extract() — one command for any archive, replacing OMZ's extract plugin.
+extract() {
+  if [[ -z "$1" ]]; then echo "usage: extract <archive>"; return 1; fi
+  case "$1" in
+    *.tar.bz2) tar xjf "$1" ;;
+    *.tar.gz)  tar xzf "$1" ;;
+    *.tar.xz)  tar xJf "$1" ;;
+    *.tar.zst) tar --zstd -xf "$1" ;;
+    *.bz2)     bunzip2 "$1" ;;
+    *.rar)     unrar x "$1" ;;
+    *.gz)      gunzip "$1" ;;
+    *.tar)     tar xf "$1" ;;
+    *.tbz2)    tar xjf "$1" ;;
+    *.tgz)     tar xzf "$1" ;;
+    *.zip)     unzip "$1" ;;
+    *.Z)       uncompress "$1" ;;
+    *.7z)      7z x "$1" ;;
+    *) echo "'$1' cannot be extracted"; return 1 ;;
+  esac
+}
+
+## Coloured man pages via $LESS_TERMCAP (replaces OMZ colored-man-pages).
+export LESS_TERMCAP_mb=$'\e[01;31m'   # begin bold
+export LESS_TERMCAP_md=$'\e[01;38;5;198m' # begin bold (magenta)
+export LESS_TERMCAP_me=$'\e[0m'       # end bold
+export LESS_TERMCAP_se=$'\e[0m'       # end standalone
+export LESS_TERMCAP_so=$'\e[38;5;246m' # begin standout
+export LESS_TERMCAP_ue=$'\e[0m'       # end underline
+export LESS_TERMCAP_us=$'\e[04;38;5;146m' # begin underline
+
+# One palette everywhere bat is reachable — direct calls, man pages, lessfilter.
+export BAT_THEME="{{ zsh_bat_theme }}"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
+
+# delta as git's pager, configured through the environment so this role never
+# has to own ~/.gitconfig. --navigate makes n/N step file-to-file in a large
+# diff, which is the whole difference between reading a review and scrolling it.
+export GIT_PAGER="delta --navigate --line-numbers --hyperlinks --syntax-theme='{{ zsh_bat_theme }}'"
+
+# eza colours, Catppuccin Macchiato.
+export EZA_COLORS="da=38;2;110;115;141:uu=38;2;110;115;141:gu=38;2;110;115;141:ur=38;2;198;160;246:uw=38;2;238;212;159:ux=38;2;166;218;149:sn=38;2;139;213;202:sb=38;2;110;115;141:xx=38;2;73;77;100:di=38;2;198;160;246"
+
+# fzf: one accent (mauve), one surface, vi-style bindings on top of the shell's
+# vi-mode (tab:down / shift-tab:up already reversed to read like a menu).
+export FZF_DEFAULT_OPTS=" \
+  --layout=reverse --info=inline --border=none --pointer='▌' --marker='▌' \
+  --color=bg+:#363a4f,fg:#cad3f5,fg+:#cad3f5,hl:{{ zsh_log_accent }},hl+:{{ zsh_log_accent }} \
+  --color=pointer:{{ zsh_log_accent }},prompt:{{ zsh_log_accent }},marker:#a6da95,spinner:{{ zsh_log_accent }} \
+  --color=info:#6e738d,header:#6e738d,gutter:-1,border:#363a4f"
+export SKIM_DEFAULT_OPTIONS="--bind 'tab:down,shift-tab:up'"
+
+## feh, sized to 80% of the focused monitor rather than to the image's own
+## pixel size — a screenshot of a 4K screen otherwise opens larger than the
+## screen it was taken on.
 feh_scaled() {
   local width=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .width')
   local height=$(hyprctl -j monitors | jq -r '.[] | select(.focused) | .height')
   command feh --geometry $((width*80/100))x$((height*80/100)) --scale-down "$@"
 }
 
-## Plugins
-# oh-my-zsh
-export ZSH="{{ zsh_omz_dest }}"
-ZSH_THEME="eastwood"
-
-if [ -f "${HOME}/.config/oh-my-zsh/themes/catppuccin.zsh-theme" ]; then
-  ZSH_THEME="catppuccin"
-  CATPPUCCIN_FLAVOR="mocha" # Required! Options: mocha, flappe, macchiato, latte
-  CATPPUCCIN_SHOW_TIME=true  # Optional! If set to true, this will add the current time to the prompt
-fi
-
-ZSH_LS_BACKEND="eza"
-plugins=(
-  aliases
-  git
-  ls
-  ufw
-  thefuck
-  systemd
-  systemadmin
-  rust
-  per-directory-history
-  golang
-  extract
-  colorize
-  colored-man-pages
-)
-source $ZSH/oh-my-zsh.sh
-
-# zsh-autosuggestions
-if [ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh" ]; then
-  source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
-  ZSH_AUTOSUGGEST_STRATEGY=(history)
-  # Ghost text sits on surface2 — present when you look for it, invisible when
-  # you don't. Suggestion text that competes with real text is noise.
-  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#5b6078'
-  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=40
-fi
-
-# zsh-autopair
-if [ -f "$HOME/.zsh/zsh-autopair/zsh-autopair.plugin.zsh" ]; then
-  source "$HOME/.zsh/zsh-autopair/zsh-autopair.plugin.zsh"
-fi
-
-# Tab completion
-autoload -Uz compinit
-compinit
-
-if [ -f "$HOME/.zsh/catppuccin-fzf/themes/catppuccin-fzf-macchiato.sh" ]; then
-  source "$HOME/.zsh/catppuccin-fzf/themes/catppuccin-fzf-macchiato.sh"
-fi
-
-if [ -f "$HOME/.zsh/fzf-tab/fzf-tab.plugin.zsh" ]; then
-  source "$HOME/.zsh/fzf-tab/fzf-tab.plugin.zsh"
-  source /usr/share/fzf/key-bindings.zsh
-  source /usr/share/fzf/completion.zsh
-fi
-
-if [ -f "$HOME/.zsh/fzf-tab-source/fzf-tab-source.plugin.zsh" ]; then
-  source "$HOME/.zsh/fzf-tab-source/fzf-tab-source.plugin.zsh"
-  export LESSOPEN="|-/usr/bin/lesspipe.sh %s"
-  chmod +x ~/.lessfilter
-fi
-
-if [ -f "$HOME/.zsh/zsh-chezmoi/chezmoi.plugin.zsh" ]; then
-  source "$HOME/.zsh/zsh-chezmoi/chezmoi.plugin.zsh"
-fi
-
-zstyle ':completion:*:git-checkout:*' sort false
-zstyle ':completion:*:descriptions' format '[%d]'
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
-zstyle ':fzf-tab:*' fzf-flags --bind=tab:down,shift-tab:up,enter:accept,right:accept
-zstyle ':fzf-tab:*' use-fzf-default-opts yes
-zstyle ':fzf-tab:*' switch-group '<' '>'
-zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
-zstyle ':fzf-tab:*' popup-min-width 300
-zstyle ':fzf-tab:*' popup-pad 600 0
-zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
-zstyle ':fzf-tab:*' fzf-tab-group-order \
-  alias \
-  directory \
-  file \
-  command \
-  external command
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
-zstyle ':fzf-tab:complete:cd:*' fzf-tab-group-order \
-  directory \
-  alias
-
-source <(COMPLETE=zsh tms)
-
-## History
-HISTSIZE="{{ zsh_history_size }}"
-SAVEHIST="{{ zsh_history_size }}"
-
-HISTFILE="{{ zsh_history_file }}"
-mkdir -p "$(dirname "$HISTFILE")"
-
-setopt HIST_FCNTL_LOCK
-
-# Enabled history options
-enabled_opts=(
-  HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY
-)
-for opt in "${enabled_opts[@]}"; do
-  setopt "$opt"
-done
-unset opt enabled_opts
-
-# Disabled history options
-disabled_opts=(
-  APPEND_HISTORY EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS
-  HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS
-)
-for opt in "${disabled_opts[@]}"; do
-  unsetopt "$opt"
-done
-unset opt disabled_opts
-
-## Misc
-autoload -Uz edit-command-line
-zle -N edit-command-line
-bindkey '^x^e' edit-command-line
-
-function auto_venv() {
-  if [[ -n "$VIRTUAL_ENV" && "$PWD" != *"${VIRTUAL_ENV:h}"* ]]; then
-    deactivate
-    return
-  fi
-
-  [[ -n "$VIRTUAL_ENV" ]] && return
-
-  local dir="$PWD"
-  while [[ "$dir" != "/" ]]; do
-    if [[ -f "$dir/.venv/bin/activate" ]]; then
-      source "$dir/.venv/bin/activate"
-      return
-    fi
-    dir="${dir:h}"
-  done
-}
-function auto_nvm() {
-  [[ -f .nvmrc ]] && nvm use
-}
-
-autoload -Uz add-zsh-hook
-add-zsh-hook chpwd auto_venv
-add-zsh-hook chpwd auto_nvm
-
-[[ -n "$TMUX" ]] && auto_venv
-[[ -n "$TMUX" ]] && auto_nvm
-
-## LF
-lfcd () {
-    cd "$(command lf -print-last-dir "$@")" && zoxide add "$PWD"
-}
-alias lf=lfcd
-
-if test -n "$KITTY_INSTALLATION_DIR"; then
-  export KITTY_SHELL_INTEGRATION="no-rc"
-  autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
-  kitty-integration
-  unfunction kitty-integration
-fi
-
-## Binds
-bindkey ' ' magic-space
-
-## Useful aliases
-alias -- feh=feh_scaled
-alias -- ranger=ranger-cd
-
-# Hyprland
-alias hyprclients="hyprctl -j clients | jq -r '.[]' | jless"
-
-# Common use
-alias grubup="sudo grub-mkconfig -o /boot/grub/grub.cfg"
-alias fixpacman="sudo rm /var/lib/pacman/db.lck"
-alias tarnow='tar -acf '
-alias untar='tar -zxvf '
-alias wget='wget -c '
-alias psmem='ps auxf | sort -nr -k 4'
-alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
-alias dir='dir --color=auto'
-alias vdir='vdir --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-alias hw='hwinfo --short'
-alias big="expac -H M '%m\t%n' | sort -h | nl"
-alias gitpkg='pacman -Q | grep -i "\-git" | wc -l'
-alias update='sudo pacman -Syu'
-
-alias mirror="sudo cachyos-rate-mirrors"
-
-# Git specific aliases
-alias gl="git log --oneline"
-alias glmerge="git log --oneline --decorate --graph --parents"
-alias glreverse="git --no-pager log --reverse"
-
-# Help people new to Arch
-alias apt='man pacman'
-alias apt-get='man pacman'
-alias please='sudo'
-alias tb='nc termbin.com 9999'
-
-alias cleanup='sudo pacman -Rns (pacman -Qtdq)'
-
-# Get the error messages from journalctl
-alias jctl="journalctl -p 3 -xb"
-
-# Recent installed packages
-alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
-
-## ---------------------------------------------------------------------------
-## One palette: Catppuccin Macchiato, everywhere text is coloured
-## ---------------------------------------------------------------------------
-# The terminal's ANSI 16 are the macchiato hexes (kitty themes/macchiato.conf),
-# so tools that only speak ANSI names (tspin, grep, ls) land on the same palette
-# as tools that speak hex (fzf, bat, delta). Nothing here re-defines a colour;
-# it only points each tool at the palette that is already there.
-export BAT_THEME="{{ zsh_bat_theme }}"
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-export MANROFFOPT="-c"
-
-# eza: structure faint, permissions and sizes readable, nothing shouting.
-export EZA_COLORS="da=38;2;110;115;141:uu=38;2;110;115;141:gu=38;2;110;115;141:ur=38;2;198;160;246:uw=38;2;238;212;159:ux=38;2;166;218;149:sn=38;2;139;213;202:sb=38;2;110;115;141:xx=38;2;73;77;100:di=38;2;198;160;246"
-
-# fzf: one accent (mauve), one surface. No borders, no scrollbar, no gutter —
-# the list is the interface.
-export FZF_DEFAULT_OPTS="\
-  --bind 'tab:down,shift-tab:up' \
-  --layout=reverse --info=inline --border=none --pointer='▌' --marker='▌' \
-  --color=bg+:#363a4f,fg:#cad3f5,fg+:#cad3f5,hl:{{ zsh_log_accent }},hl+:{{ zsh_log_accent }} \
-  --color=pointer:{{ zsh_log_accent }},prompt:{{ zsh_log_accent }},marker:#a6da95,spinner:{{ zsh_log_accent }} \
-  --color=info:#6e738d,header:#6e738d,gutter:-1,border:#363a4f"
-export SKIM_DEFAULT_OPTIONS="--bind 'tab:down,shift-tab:up'" # for tms
-
-# Must be at the end
-if [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-  if [ -f "$HOME/.zsh/catppuccin-zsh-syntax-highlighting/themes/catppuccin_macchiato-zsh-syntax-highlighting.zsh" ]; then
-    source "$HOME/.zsh/catppuccin-zsh-syntax-highlighting/themes/catppuccin_macchiato-zsh-syntax-highlighting.zsh"
-  fi
-  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets cursor)
-  ZSH_HIGHLIGHT_STYLES[cursor]='fg=blue'
-fi
-
-## Logging workspace. Aliases, verbs and the log-window shell profile all live
-## in one file so this config stays readable.
-source "$HOME/.config/zsh/logrc.zsh"
-
-## Suffix aliases
+## Suffix aliases — open files with the right tool by extension.
 alias -s md="bat"
-alias -s mov="open"
+alias -s txt="bat"
+alias -s yaml="bat -l yaml"
+alias -s json="jless"
 alias -s png="feh_scaled"
+alias -s mov="open"
 alias -s mp4="open"
 alias -s go="$EDITOR"
 alias -s rs="$EDITOR"
@@ -289,21 +735,60 @@ alias -s hpp="$EDITOR"
 alias -s js="$EDITOR"
 alias -s ts="$EDITOR"
 alias -s rb="$EDITOR"
-alias -s txt="$EDITOR"
-alias -s yaml="bat -l yaml"
-alias -s json="jless"
 
-## Global aliases
+## Global aliases — these expand anywhere on the line, not just in command
+## position, so they read as pipeline punctuation: `rg TODO G test L`.
 alias -g NE='2>/dev/null'
 alias -g DN='> /dev/null'
 alias -g NUL='>/dev/null 2>&1'
+alias -g G='| rg'
+alias -g L='| less'
+alias -g H='| head -20'
+alias -g T='| tail -20'
+alias -g WC='| wc -l'
+alias -g J='| jq'
+alias -g S='| sort'
+alias -g U='| sort -u'
+alias -g X='| xargs -r'
+alias -g CP='| wl-copy'          # pipe the output straight to the clipboard
+alias -g NOW='$(date +%Y-%m-%dT%H:%M:%S)'
 
-## Widgets
-clear-keep-buffer() {
-  zle clear-screen
-}
-zle -N clear-keep-buffer
-bindkey '^Xl' clear-keep-buffer
+## mkcd — create a directory and step into it. The two halves of the same act.
+mkcd() { mkdir -p -- "$1" && cd -- "$1" }
 
-## Hotkey Insertion
-bindkey -s '^Xgc' 'git commit -m ""\C-b'
+## bak — a timestamped copy beside the original, before you edit it in anger.
+bak() { for f in "$@"; do cp -a -- "$f" "$f.$(date +%Y%m%d%H%M%S).bak"; done }
+
+## cheat — the manpage's useful half, for commands whose manpage is a novel.
+cheat() { curl -fsS "https://cheat.sh/$1" | bat -pp --language=help 2>/dev/null }
+
+# tms (tmux-sessionizer) completion — a subprocess, so deferred like the rest.
+zsh-defer -c 'source <(COMPLETE=zsh tms)'
+
+# command-not-found: name the package that provides a missing binary. Inert
+# until `pkgfile --update` has run once (the role does it at provision time).
+[[ -f /usr/share/doc/pkgfile/command-not-found.zsh ]] && \
+  source /usr/share/doc/pkgfile/command-not-found.zsh
+
+# Paste from the system clipboard in vi insert mode (^V).
+if (( $+commands[wl-paste] )); then
+  paste-from-clipboard() {
+    LBUFFER+="$(wl-paste --no-newline 2>/dev/null)"
+    zle reset-prompt
+  }
+  zle -N paste-from-clipboard
+  bindkey '^V' paste-from-clipboard
+fi
+
+## kitty terminal integration (only when running under kitty).
+if test -n "$KITTY_INSTALLATION_DIR"; then
+  export KITTY_SHELL_INTEGRATION="no-rc"
+  autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+  kitty-integration
+  unfunction kitty-integration
+fi
+
+## Logging workspace — aliases, verbs, log-window profile. Clears PROMPT/RPROMPT
+## in the log window, so this must be sourced last.
+source "$HOME/.config/zsh/logrc.zsh"
+

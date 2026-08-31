@@ -52,8 +52,7 @@ common_packages:
   - kitty
   - foot
   - zsh
-  - zsh-autocomplete
-  - zsh-autopair-git
+  - zsh-antidote
 
   # System tools
   - cpupower
