@@ -29,3 +29,30 @@
   register: tmux_validate
   failed_when: tmux_validate.rc != 0
   notify: Kill the tmux validation server
+
+- name: Ensure the fastfetch config directory exists
+  ansible.builtin.file:
+    path: "{{ fastfetch_config_dir }}"
+    state: directory
+    mode: "0755"
+
+# Shipped with the role, so a fresh machine has a logo before the first shell.
+- name: Deploy the fastfetch logo images
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/fastfetch/"
+    dest: "{{ fastfetch_config_dir }}/"
+    mode: "0644"
+
+- name: Render the fastfetch banner config
+  ansible.builtin.template:
+    src: fastfetch.jsonc.j2
+    dest: "{{ fastfetch_config }}"
+    mode: "0644"
+
+# A typo here is otherwise a wall of errors on top of every new shell.
+- name: Validate the fastfetch config
+  ansible.builtin.command:
+    cmd: fastfetch --config "{{ fastfetch_config }}" --logo none --pipe true
+  changed_when: false
+  register: fastfetch_check
+  failed_when: fastfetch_check.rc != 0

@@ -23,6 +23,13 @@
   become: false
   when: zsh_cli_packages | length > 0
 
+- name: Install fastfetch for the shell banner
+  kewlfft.aur.aur:
+    name: fastfetch
+    use: yay
+    state: present
+  become: false
+
 # The command-not-found hook in .zshrc is inert until this database exists.
 - name: Seed the pkgfile database
   ansible.builtin.command:

@@ -1,0 +1,48 @@
+// {{ ansible_managed }}
+// Greeting banner, printed by .zshrc on every kitty shell.
+//
+// Layout is deliberately flat: one accent colour for the keys, terminal
+// default for the values, two rules. Nothing competes with the logo.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "display": {
+    "separator": "{{ fastfetch_separator }}",
+    "color": {
+      "keys": "{{ fastfetch_color_keys }}",
+      "title": "{{ fastfetch_color_title }}"
+    }
+  },
+  "logo": {
+    "type": "{{ fastfetch_logo_type }}",
+    "source": "{{ fastfetch_logo }}",
+    "height": {{ fastfetch_logo_height }},
+    "padding": {"top": {{ fastfetch_logo_padding_top }}, "right": {{ fastfetch_logo_padding_right }}}
+  },
+  "modules": [
+    {
+      "type": "title",
+      "key": " ",
+      "format": "{{ '{#' }}{{ fastfetch_accent }}}{user-name}{{ '{#' }}{{ fastfetch_color_dim }}}@{{ '{#' }}{{ fastfetch_accent }}}{host-name}"
+    },
+    {"type": "custom", "format": "{{ '{#' }}{{ fastfetch_color_dim }}}{{ fastfetch_rule }}"},
+{% for m in fastfetch_modules %}
+    {
+      "type": "{{ m.type }}",
+      "key": "{{ '%-*s' | format(fastfetch_key_width, m.label) }}"
+{%- if m.format is defined %},
+      "format": "{{ m.format }}"
+{%- endif %}
+{%- for k, v in (m.options | default({})).items() %},
+      "{{ k }}": {{ v | to_json }}
+{%- endfor %}
+    },
+{% endfor %}
+    {"type": "custom", "format": "{{ '{#' }}{{ fastfetch_color_dim }}}{{ fastfetch_rule }}"},
+    {
+      "type": "colors",
+      "key": " ",
+      "symbol": "circle",
+      "paddingLeft": 1
+    }
+  ]
+}

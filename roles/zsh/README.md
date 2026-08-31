@@ -10,6 +10,20 @@ bindings are left. Enter types the command onto the prompt.
 One row is one binding. Where two commands are close relatives they still get a
 row each, because a row you cannot search for is a row you will not find.
 
+## fastfetch
+
+The banner every kitty shell opens with. Rows, icons, colours, logo and the
+greeting live in `roles/zsh/defaults/main.yml` (`fastfetch_*`); the logo images
+ship in `roles/zsh/files/fastfetch/` — drop a new one there and point
+`fastfetch_logo` at it.
+
+| Command                        | Effect                                 |
+| ------------------------------ | -------------------------------------- |
+| `fastfetch`                    | print the banner again                 |
+| `fastfetch --list-modules`     | module types available for a new row   |
+| `fastfetch --list-logos`       | built-in logos, for `fastfetch_logo_type` other than `kitty` |
+| `fastfetch --logo none`        | the text block alone, e.g. to check alignment |
+
 ## prompt
 
 What the prompt is telling you. Nothing here is typed.

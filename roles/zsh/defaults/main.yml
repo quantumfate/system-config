@@ -207,3 +207,64 @@ zsh_tms_excluded_dirs:
   - node_modules
   - target
   - .git
+
+# --- fastfetch --------------------------------------------------------------
+# The banner .zshrc prints in every kitty shell. The logo images ship with the
+# role (files/fastfetch/) and are copied into the config dir alongside it.
+fastfetch_config_dir: "{{ target_home }}/.config/fastfetch"
+fastfetch_config: "{{ fastfetch_config_dir }}/config.jsonc"
+
+# kitty graphics protocol, so the logo is a real image and not ascii. Any other
+# type (e.g. `small`, `builtin`) makes `source` a logo name instead of a path.
+fastfetch_logo_type: kitty
+fastfetch_logo: "{{ fastfetch_config_dir }}/yukino.png"
+fastfetch_logo_height: 16
+fastfetch_logo_padding_top: 2
+fastfetch_logo_padding_right: 3
+
+# Palette indices, not hex: fastfetch resolves `{#NN}` against the terminal's
+# own 16 colours, which kitty.conf already paints Catppuccin. One accent for
+# every key — colour carries no meaning here, so varying it is just noise.
+fastfetch_accent: "35"        # mauve — keys, the user@host line
+fastfetch_color_keys: "35"
+fastfetch_color_title: "35"
+fastfetch_color_dim: "90"     # surface grey — the rules and the @ separator
+
+# Labels are space-padded to this width by the template, so the values line up.
+# fastfetch's own `key.width` does it with a cursor-move escape, which survives
+# neither a pipe nor a logo to its left.
+fastfetch_key_width: 9
+fastfetch_separator: "  "
+fastfetch_rule: "─────────────────────────────────"
+
+# One entry per row. Lowercase, no icons: the row is scanned as a word, and a
+# glyph column only widens the block.
+fastfetch_modules:
+  - type: os
+    label: "os"
+  - type: kernel
+    label: "kernel"
+    format: "{release}"
+  - type: uptime
+    label: "uptime"
+  - type: packages
+    label: "pkgs"
+  - type: wm
+    label: "wm"
+    format: "{pretty-name} ({protocol-name})"
+  - type: terminal
+    label: "term"
+  - type: shell
+    label: "shell"
+  - type: cpu
+    label: "cpu"
+    format: "{name}"
+  - type: gpu
+    label: "gpu"
+    format: "{name}"
+  - type: memory
+    label: "memory"
+  - type: disk
+    label: "disk"
+    options:
+      folders: "/"
