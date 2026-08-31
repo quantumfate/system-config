@@ -17,14 +17,8 @@ galaxy_info:
     - gtk
     - qt
 
-# `base` is a hard requirement, not a convenience. This role installs its theme
-# packages through yay, and yay shells out to sudo on its own — a play has no
-# tty, so that only works while a sudo timestamp is already valid. base's pacman
-# tasks run under ansible's own become, which refreshes the user-wide timestamp
-# (roles/sudoers: timestamp_type=global) before yay is ever reached.
-#
-# Without this, a full converge worked (base runs first anyway) while a tagged
-# `-t theming` run failed with "sudo: a terminal is required" — the dependency
-# makes the tagged run behave like the full one.
+# Required, not cosmetic: yay shells out to sudo with no tty, so it needs the
+# warm sudo timestamp base leaves behind. Without it `-t theming` fails with
+# "sudo: a terminal is required" while a full converge works.
 dependencies:
   - role: base

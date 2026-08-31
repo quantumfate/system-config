@@ -1,5 +1,4 @@
 ---
-# Dotfiles source. chezmoi treats `origin` as its own remote for update and
-# auto-push, so this role makes sure the checkout's origin matches.
+# Dotfiles source. Also the remote chezmoi updates and auto-pushes to.
 chezmoi_repo: git@codeberg.org:quantumfate/dotfiles.git
 chezmoi_source: "{{ target_home }}/.local/share/chezmoi"

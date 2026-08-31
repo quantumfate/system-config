@@ -1,15 +1,11 @@
 {% import '_qtfont.j2' as qt -%}
 # ~/.config/qt6ct/qt6ct.conf — rendered by roles/theming.
 #
-# QT_QPA_PLATFORMTHEME=qt6ct makes this file the source of truth for every Qt6
-# app AND for the Qt file dialogs that GTK portals hand off to. The previous
-# file was a single line of literal "\n" escapes, which qt6ct cannot parse, so
-# Qt6 apps were running unstyled with default fonts.
+# QT_QPA_PLATFORMTHEME=qt6ct makes this the source of truth for Qt6 apps and
+# for the Qt file dialogs portals hand off to.
 #
-# Style comes from Kvantum (the catppuccin Kvantum theme draws the widgets) and
-# the palette from the catppuccin colour scheme; do NOT also set
-# QT_STYLE_OVERRIDE in the environment — two style selectors fight, and the
-# environment one wins over anything chosen here.
+# Widgets from Kvantum, palette from the catppuccin colour scheme. Setting
+# QT_STYLE_OVERRIDE in the environment would beat both.
 
 [Appearance]
 style=kvantum

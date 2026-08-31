@@ -1,8 +1,8 @@
 ---
-# The logging workspace: one palette, one pipeline, one isolated tmux server.
+# The logging workspace:
 #
-#   ~/.config/tailspin/theme.toml   severity colours (macchiato via ANSI 16)
-#   ~/.config/tmux/logs.conf        config for the isolated log tmux server
+#   ~/.config/tailspin/theme.toml   severity colours
+#   ~/.config/tmux/logs.conf        the isolated log tmux server
 #   ~/.config/zsh/logrc.zsh         the `log*` verbs, sourced by .zshrc
 #   ~/.local/bin/logstream          source -> columns -> colour -> pager
 #   ~/.local/bin/logpick            fzf source picker

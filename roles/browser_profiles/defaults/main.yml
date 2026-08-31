@@ -1,6 +1,6 @@
 ---
-# browser_config_src lives in group_vars/all/main.yml: roles/theming renders
-# user.js into it and this role links it into the profiles.
+# The prefs source, browser_config_src, is in group_vars/all/main.yml — two
+# roles write it.
 
 # Profile dirs to skip when symlinking — not real browser profiles.
 browser_profile_excludes:

@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 # logpick — fuzzy-pick a log source, print its logstream spec. Rendered by roles/zsh.
 #
-# One list, one keystroke, no memorising unit names. The list is deliberately
-# ordered by how often it is needed, not alphabetically: fixed positions mean
-# the top entries become muscle memory instead of a re-read every time.
+# Ordered by how often each entry is needed, not alphabetically, so the top of
+# the list holds still and becomes muscle memory.
 set -uo pipefail
 
 WORKDIR="${ZSH_LOG_DIR:-{{ zsh_log_dir }}}"
 
-# uwsm names a scope `app-<compositor>-<app>-<id>.scope` and sets the
-# Description to the bare app name. A .desktop launch gets no Description (it
-# repeats the unit name), so derive the label from the unit instead: drop the
-# `app-` prefix, the trailing pid/id, and systemd's \x2d escaping.
+# uwsm scopes are `app-<compositor>-<app>-<id>.scope`, with the app name in the
+# Description — except for .desktop launches, which have none, so fall back to
+# parsing the unit name.
 uwsm_apps() {
   SYSTEMD_COLORS=0 systemctl --user list-units 'app-*.scope' --state=running \
     --no-legend --plain --no-pager 2>/dev/null |
@@ -39,9 +37,8 @@ sources() {
     "prev        previous boot, from the top" \
     "audit       audit / access denials"
 
-  # Apps launched through uwsm live in the USER manager as `app-*.scope`, not as
-  # services, so a --type=service listing never shows them — which is every GUI
-  # program started from Hyprland. journalctl -u takes a scope name just fine.
+  # Every GUI program Hyprland starts is a user `app-*.scope`, which no
+  # --type=service listing shows. journalctl -u takes a scope name fine.
   uwsm_apps
 
   systemctl list-units --type=service --state=running --no-legend --plain 2>/dev/null \

@@ -1,22 +1,6 @@
 ---
-# Desktop theming: one flavour (macchiato), one accent (mauve), one type scale.
-#
-# Four toolkits have to be told the same thing in four different dialects, and
-# a fifth — the XDG portals — reads none of those files but dconf instead:
-#
-#   GTK2   ~/.gtkrc-2.0
-#   GTK3   ~/.config/gtk-3.0/settings.ini
-#   GTK4   settings.ini for font/icons/cursor, but libadwaita only obeys
-#          ~/.config/gtk-4.0/gtk.css, so the theme's stylesheet is linked in
-#   Qt     qt6ct/qt5ct (fonts + palette) with Kvantum drawing the widgets
-#   X11    xsettingsd, for XWayland clients
-#   dconf  what xdg-desktop-portal-gtk reports to Flatpaks and file dialogs
-#
-# Miss one and exactly one class of window comes out wrong — usually a file
-# picker, which is why "everything is themed except the save dialog" happens.
-
-# Repo and AUR in one transaction, like roles/packages. Needs a warm sudo
-# timestamp, which the `base` dependency (meta/main.yml) provides.
+# Every toolkit needs telling separately: GTK2/3/4, Qt (qt5ct/qt6ct + Kvantum),
+# xsettingsd for XWayland, and dconf for the portals and their file dialogs.
 - name: Install the theme assets
   kewlfft.aur.aur:
     name: "{{ theme_packages }}"
@@ -62,9 +46,8 @@
     label: "{{ item.dest | basename }}"
   notify: Reload xsettingsd
 
-# libadwaita ignores gtk-theme-name entirely: a GTK4 app is themed only if the
-# theme's own stylesheet is present under ~/.config/gtk-4.0. Symlinks (not
-# copies) so a theme package update lands without re-running this role.
+# libadwaita ignores gtk-theme-name; only the stylesheet under ~/.config/gtk-4.0
+# themes a GTK4 app. Links, so a theme update lands without re-running the role.
 - name: Link the GTK4 stylesheets from the installed theme
   ansible.builtin.file:
     src: "/usr/share/themes/{{ theme_gtk }}/gtk-4.0/{{ item }}"
@@ -76,9 +59,8 @@
     - gtk-dark.css
     - assets
 
-# Portals and Flatpaks do not read settings.ini — they ask the GSettings
-# desktop-interface schema. Without this the app is themed and its file chooser
-# is not, which is the single most common "half-themed desktop" symptom.
+# Portals and Flatpaks read the GSettings desktop-interface schema, not
+# settings.ini — without this the app is themed and its file chooser is not.
 - name: Publish the theme to dconf for the portals
   community.general.dconf:
     key: "/org/gnome/desktop/interface/{{ item.key }}"
@@ -98,19 +80,14 @@
   loop_control:
     label: "{{ item.key }}"
 
-# Left over from the DankMaterialShell/matugen setup, which this machine no
-# longer runs. They are user-level overrides layered ON TOP of the theme, so
-# while they exist the catppuccin colours are only half visible.
 - name: Remove the matugen leftovers
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ theme_stale_files }}"
 
-# Writes into /usr/share/icons, so it needs root. `become` rather than letting
-# the script re-exec itself under sudo: papirus-folders only calls sudo when it
-# is not already root (see its _is_root_user check), and that internal sudo has
-# no tty during a play — the same failure mode as running yay for repo packages.
+# `become` rather than letting papirus-folders call sudo itself: its internal
+# sudo has no tty during a play.
 - name: Recolour Papirus folders
   become: true
   ansible.builtin.command: papirus-folders -C {{ gtk_icon_theme_flavour }} --theme Papirus-Dark
@@ -123,4 +100,3 @@
     src: zen-user.js.j2
     dest: "{{ browser_config_src }}/user.js"
     mode: "0644"
-

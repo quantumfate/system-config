@@ -1,6 +1,4 @@
 ---
-# Chezmoi needs to be bootstrapped for the user config
-
 - name: Install chezmoi
   become: true
   community.general.pacman:
@@ -18,9 +16,8 @@
   failed_when: false
   check_mode: false
 
-# An existing checkout keeps its old origin (git's module never repoints it),
-# so force it onto the codeberg repo from the parameter. chezmoi uses `origin`
-# as its own bootstrap/update remote, so this is what makes chezmoi use codeberg.
+# git's module never repoints an existing checkout, and chezmoi uses `origin`
+# as its own update remote — so force it here.
 - name: Check the dotfiles origin remote
   ansible.builtin.command: git remote get-url origin
   args:

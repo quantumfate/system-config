@@ -1,7 +1,4 @@
 ---
-# The lessfilter/alias toolchain. Installed through yay so both repo and AUR
-# names resolve; see zsh_log_packages / zsh_log_binary_packages in defaults.
-
 - name: Install the log-viewing toolchain
   kewlfft.aur.aur:
     name: "{{ zsh_log_packages }}"
@@ -26,8 +23,7 @@
   become: false
   when: zsh_cli_packages | length > 0
 
-# pkgfile answers "command not found" with the package that provides it, but
-# only once its file database exists; the hook in .zshrc is inert until then.
+# The command-not-found hook in .zshrc is inert until this database exists.
 - name: Seed the pkgfile database
   ansible.builtin.command:
     cmd: pkgfile --update
@@ -35,9 +31,7 @@
     creates: /var/cache/pkgfile/core.files
   become: true
 
-# oh-my-zsh is gone: the plugin set moved to antidote and the prompt is written
-# out in .zshrc. The clone is a few thousand files that nothing sources any
-# more, and leaving it invites a stray `source $ZSH/oh-my-zsh.sh` back in.
+# Superseded by antidote; nothing sources it any more.
 - name: Remove the oh-my-zsh install
   ansible.builtin.file:
     path: "{{ item }}"

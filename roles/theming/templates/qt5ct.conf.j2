@@ -1,15 +1,12 @@
 {% import '_qtfont.j2' as qt -%}
 # ~/.config/qt5ct/qt5ct.conf — rendered by roles/theming.
 #
-# The Qt5 twin of qt6ct.conf, kept identical so a Qt5 app (launched with
-# QT_QPA_PLATFORMTHEME=qt5ct) is indistinguishable from a Qt6 one. The session
-# environment names qt6ct, because Qt5's plugin only answers to "qt5ct" and a
-# single variable cannot name both — modern apps are Qt6, this is the fallback.
+# The Qt5 twin of qt6ct.conf. The session names qt6ct because one variable
+# cannot name both plugins; this is the fallback for Qt5 apps launched with
+# QT_QPA_PLATFORMTHEME=qt5ct.
 #
-# Style comes from Kvantum (the catppuccin Kvantum theme draws the widgets) and
-# the palette from the catppuccin colour scheme; do NOT also set
-# QT_STYLE_OVERRIDE in the environment — two style selectors fight, and the
-# environment one wins over anything chosen here.
+# Widgets from Kvantum, palette from the catppuccin colour scheme. Setting
+# QT_STYLE_OVERRIDE in the environment would beat both.
 
 [Appearance]
 style=kvantum

@@ -1,12 +1,8 @@
 # ~/.config/tmux/logs.conf — rendered by roles/zsh.
 #
-# Config for the ISOLATED log tmux server (socket "{{ zsh_tmux_log_socket }}").
-# It shares no server, no session list and no key muscle-memory collisions with
-# the coding server: `tmux` reaches the coding one, `tmux -L {{ zsh_tmux_log_socket }}`
-# reaches this one. Killing one never touches the other.
-#
-# Everything here is tuned for reading, not editing: no mouse-driven surprises,
-# no blinking, no status noise. One bar, one colour per meaning.
+# The isolated log tmux server: `tmux` reaches the coding one, `tmux -L
+# {{ zsh_tmux_log_socket }}` this one. No shared state, so killing one leaves
+# the other alone. Tuned for reading, not editing.
 
 set -g default-terminal "tmux-256color"
 set -ag terminal-overrides ",xterm-kitty:RGB"
@@ -18,21 +14,15 @@ set -g base-index 1
 setw -g pane-base-index 1
 set -g renumber-windows on
 
-# Same prefix as the coding server (tmux's default C-b) on purpose: the two
-# servers are isolated by SOCKET, not by muscle memory. One chord to learn,
-# and no pause to remember which window you are in.
+# Deliberately the same prefix as the coding server: the two are isolated by
+# socket, so there is one chord to learn.
 set -g prefix C-b
 bind C-b send-prefix
 
 # --- Look -------------------------------------------------------------------
-# Catppuccin Macchiato, accent {{ zsh_log_accent }} (mauve), hardcoded (no plugin
-# load: this server must start fast and stay predictable even if the plugin dir
-# is mid-update).
-#
-# No filled blocks: the current window is bold accented text, not a painted
-# chip. The status bar is TWO rows and the second is empty. That blank row is the gap
-# between the bar and the first log line — without it the newest line sits
-# flush against the chrome and the eye cannot tell where the log starts.
+# Catppuccin Macchiato, hardcoded — no plugin load, so the server starts fast
+# even mid plugin update. Two status rows, the second empty: that blank row is
+# the gap between the chrome and the first log line.
 set -g status 2
 set -g status-position top
 set -g status-justify left

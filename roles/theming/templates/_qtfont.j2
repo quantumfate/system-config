@@ -1,21 +1,15 @@
 {#-
-  QFont serialisation for qt5ct/qt6ct.
-
-  Both store fonts as a QDataStream blob in QSettings' escaped form, NOT as a
-  readable font string — a plain "Adwaita Sans,12" is silently ignored and Qt
-  falls back to the fontconfig default. The layout, verified byte-for-byte
-  against values qt6ct itself wrote:
+  QFont serialisation for qt5ct/qt6ct. They store fonts as an escaped
+  QDataStream blob; a readable "Adwaita Sans,12" is silently ignored.
 
     \0\0\0@        QVariant type 64 (QFont)
-    \0\0\0\xNN     byte length of the family name (UTF-16BE, so 2 x characters)
+    \0\0\0\xNN     byte length of the family name (UTF-16BE)
     \0X ...        the family name, one \0 + char per ASCII character
-    @Y\0\0\0\0\0\0 point size as a big-endian IEEE-754 double
-    tail           weight/style/hint flags, identical for every font we write
+    @Y\0\0\0\0\0\0 point size, big-endian IEEE-754 double
+    tail           weight/style/hint flags, identical for every font here
 
-  QSettings escapes the character after a \0 when it is a hex digit, otherwise
-  \0a would read back as an escape sequence — hence the _hexmap below. The size
-  map holds the second byte of the double for each supported point size
-  (12.0 = 0x4028 -> "@("); add an entry to support another size.
+  _hexmap: QSettings escapes a hex digit following \0, so those go in as \xNN.
+  _sizemap: second byte of the double per point size — add one to support more.
 -#}
 {%- set _hexmap = {
   '0': '30', '1': '31', '2': '32', '3': '33', '4': '34', '5': '35', '6': '36',

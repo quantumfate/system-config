@@ -1,17 +1,14 @@
 ## ---------------------------------------------------------------------------
 ## Logging workspace — sourced from .zshrc. Rendered by roles/zsh.
 ## ---------------------------------------------------------------------------
-# Everything log-shaped lives here, one file, so the shell config stays small
-# and this can be read top to bottom in one sitting.
+# One pipeline, one owner:
 #
-# The rendering pipeline has exactly one shape and one owner:
+#   source ──▶ logstream ──▶ tspin ──▶ less -RS
+#              (columns)     (colour)  (no wrap)
 #
-#   source ──▶ logstream ──▶ tspin (macchiato theme) ──▶ less -RS
-#              (columns)     (colour, applied ONCE)      (no wrap)
-#
-# Never pipe a coloured stream into `less` yourself: LESSOPEN would hand it to
-# lesspipe → ~/.lessfilter, which would colour it a second time and corrupt the
-# escape codes. `logstream` clears LESSOPEN for exactly this reason.
+# Never pipe an already-coloured stream into `less`: LESSOPEN hands it to
+# ~/.lessfilter, which colours it twice and corrupts the escapes. logstream
+# clears LESSOPEN for that reason.
 
 export ZSH_LOG_DIR="{{ zsh_log_dir }}"
 export ZSH_LOG_WORKDIR="{{ zsh_log_workdir }}"
@@ -19,13 +16,12 @@ export ZSH_LOG_WORKDIR="{{ zsh_log_workdir }}"
 {% endif %}
 # One palette everywhere bat is reachable — direct calls, man pages, .lessfilter.
 export BAT_THEME="{{ zsh_bat_theme }}"
-# systemd's own pager (systemctl status, journalctl without a pipe) obeys the
-# same no-wrap, keep-the-screen rules as ours.
+# systemd's own pager, same no-wrap rules as ours.
 export SYSTEMD_LESS="FRSXMK"
 
 # --- Verbs ------------------------------------------------------------------
-# Deliberately few, all starting with `log`, all doing the same thing to a
-# different source. Tab through them instead of remembering journalctl flags.
+# All `log`-prefixed, so they can be tabbed through instead of remembering
+# journalctl flags.
 
 # log            pick a source (fzf), open it in the dedicated log window
 # log <spec>     open that source directly
@@ -49,8 +45,7 @@ alias logaudit='logview audit'     # denials
 # ls the workspace, same columns as everywhere else
 alias logs='eza -1 --color=always --icons=never "$ZSH_LOG_DIR"'
 
-# logwhy <unit> — the three questions you always ask about a broken unit,
-# answered on one screen: is it up, why did it stop, what did it say last.
+# logwhy <unit> — is it up, why did it stop, what did it say last.
 logwhy() {
   local unit="${1:?usage: logwhy <unit>}"
   {
@@ -62,9 +57,8 @@ logwhy() {
   } | logstream -
 }
 
-# loggrep <pattern> [journalctl args…] — search instead of scroll. The query is
-# built here, the rendering is still logstream's job, so the result looks
-# exactly like every other log screen.
+# loggrep <pattern> [journalctl args…] — search instead of scroll. Rendering
+# stays logstream's job, so the result looks like every other log screen.
 loggrep() {
   local pat="${1:?usage: loggrep <pattern> [journalctl args…]}"; shift
   SYSTEMD_COLORS=0 journalctl --output=json --no-hostname -b --no-pager "$@" \
@@ -72,7 +66,7 @@ loggrep() {
     | logstream json
 }
 
-# logsince <when> [unit] — a bounded window. Bounded beats infinite scroll:
+# logsince <when> [unit] — a bounded window:
 #   logsince '15 min ago'      logsince today sshd      logsince '09:00'
 logsince() {
   local when="${1:?usage: logsince <when> [unit]}"; shift
@@ -81,9 +75,8 @@ logsince() {
 }
 
 # --- Inside the log window --------------------------------------------------
-# ZSH_LOGVIEW is set by `logview`. In that window the shell drops to a one-glyph
-# prompt: no git status, no path, no time, no autosuggestions ghost-text. The
-# only moving text on screen should be the log itself.
+# ZSH_LOGVIEW is set by `logview`. There the prompt drops to one glyph and the
+# autosuggestion ghost-text goes, so the log is the only moving text.
 if [[ -n "${ZSH_LOGVIEW:-}" ]]; then
   unset ZSH_AUTOSUGGEST_STRATEGY
   ZSH_AUTOSUGGEST_MANUAL_REBIND=1

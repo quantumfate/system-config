@@ -1,7 +1,6 @@
 ---
-# The interactive shell pipeline. Everything the bootstrap needs at login time
-# is created here: the antidote-bundled plugin set, the handful of rendered
-# dotfiles, the logging workspace, and the packages that back the log toolchain.
+# The interactive shell: plugin set, rendered dotfiles, logging workspace and
+# the packages behind them.
 
 - name: Install the log-viewing toolchain
   ansible.builtin.include_tasks: install.yml
@@ -18,9 +17,8 @@
       zsh -c 'source /usr/share/zsh-antidote/antidote.zsh &&
       antidote bundle < "{{ zsh_plugins_file }}" > "{{ zsh_plugins_static }}"'
   environment:
-    # https://github.com/zsh-users/zsh-syntax-highlighting's HTTPS clone fails
-    # under HTTP/2 in this network (git asks for a Username then errors); HTTP/1.1
-    # is stable. Scoped here so the user's own git config stays untouched.
+    # zsh-syntax-highlighting's HTTPS clone fails under HTTP/2 here (git prompts
+    # for a username, then errors). Scoped so the user's git config is untouched.
     GIT_CONFIG_COUNT: "1"
     GIT_CONFIG_KEY_0: "http.version"
     GIT_CONFIG_VALUE_0: "HTTP/1.1"
@@ -55,6 +53,18 @@
     src: lessfilter.j2
     dest: "{{ target_home }}/.lessfilter"
     mode: "0755"
+
+- name: Ensure the zsh config directory exists
+  ansible.builtin.file:
+    path: "{{ zsh_cheatsheet | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Deploy the shell cheatsheet the Alt-h popup reads
+  ansible.builtin.copy:
+    src: "{{ role_path }}/README.md"
+    dest: "{{ zsh_cheatsheet }}"
+    mode: "0644"
 
 - name: Validate .zshrc syntax
   ansible.builtin.command:

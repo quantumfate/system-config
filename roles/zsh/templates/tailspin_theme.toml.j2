@@ -1,12 +1,10 @@
 # ~/.config/tailspin/theme.toml — rendered by roles/zsh.
 #
-# Design rule: a log line has exactly THREE things worth a colour — WHEN,
-# HOW BAD, and WHAT. Everything else is structure and stays uncoloured, so
-# the eye never has to sort noise from signal.
+# Three things in a log line get a colour — when, how bad, and what. The rest is
+# structure and stays uncoloured.
 #
-# tspin only accepts the 16 ANSI names (no hex). That is on purpose here:
-# the terminal palette is Catppuccin Macchiato (kitty themes/macchiato.conf),
-# so `red` IS #ed8796 and `blue` IS #8aadf4. One palette, one source of truth.
+# tspin takes only the 16 ANSI names, which the kitty palette already defines as
+# Macchiato: `red` IS #ed8796, `blue` IS #8aadf4.
 #
 #   ANSI name       Macchiato       used for
 #   red             #ed8796         error / fatal
@@ -17,14 +15,14 @@
 #   cyan            #8bd5ca         numbers, ids
 #   bright_black    #5b6078         separators, structure
 
-# Timestamps: dim and stable. They anchor the column, they never shout.
+# Timestamps anchor the column, so they stay dim.
 [dates]
 date = { fg = "bright_black" }
 time = { fg = "blue" }
 zone = { fg = "bright_black" }
 separator = { faint = true }
 
-# Numbers stay quiet — a PID is not an event.
+# A PID is not an event.
 [numbers]
 style = { fg = "cyan", faint = true }
 
@@ -54,10 +52,8 @@ id = { fg = "bright_black", faint = true }
 bracket = { faint = true }
 
 # --- Severity ---------------------------------------------------------------
-# Colour carries the level; bold is reserved for the handful of words that mean
-# "drop everything" (fatal/panic/crit). Error and warning are coloured but not
-# bold: on a busy screen a page full of bold red is as unreadable as no colour
-# at all. Both syslog and systemd/journald spellings are covered.
+# Colour carries the level; bold is only for "drop everything". A page of bold
+# red reads no better than no colour at all. Syslog and journald spellings both.
 [[keywords]]
 words = ["FATAL", "fatal", "PANIC", "panic", "CRITICAL", "critical", "CRIT", "EMERG", "emerg", "ALERT", "alert"]
 style = { fg = "red", bold = true }

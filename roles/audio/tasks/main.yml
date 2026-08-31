@@ -1,5 +1,4 @@
 ---
-# === WirePlumber hooks ===
 - name: Ensure WirePlumber scripts dir exists
   ansible.builtin.file:
     path: "{{ target_home }}/.local/share/wireplumber/scripts"
@@ -32,10 +31,6 @@
     - 90-bt-auto-switch.conf
   when: audio_deploy_wireplumber_hooks | bool
 
-# === Bluetooth profile policy ===
-# Exposes the headset mic and auto-switches A2DP <-> HSP/HFP when an app opens
-# a capture stream. Upstream defaults match, but pin them so the behaviour is
-# declared rather than inherited from the distro config.
 - name: Ensure WirePlumber config drop-in dir exists
   ansible.builtin.file:
     path: "{{ target_home }}/.config/wireplumber/wireplumber.conf.d"
@@ -50,9 +45,7 @@
     mode: "0644"
   when: audio_deploy_bluetooth_policy | bool
 
-# === Audio notification service ===
-# The notification script lives in the scripts repo (cloned by the externals
-# role). The systemd unit references it at the known path.
+# The unit points at a script from the scripts repo, cloned by roles/externals.
 - name: Ensure systemd user dir exists
   ansible.builtin.file:
     path: "{{ target_home }}/.config/systemd/user"

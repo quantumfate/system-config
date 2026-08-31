@@ -1,14 +1,10 @@
 ---
-# Bluetooth auto-switch: when a Bluetooth audio sink connects, switch the
-# default sink to it; on disconnect, fall back to the highest-priority
-# remaining sink. Fully portable — no hardcoded device names.
+# Make a connecting Bluetooth sink the default one, and fall back on disconnect.
 audio_deploy_wireplumber_hooks: true
 
-# Desktop notification when the default audio sink changes. Uses pactl subscribe
-# (event-driven, zero CPU idle). Requires libnotify (notify-send).
+# Notify on default-sink changes. Needs libnotify.
 audio_deploy_notification_service: true
 
-# Bluetooth profile policy: always expose the headset microphone, and switch the
-# card from A2DP to HSP/HFP while an app is recording (reverting afterwards).
-# Note: HFP is 16 kHz mono - playback quality drops while the mic is in use.
+# Expose the headset mic and switch A2DP -> HSP/HFP while recording. HFP is
+# 16 kHz mono, so playback quality drops while the mic is in use.
 audio_deploy_bluetooth_policy: true

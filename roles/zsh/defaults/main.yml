@@ -1,67 +1,75 @@
 ---
-# Logging workspace. A calm, dedicated directory that tmux-sessionizer (tms)
-# bookmarks so a log viewer can be opened in its own tmux window/session.
+# Logging workspace. Bookmarked in tms so it opens in its own tmux session.
 zsh_log_dir: "{{ target_home }}/.local/share/logs"
 
-# Dedicated kitty instance class for the log viewer. Hyprland binds this class
-# to its own workspace/scratchpad (windowrules live in the hypr repo, see the
-# README); this role only names the class and launches with it.
+# kitty instance class for the log viewer. The hypr repo has windowrules for it.
 zsh_kitty_log_class: logviewer
 
-# Reading a wall of log lines is not coding: the viewer window runs one notch
-# larger with generous padding, so the text block has air around it.
+# The log viewer window: same font, more air than the everyday terminal.
 zsh_log_font_size: "{{ zsh_terminal_font_size }}"
-# kitty window_padding_width, "top right bottom left". Extra room above so the
-# tmux status bar is not glued to the top edge of the screen.
-zsh_log_padding: "14 16 10 16"
-# Cell height as a percentage of the font's natural line box. Extra leading is
-# what turns a wall of log lines into scannable rows; 130 is roughly one third
-# of a line of air between rows.
-zsh_log_line_height: 138  # more than the everyday terminal: denser text, longer sessions
+zsh_log_padding: "14 16 10 16"   # kitty window_padding_width, T R B L
+zsh_log_line_height: 138         # cell height, % of the font's line box
 
-# Primary accent for every terminal surface (kitty cursor, both tmux bars, the
-# fzf picker, the log prompt). Catppuccin Macchiato mauve. Severity colours are
-# NOT accent colours — they stay semantic (red/yellow/blue/green), see the
-# tailspin theme.
+# Accent for every terminal surface — kitty cursor, tmux bars, fzf, the log
+# prompt. Severity colours stay semantic, see the tailspin theme.
 zsh_log_accent: "#c6a0f6"
 
+# --- Catppuccin Macchiato palette -------------------------------------------
+# For the tools that take colours rather than a theme name: delta, LESS_TERMCAP,
+# fzf, eza. bat and tailspin ship the same palette as a named theme.
+zsh_palette:
+  base: "#24273a"
+  mantle: "#1e2030"
+  surface0: "#363a4f"
+  surface1: "#494d64"
+  surface2: "#5b6078"
+  overlay0: "#6e738d"
+  overlay1: "#8087a2"
+  text: "#cad3f5"
+  subtext0: "#a5adcb"
+  red: "#ed8796"
+  green: "#a6da95"
+  yellow: "#eed49f"
+  blue: "#8aadf4"
+  mauve: "#c6a0f6"
+  teal: "#8bd5ca"
+  peach: "#f5a97f"
+  lavender: "#b7bdf8"
+  # Diff backgrounds, blended into `base`. The -emph pair marks the changed
+  # span inside a line, so it sits a step brighter.
+  diff_minus: "#5b3a44"
+  diff_minus_emph: "#894a5b"
+  diff_plus: "#3e5240"
+  diff_plus_emph: "#4f6f52"
+
+
 # --- Typography -------------------------------------------------------------
-# Shared by the everyday terminal and the log viewer. Size and leading live in
-# kitty because they are properties of the cell grid: neither tmux nor neovim
-# can change how tall a text row is inside a terminal.
+# Only kitty can set these: line height is a property of the cell grid, so no
+# TUI inside the terminal can loosen its own rows.
 zsh_terminal_font: "Hack Nerd Font Mono"
 zsh_terminal_font_size: 14
-# Cell height as a percentage of the font's natural line box. Extra leading is
-# the single highest-value readability change available in a terminal — and the
-# ONLY way to loosen the gap between a TUI's bottom bar and the content above
-# it, since a terminal grid has no sub-row spacing to give.
-zsh_terminal_line_height: 130
-# kitty window_padding_width, "top right bottom left".
-zsh_terminal_padding: "12 14 10 14"
+zsh_terminal_line_height: 130      # cell height, % of the font's line box
+zsh_terminal_padding: "12 14 10 14"  # kitty window_padding_width, T R B L
 
-# Isolated tmux server for logs. `tmux` reaches the coding server; the log
-# server answers only on this socket, has its own config (logs.conf), its own
-# prefix and its own session list. Killing one never touches the other.
+# Socket of the isolated log tmux server — own config, prefix and session list,
+# so killing it never touches the coding server.
 zsh_tmux_log_socket: logs
 
-# Working directory for every log window: a runtime-tmpfs path, deliberately
-# outside the project tree. A stray glob, `ls` or fuzzy-find in a log window
-# can never wander into code.
+# Working dir for log windows. On tmpfs and outside the project tree, so a
+# stray glob or fuzzy-find cannot wander into code.
 zsh_log_workdir: "/run/user/{{ ansible_facts.user_uid | default(1000) }}/logview"
 
-# Plugins loaded for the interactive shell via antidote. Each line is a bundle
-# spec exactly as antidote expects in ~/.zsh_plugins.txt (repo[/path] with
-# optional annotations). Managed here so .zshrc, the bundle file and the role
-# that renders both stay in one place. Updates: `antidote update`.
+# antidote bundles for the interactive shell, one spec per line as
+# ~/.zsh_plugins.txt expects. Update with `antidote update`.
 #
-# ORDER IS LOAD ORDER and two constraints are real:
-#   * zsh-defer must be first — later entries and .zshrc call it.
-#   * zsh-syntax-highlighting hooks the ZLE widgets it finds at load time, so it
-#     goes near the end, and history-substring-search must come *after* it or
-#     its own highlighting is silently overwritten.
+# Order is load order, and two entries are pinned:
+#   * zsh-defer first — later entries and .zshrc call it.
+#   * syntax-highlighting near the end (it hooks the ZLE widgets that exist at
+#     load time), with history-substring-search after it or its highlighting is
+#     overwritten.
 zsh_plugins:
-  # Deferred loading. `zsh-defer <cmd>` runs cmd after the first prompt paints,
-  # which is where every slow `eval "$(tool init)"` belongs.
+  # `zsh-defer <cmd>` runs cmd after the first prompt paints — where every slow
+  # `eval "$(tool init)"` belongs.
   - romkatv/zsh-defer
 
   - zsh-users/zsh-autosuggestions
@@ -72,34 +80,32 @@ zsh_plugins:
   - marlonrichert/zsh-edit
   - mass8326/zsh-chezmoi
 
-  # fzf over git: interactive add/diff/log/stash/checkout with previews. The
-  # `f`-prefixed wrappers in .zshrc are the entry points (FORGIT_NO_ALIASES).
+  # fzf over git. The `f`-prefixed wrappers in .zshrc are the entry points.
   - wfxr/forgit
-  # ^Z is a toggle, not a one-way trip: suspends, and resumes on an empty line.
-  # Worth more than any other single binding when $EDITOR is a full-screen nvim.
+  # ^Z as a toggle: suspends, and resumes from an empty line.
   - mdumitru/fancy-ctrl-z
-  # `bd <dir>` — jump straight up to a named ancestor, no counting of `..`.
+  # `bd <dir>` — jump up to a named ancestor without counting `..`.
   - Tarrasch/zsh-bd
-  # Types out the alias you forgot you wrote. The only way a large alias set
-  # actually enters muscle memory instead of rotting in .zshrc.
+  # Prints the alias you forgot you wrote.
   - MichaelAquilina/zsh-you-should-use
 
   - zsh-users/zsh-syntax-highlighting
   - zsh-users/zsh-history-substring-search
 
-# Paths on the host where antidote stores the plugin clones and the rendered
-# static load file. .zshrc sources the static file; only the bundle file drives
-# regeneration.
+# Bundle list and the static load file antidote generates from it; .zshrc
+# sources the static one.
 zsh_plugins_file: "{{ target_home }}/.zsh_plugins.txt"
 zsh_plugins_static: "{{ target_home }}/.zsh_plugins.zsh"
+
+# Copy of the role's README that the Alt-h popup reads — docs and cheatsheet
+# are the same file.
+zsh_cheatsheet: "{{ target_home }}/.config/zsh/cheatsheet.md"
 
 # History
 zsh_history_file: "{{ target_home }}/.zsh_history"
 zsh_history_size: "10000"
 
-# Packages backing the lessfilter dispatcher and the shell's log aliases.
-# Owned by this role (not group_vars) so the log toolchain travels with the
-# role. Installed via yay so repo and AUR names are both valid.
+# Viewers the lessfilter dispatcher and the log aliases dispatch to.
 zsh_log_packages:
   # Text / log viewers
   - bat
@@ -109,20 +115,19 @@ zsh_log_packages:
   - jq                # json branch, hyprland alias
   - chafa             # image terminal renderer
   - lesspipe          # LESSOPEN driver
+  - libarchive        # bsdtar — archive table of contents
   # Specific file-type branches
   - sqlite            # vnd.sqlite3 branch
   - poppler           # pdftotext branch
   - perl-image-exiftool  # image metadata
-  # Heavy / binary-only viewers. Only pulled when zsh_log_binary_viewers is on.
+  # Pulled only when zsh_log_binary_viewers is on.
   - jupyter-notebook  # ipynb branch
   - python-pandas
   - python-numpy
   - python-lmdb       # data.mdb branch
   - python-plotext    # AUR: tfevents plotting
 
-# Everyday CLI tooling the aliases and functions in .zshrc assume. Separate from
-# zsh_log_packages because these back the *shell*, not the log pipeline: nothing
-# here is optional once an alias points at it.
+# Tools the .zshrc aliases and functions call directly.
 zsh_cli_packages:
   - git-delta          # side-by-side, syntax-aware git pager
   - difftastic         # structural diff — `gdt`, ignores pure reformatting
@@ -138,25 +143,56 @@ zsh_cli_packages:
   - sd                 # sed for the 90% case, no regex dialect surprises
   - just               # project-local command runner (justfile)
 
-# The ML/event-file viewers (tensorflow/torch) are multi-GB installs for a
-# handful of binary formats. Off by default; enable only if you actually read
-# .tfevents / .pth files.
+# Multi-GB installs for .tfevents / .pth files. Off unless you read those.
 zsh_log_binary_viewers: false
 zsh_log_binary_packages:
   - python-tensorboard
   - python-tensorflow
   - python-pytorch
 
-# tspin theme. The role renders a Catppuccin Macchiato theme to this path;
-# point the variable elsewhere to override it with your own file.
+# tspin theme. Rendered by the role; point elsewhere to use your own file.
 zsh_tailspin_theme: "{{ target_home }}/.config/tailspin/theme.toml"
 
-# bat's built-in Catppuccin theme, used for every non-log file bat renders
-# (including through .lessfilter). Keeps one palette across the whole terminal.
+# bat theme for every non-log file, including through .lessfilter.
 zsh_bat_theme: "Catppuccin Macchiato"
 
-# tmux-sessionizer (tms). The log dir is added as a bookmark so a log viewer
-# can be opened in its own tmux window/session and picked via fzf.
+# delta's chrome, which the bat syntax theme does not reach: diff backgrounds,
+# file and hunk headers, the line-number gutter. A `syntax` foreground leaves
+# the highlighting to bat and only paints the background behind it.
+zsh_delta_options: >-
+  --navigate --line-numbers --hyperlinks
+  --syntax-theme='{{ zsh_bat_theme }}'
+  --true-color=always
+  --minus-style='syntax {{ zsh_palette.diff_minus }}'
+  --minus-non-emph-style='syntax {{ zsh_palette.diff_minus }}'
+  --minus-emph-style='syntax {{ zsh_palette.diff_minus_emph }}'
+  --minus-empty-line-marker-style='syntax {{ zsh_palette.diff_minus }}'
+  --plus-style='syntax {{ zsh_palette.diff_plus }}'
+  --plus-non-emph-style='syntax {{ zsh_palette.diff_plus }}'
+  --plus-emph-style='syntax {{ zsh_palette.diff_plus_emph }}'
+  --plus-empty-line-marker-style='syntax {{ zsh_palette.diff_plus }}'
+  --zero-style='syntax'
+  --whitespace-error-style='{{ zsh_palette.base }} {{ zsh_palette.red }}'
+  --file-style='bold {{ zsh_palette.mauve }}'
+  --file-decoration-style='{{ zsh_palette.surface1 }} ul'
+  --hunk-header-style='file line-number syntax'
+  --hunk-header-decoration-style='{{ zsh_palette.surface1 }} box'
+  --hunk-header-file-style='{{ zsh_palette.lavender }}'
+  --hunk-header-line-number-style='{{ zsh_palette.teal }}'
+  --line-numbers-minus-style='{{ zsh_palette.red }}'
+  --line-numbers-plus-style='{{ zsh_palette.green }}'
+  --line-numbers-zero-style='{{ zsh_palette.overlay0 }}'
+  --line-numbers-left-style='{{ zsh_palette.surface2 }}'
+  --line-numbers-right-style='{{ zsh_palette.surface2 }}'
+  --blame-palette='{{ zsh_palette.base }} {{ zsh_palette.mantle }}
+  {{ zsh_palette.surface0 }} {{ zsh_palette.surface1 }}'
+  --blame-code-style='syntax'
+  --merge-conflict-begin-symbol='~'
+  --merge-conflict-end-symbol='~'
+  --merge-conflict-ours-diff-header-style='{{ zsh_palette.yellow }} bold'
+  --merge-conflict-theirs-diff-header-style='{{ zsh_palette.yellow }} bold'
+
+# tmux-sessionizer. Fixed entries in its fzf picker.
 zsh_tms_bookmarks:
   - "{{ target_home }}"
   - "{{ target_home }}/Documents/Obsidian/Main"

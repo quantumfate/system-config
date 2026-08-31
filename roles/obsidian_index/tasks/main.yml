@@ -1,7 +1,6 @@
 ---
-# === Obsidian index-note position watcher ===
-# The normalizer and its inotify wrapper live in the scripts repo (cloned by the
-# externals role). The unit references them at the known path.
+# The normalizer and its inotify wrapper come from the scripts repo, cloned by
+# roles/externals.
 - name: Check the Obsidian vault exists
   ansible.builtin.stat:
     path: "{{ obsidian_index_vault }}"

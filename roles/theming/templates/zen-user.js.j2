@@ -1,8 +1,6 @@
 // ~/.config/zen-chezmoi/user.js — rendered by roles/theming.
-//
-// Betterfox base (see the banner below) plus this machine's privacy and design
-// prefs. Fonts and the design section at the end come from the role's variables
-// in defaults/main.yml, so the browser moves with the rest of the desktop.
+// Betterfox base plus this machine's privacy and design prefs; fonts and the
+// design section come from defaults/main.yml.
 //
 /* You may copy+paste this file and use it as it is.
  *
@@ -392,40 +390,28 @@ user_pref("mod.ivaon.urlbar.hide_results", 2);
 
 /****************************************************************************
  * SECTION: DESIGN                                                          *
- * The same rules as the terminal, the editor and the desktop: one accent,   *
- * no dimming, more space, less motion.                                      *
  ****************************************************************************/
 
-// One accent, everywhere. Mauve is the tmux current window, the nvim mode
-// indicator, the kitty cursor and the GTK/Qt accent — the browser is not an
-// exception to the palette.
+// The desktop accent, matching tmux/nvim/kitty and GTK/Qt.
 user_pref("zen.theme.accent-color", "{{ theme_accent_hex }}");
 
-// Corner radius matches Hyprland's windows and neovim's floats, so a browser
-// window sitting next to a terminal has the same silhouette.
+// Same corner radius as Hyprland windows and neovim floats.
 user_pref("zen.theme.border-radius", 4);
 
-// More air between the chrome and the page (default 8). Space is what makes a
-// dense interface readable; this is the browser's version of kitty's padding.
+// Air between chrome and page (default 8).
 user_pref("zen.theme.content-element-separation", 12);
 
-// No dimming of unfocused windows. Same decision as the snacks backdrop in
-// neovim and the inactive-opacity override on the log viewer: a wall of text
-// you are still reading must not lose contrast because focus moved.
+// Never dim an unfocused window — text stays readable while focus is elsewhere.
 user_pref("zen.view.grey-out-inactive-windows", false);
 
-// Normal toolbar density. Compact density buys a few pixels and costs every
-// click target; Zen's compact MODE (which hides the chrome entirely, set above)
-// is the right way to reclaim that space.
+// Normal toolbar density. Compact mode (set above) is the way to save space.
 user_pref("browser.uidensity", 0);
 
-// The UI one notch larger, matching GTK/Qt going from 11/10pt to {{ theme_ui_font_size }}pt.
-// Firefox has no chrome-font-size pref; scaling device pixels is the only lever.
-user_pref("layout.css.devPixelsPerPx", "1.1");
+// UI one notch larger, matching GTK/Qt at {{ theme_ui_font_size }}pt. Firefox has no
+// chrome-font-size pref, so device pixels are the only lever.
+user_pref("layout.css.devPixelsPerPx", "1.23");
 
-// Less motion. Sidebar slides, cosmetic animations and the fullscreen
-// transition are movement in the periphery that carries no information; the
-// reduced-motion flag also tells websites to stop their own.
+// Less motion, and tell websites to drop theirs too.
 user_pref("ui.prefersReducedMotion", 1);
 user_pref("toolkit.cosmeticAnimations.enabled", false);
 user_pref("zen.view.compact.animate-sidebar", false);

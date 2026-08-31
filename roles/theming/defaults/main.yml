@@ -1,45 +1,29 @@
 ---
-# One flavour, one accent, everywhere. Catppuccin Macchiato + mauve is the same
-# palette the terminal surface uses (roles/zsh) and the same one quickshell
-# reads from its assets/theme.default.json, so nothing on screen disagrees.
+# Catppuccin Macchiato + mauve, the same palette roles/zsh and quickshell use.
 theme_flavour: macchiato
 theme_accent: mauve
 
-# Derived names. All three packages ship one directory per flavour+accent pair,
-# so the names are mechanical — never hand-write them.
+# Derived theme directory names — one dir per flavour+accent pair.
 theme_gtk: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}-standard+default"
 theme_cursor: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}-cursors"
 theme_kvantum: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
 theme_qt_colors: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
 theme_icons: Papirus-Dark
 
-# The accent as a hex value, for the surfaces that want a colour rather than a
-# theme name (Zen, and anything else that takes one). Catppuccin Macchiato.
+# The accent for surfaces that take a colour instead of a theme name (Zen).
 theme_accent_hex: "#c6a0f6"
 
-# --- Type and space ---------------------------------------------------------
-# Same principle as the terminal: larger text, more room around it. 12pt is one
-# notch up from GTK's 11 / Qt's 10 — noticeably roomier without reflowing app
-# layouts. The monospace font is the terminal's, so a file listing in a GTK
-# dialog and the same listing in kitty are the same shape.
+# UI type. One notch above the GTK/Qt defaults; mono font is the terminal's.
 theme_ui_font: "Adwaita Sans"
 theme_ui_font_size: 12
 theme_mono_font: "Hack Nerd Font Mono"
 theme_mono_font_size: 12
 
-# 28 rather than 24: the pointer is the one UI element that is never scaled by
-# the app, and a bigger one is easier to reacquire after looking away.
+# Pointer size. Nothing else scales the cursor, so it is set large here.
 theme_cursor_size: 28
 
-# Packages that own the theme assets. Kept here rather than in group_vars so the
-# look travels with the role that configures it.
-#
-# One list through yay, repo and AUR alike — the same pattern as roles/packages.
-#
-# yay calls sudo itself and a play has no tty, so it needs a sudo timestamp that
-# is already valid. That is what the `base` dependency in meta/main.yml is for:
-# its pacman tasks run under ansible's own become, which refreshes the user-wide
-# timestamp (roles/sudoers sets timestamp_type=global) before yay is reached.
+# Theme assets. Repo and AUR in one yay transaction; the `base` dependency in
+# meta/main.yml is what leaves a valid sudo timestamp for it.
 theme_packages:
   - catppuccin-gtk-theme-{{ theme_flavour }}
   - catppuccin-cursors-{{ theme_flavour }}
@@ -51,9 +35,7 @@ theme_packages:
   - xsettingsd
   - adwaita-fonts
 
-# Leftovers from the DankMaterialShell/matugen experiment. They are user-level
-# overrides that win over the GTK theme and the Qt colour scheme, so as long as
-# they exist the catppuccin theming below is only half applied.
+# Leftover matugen overrides. User-level, so they win over the theme until removed.
 theme_stale_files:
   - "{{ target_home }}/.config/gtk-3.0/gtk.css"
   - "{{ target_home }}/.config/gtk-3.0/dank-colors.css"

@@ -1,6 +1,4 @@
 ---
-# Link user.js to zen-profiles
-
 - name: Create browser profiles by starting each browser once
   ansible.builtin.shell:
     cmd: timeout 5 {{ item }} --headless >/dev/null 2>&1 || true

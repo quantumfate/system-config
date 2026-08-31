@@ -1,6 +1,5 @@
 ---
-# Package sets, sourced from the former chezmoi .chezmoidata/packages.yaml.
-# All installs go through yay (repo + AUR), see roles/packages.
+# Package sets. Everything installs through yay (repo + AUR), see roles/packages.
 common_packages:
   # Core utilities
   - base-devel

@@ -1,16 +1,9 @@
-# group_vars/externals.yml
-# External Repositories that must be present
+# Checkouts and theme archives roles/externals keeps in sync.
 
-# External zsh plugins are owned by roles/zsh (see roles/zsh/defaults/main.yml).
-# Only non-shell checkouts remain here.
-# The tmux catppuccin plugin is gone: both tmux configs (the coding server and
-# the isolated log server, roles/zsh) hardcode the Macchiato palette instead of
-# loading a plugin at every reload.
+# Plugin checkouts. zsh plugins live in roles/zsh; tmux hardcodes its palette.
 externals_repos: []
 
-# --- Personal checkouts ---------------------------------------------------
-# ff-only pulls: local commits and edits are never clobbered. The pull is
-# skipped while a checkout is dirty, mirroring the old .pull.args = ["--ff-only"].
+# Personal repos. Pulled ff-only, and skipped entirely while dirty.
 externals_projects:
   - name: hypr
     repo: git@codeberg.org:quantumfate/hypr.git
@@ -37,7 +30,7 @@ externals_projects:
     repo: git@codeberg.org:quantumfate/system-config.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/system-config"
 
-# Former {{ if .gaming }} / {{ if eq .profile "desktop" }} blocks.
+# Cloned only when the matching flag in group_vars/all/main.yml is set.
 externals_projects_gaming:
   - name: dofus-scripts
     repo: git@codeberg.org:quantumfate/dofus-scripts.git
@@ -48,10 +41,8 @@ externals_projects_desktop:
     repo: git@codeberg.org:quantumfate/kbd75-rev2.git
     dest: "{{ target_home }}/Projects/codeberg/quantumfate/kbd75-rev2"
 
-# Catppuccin themes (former archives)
-# archive_subdir is the directory inside the tarball whose contents land in
-# dest, replacing the old stripComponents/include pair. Refreshed on every
-# run instead of on a refreshPeriod timer.
+# Catppuccin themes. archive_subdir is the directory inside the tarball whose
+# contents land in dest.
 externals_archives:
   - name: btop
     url: https://github.com/catppuccin/btop/archive/refs/heads/main.tar.gz
@@ -98,5 +89,5 @@ externals_archives:
     archive_subdir: wlogout-main/themes
     dest: "{{ target_home }}/.config/wlogout/catppuccin/themes"
 
-# Single-file downloads (former type = "file")
+# Single-file downloads.
 externals_files: []

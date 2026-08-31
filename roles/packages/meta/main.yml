@@ -15,15 +15,8 @@ galaxy_info:
     - yay
     - aur
 
-# `base` is a hard requirement, not a convenience. This role installs every
-# package through yay (`kewlfft.aur.aur`), and yay shells out to sudo on its
-# own for the pacman step — a play has no tty, so that only works while a sudo
-# timestamp is already valid. base's pacman tasks run under ansible's own
-# become, refreshing the user-wide timestamp (roles/sudoers:
-# timestamp_type=global) before yay is ever reached.
-#
-# Without this, a full converge worked (base runs first anyway) while a tagged
-# `-t packages` or `-t zsh` run failed with "sudo: a terminal is required" — the
-# dependency makes those tagged runs behave like the full one.
+# Required, not cosmetic: yay shells out to sudo with no tty, so it needs the
+# warm sudo timestamp base leaves behind. Without it a tagged `-t packages` run
+# fails with "sudo: a terminal is required" while a full converge works.
 dependencies:
   - role: base

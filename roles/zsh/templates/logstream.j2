@@ -1,25 +1,17 @@
 #!/usr/bin/env bash
 # logstream — the ONE way a log reaches the screen. Rendered by roles/zsh.
 #
-# Why a single entrypoint: every source (journal, kernel, unit, plain file) is
-# rendered with the SAME columns, the SAME palette and the SAME pager keys.
-# Nothing shifts under you when you switch source — you learn the shape once.
-#
-# Column contract, byte-identical for every journal source:
+# One entrypoint, so every source renders with the same columns, palette and
+# pager keys:
 #
 #   YYYY-MM-DD HH:MM:SS  LEVEL    source                message…
 #   └─ 19 ─────────────┘ └─ 7 ──┘ └─ 20 ───────────────┘
 #
-# The level field is 7 wide, not 6: NOTICE is six characters, so a 6-wide field
-# leaves no gap and prints "NOTICElibddcutil".
+# The level field is 7 wide, not 6: NOTICE is six characters and a 6-wide field
+# prints "NOTICElibddcutil". Long lines scroll sideways, never wrap.
 #
-# Fixed widths, left-aligned, no hostname, no wrapping. The eye lands on the
-# same x-position every line, so scanning costs nothing. Long lines scroll
-# sideways (← →) instead of reflowing and destroying the vertical rhythm.
-#
-# Colour contract: applied EXACTLY ONCE, by tspin, with the macchiato theme.
-# The pager runs with LESSOPEN cleared so lesspipe/.lessfilter cannot colour an
-# already-coloured stream and corrupt the escape codes.
+# Colour is applied exactly once, by tspin. The pager runs with LESSOPEN cleared
+# so .lessfilter cannot colour the stream a second time and corrupt the escapes.
 #
 # Usage:  logstream <spec> [extra journalctl args...]
 #   follow        live journal, all units
@@ -38,18 +30,16 @@ set -uo pipefail
 
 THEME="${TAILSPIN_THEME:-{{ target_home }}/.config/tailspin/theme.toml}"
 
-# Only severity, timestamps and structure get colour. Every "smart" highlighter
-# (urls, uuids, ips, paths, pointers, processes) is off: they colour tokens that
-# carry no severity meaning and turn a log into confetti.
+# Severity, timestamps and structure only. The "smart" highlighters colour
+# tokens that carry no meaning and turn a log into confetti.
 TSPIN=(tspin -p --disable urls,emails,uuids,ipv4,pointers,paths,processes,numbers)
 [ -f "$THEME" ] && TSPIN+=(--theme "$THEME")
 
 # -R pass colour through   -S never wrap   -X keep the screen on exit
 PAGER_ARGS=(-R -S -X --tabs=4 --quit-if-one-screen --no-init)
 
-# journald's own field names are unstable across sources (SYSLOG_IDENTIFIER,
-# _COMM, _SYSTEMD_UNIT); collapsing them into one `source` column is what makes
-# the layout identical whether you are reading the kernel or a user service.
+# journald names the source differently per transport (SYSLOG_IDENTIFIER,
+# _COMM, _SYSTEMD_UNIT); collapse them into one column.
 JQ_FMT='
   (.__REALTIME_TIMESTAMP | tonumber / 1000000 | strflocaltime("%Y-%m-%d %H:%M:%S")) as $ts
   | ({"0":"EMERG","1":"ALERT","2":"CRIT","3":"ERROR","4":"WARN",
@@ -59,9 +49,8 @@ JQ_FMT='
   | ((.MESSAGE | if type == "array" then (map([.] | implode) | join("")) else . end) // "") as $msg
   | "\($ts)  \(($lvl + "       ")[0:7])\(($src + "                    ")[0:20])  \($msg)"'
 
-# SYSTEMD_COLORS=0 is not cosmetic: with colours forced on, journalctl emits
-# ANSI escapes INSIDE the json string values and jq dies on the control
-# characters. Colour is tspin's job further down the pipe, never journalctl's.
+# SYSTEMD_COLORS=0: with colour forced on, journalctl puts ANSI escapes inside
+# the json string values and jq dies on the control characters.
 journal() { SYSTEMD_COLORS=0 journalctl --output=json --no-hostname "$@"; }
 
 fmt_journal() { jq -r --unbuffered "$JQ_FMT"; }
@@ -76,14 +65,13 @@ page() {
 spec="${1:-boot}"; shift || true
 target="${spec#*:}"
 
-# follow=1 for live sources, 0 for bounded history: a finished, scrollable
-# buffer is calmer than a stream that keeps moving while you read it.
+# follow=1 for live sources, 0 for bounded history.
 follow=1
 fmt=fmt_journal
 
 case "$spec" in
-  # stdin modes: the log* shell verbs build their own journalctl query and hand
-  # it here, so the columns and the palette stay defined in exactly one place.
+  # stdin modes: the log* verbs build their own query and hand it here, so the
+  # columns stay defined in one place.
   json)      src() { cat; };                    follow=0 ;;
   -)         src() { cat; }; fmt=fmt_plain;     follow=0 ;;
   follow)    src() { journal -b -f -n 200; } ;;
