@@ -30,7 +30,8 @@ Rendered by `roles/zsh`. Edit the templates, not `~/.zshrc`.
 | `^A ^E ^K ^U ^W ^Y` | line editing in insert mode                             |
 | `^Z`                | suspend — and `^Z` again on an empty line resumes       |
 | `^V`                | paste from the Wayland clipboard                        |
-| `Tab`               | fzf-tab: `Tab`/`S-Tab` move, `<`/`>` switch group       |
+| `Tab` `S-Tab` | move in **any** fzf; in a multi-select list Tab also marks |
+| `<` `>` | fzf-tab: switch completion group |
 
 ## Moving
 

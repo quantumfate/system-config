@@ -8,6 +8,10 @@ bind C-b send-prefix
 
 set -ga update-environment "TERM"
 set -ga update-environment "TERM_PROGRAM"
+# `C-b C-o` runs tms from the *session's* environment, not from a fresh shell,
+# so without this it would keep whatever fzf options the tmux server was born
+# with — a .zshrc change would reach every other fzf but that one.
+set -ga update-environment "FZF_DEFAULT_OPTS"
 set -g default-terminal "tmux-256color"
 set -ag terminal-overrides ",xterm-kitty:RGB"
 set -g focus-events on

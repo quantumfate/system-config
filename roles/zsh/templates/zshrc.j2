@@ -700,9 +700,18 @@ export GIT_PAGER="delta --navigate --line-numbers --hyperlinks --syntax-theme='{
 # eza colours, Catppuccin Macchiato.
 export EZA_COLORS="da=38;2;110;115;141:uu=38;2;110;115;141:gu=38;2;110;115;141:ur=38;2;198;160;246:uw=38;2;238;212;159:ux=38;2;166;218;149:sn=38;2;139;213;202:sb=38;2;110;115;141:xx=38;2;73;77;100:di=38;2;198;160;246"
 
-# fzf: one accent (mauve), one surface, vi-style bindings on top of the shell's
-# vi-mode (tab:down / shift-tab:up already reversed to read like a menu).
+# fzf: one accent (mauve), one surface, and Tab as the navigation key in every
+# fzf there is — the shell's ^R/^T/Alt-C, the tms session pickers tmux opens in
+# a window, forgit, fzf-tab's popup.
+#
+# `toggle+down`, not `down`: Tab's default job is toggling a selection, and
+# rebinding it outright would silently break multi-select where it matters most
+# (staging several files with `fa`). Toggle is a no-op in a single-select list,
+# so a plain picker gets pure movement while a multi-select one gets the
+# ranger-style "mark this, move on" that Tab is for. btab only moves — toggling
+# on the way back up reads as undo but is not.
 export FZF_DEFAULT_OPTS=" \
+  --bind='tab:toggle+down,btab:up' \
   --layout=reverse --info=inline --border=none --pointer='▌' --marker='▌' \
   --color=bg+:#363a4f,fg:#cad3f5,fg+:#cad3f5,hl:{{ zsh_log_accent }},hl+:{{ zsh_log_accent }} \
   --color=pointer:{{ zsh_log_accent }},prompt:{{ zsh_log_accent }},marker:#a6da95,spinner:{{ zsh_log_accent }} \
