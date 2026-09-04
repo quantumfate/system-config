@@ -33,6 +33,7 @@ common_packages:
   - trash-cli
   - qtkeychain-qt6
   - copyq
+  - linear-bin
 
   # Cryptsetup
   - fwupd
