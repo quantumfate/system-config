@@ -9,8 +9,4 @@ path=( "{{ target_home }}/.luarocks/bin" $path )
 path=( "{{ target_home }}/.cargo/bin" $path )
 {%- endif %}
 
-export ESO_USER_DIR="{{ target_home }}/Games/the-elder-scrolls-online/drive_c/users/quantum/My Documents/Elder Scrolls Online"
-export ESO_LIVE_ADDONS_DIR="$ESO_USER_DIR/live/AddOns"
-export ESO_LIVE_SV_DIR="$ESO_USER_DIR/live/SavedVariables"
-export ESO_PTS_ADDONS_DIR="$ESO_USER_DIR/pts/AddOns"
-export ESO_PTS_SV_DIR="$ESO_USER_DIR/pts/SavedVariables"
+export PROTON_PASS_LINUX_KEYRING="dbus"
