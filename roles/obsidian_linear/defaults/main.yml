@@ -1,0 +1,16 @@
+---
+# One-way mirror of Linear issues into the vault. Linear is the source of
+# truth; the sync never deletes and never writes back.
+obsidian_linear_deploy: true
+
+obsidian_linear_vault: "{{ target_home }}/Documents/Obsidian/Main"
+
+# How often the timer fires. The sync is cheap and idempotent, so a short
+# interval mostly costs API calls.
+obsidian_linear_interval: "5min"
+
+# Proton Pass coordinates for the API key. Read at runtime, never written to
+# disk; a locked vault makes the sync notify and exit rather than run stale.
+obsidian_linear_pass_vault: Productivity
+obsidian_linear_pass_item: linear.app
+obsidian_linear_pass_field: api_key

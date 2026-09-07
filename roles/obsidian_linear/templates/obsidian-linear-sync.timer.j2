@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodic Linear to Obsidian sync
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec={{ obsidian_linear_interval }}
+# A missed window (suspend, logout) syncs once on resume rather than piling up.
+Persistent=true
+Unit=obsidian-linear-sync.service
+
+[Install]
+WantedBy=timers.target

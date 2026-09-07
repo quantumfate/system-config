@@ -1,0 +1,64 @@
+---
+- name: Check the Obsidian vault exists
+  ansible.builtin.stat:
+    path: "{{ obsidian_linear_vault }}"
+  register: obsidian_linear_vault_stat
+  when: obsidian_linear_deploy | bool
+
+- name: Ensure systemd user dir exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user"
+    state: directory
+    mode: "0755"
+  when:
+    - obsidian_linear_deploy | bool
+    - obsidian_linear_vault_stat.stat.isdir | default(false)
+
+- name: Deploy obsidian-linear-sync user units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ target_home }}/.config/systemd/user/{{ item }}"
+    mode: "0644"
+  loop:
+    - obsidian-linear-sync.service
+    - obsidian-linear-sync.timer
+  notify: Restart obsidian-linear-sync timer
+  when:
+    - obsidian_linear_deploy | bool
+    - obsidian_linear_vault_stat.stat.isdir | default(false)
+
+# Only the timer is enabled; the service is oneshot and stays trigger-driven so
+# `systemctl --user start obsidian-linear-sync` is a clean manual sync.
+- name: Enable obsidian-linear-sync timer
+  ansible.builtin.systemd_service:
+    name: obsidian-linear-sync.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+    scope: user
+  when:
+    - obsidian_linear_deploy | bool
+    - obsidian_linear_vault_stat.stat.isdir | default(false)
+
+- name: Check the Proton Pass session can still reach the Linear key
+  ansible.builtin.shell:
+    cmd: timeout 5 pass-cli item view --vault-name {{ obsidian_linear_pass_vault }}
+         --item-title {{ obsidian_linear_pass_item }} --output=json >/dev/null
+    executable: /bin/bash
+  register: obsidian_linear_key
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  no_log: true
+  environment:
+    PATH: "{{ target_home }}/.local/bin:{{ ansible_facts.env.PATH }}"
+  when: obsidian_linear_deploy | bool
+
+- name: Report a locked Proton Pass vault
+  ansible.builtin.debug:
+    msg: >-
+      No Proton Pass session — the Linear sync will notify and exit until you
+      run `pass-cli login --interactive`.
+  when:
+    - obsidian_linear_deploy | bool
+    - obsidian_linear_key.rc | default(0) != 0
