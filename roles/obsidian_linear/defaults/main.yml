@@ -5,9 +5,9 @@ obsidian_linear_deploy: true
 
 obsidian_linear_vault: "{{ target_home }}/Documents/Obsidian/Main"
 
-# How often the timer fires. The sync is cheap and idempotent, so a short
-# interval mostly costs API calls.
-obsidian_linear_interval: "5min"
+# How often the timer fires, as an OnCalendar expression. The sync is cheap and
+# idempotent, so a short interval mostly costs API calls.
+obsidian_linear_interval: "*:0/5"
 
 # Proton Pass coordinates for the API key. Read at runtime, never written to
 # disk; a locked vault makes the sync notify and exit rather than run stale.

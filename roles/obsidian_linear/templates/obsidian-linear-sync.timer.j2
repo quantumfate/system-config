@@ -2,9 +2,10 @@
 Description=Periodic Linear to Obsidian sync
 
 [Timer]
-OnBootSec=2min
-OnUnitActiveSec={{ obsidian_linear_interval }}
-# A missed window (suspend, logout) syncs once on resume rather than piling up.
+# Wall-clock rather than monotonic: Persistent= only applies to OnCalendar, and
+# a monotonic OnBootSec= stops rescheduling once it has elapsed.
+OnCalendar={{ obsidian_linear_interval }}
+# A window missed while suspended or logged out syncs once on resume.
 Persistent=true
 Unit=obsidian-linear-sync.service
 
