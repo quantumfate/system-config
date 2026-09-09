@@ -268,3 +268,48 @@ fastfetch_modules:
     label: "disk"
     options:
       folders: "/"
+
+# --- Environment variables ----------------------------------------------------
+# Rendered into ~/.config/environment.d/ (read by systemd --user and uwsm at
+# login) and ~/.zshenv (shells started outside uwsm, e.g. TTY or SSH). Both
+# templates consume the same lists — edit once, applies everywhere.
+#
+# environment.d format: KEY=value (no export, no shell syntax).
+# zshenv format: shell assignments + export.
+#
+# The uwsm session files (env, env-niri) are also deployed by this role but
+# only contain Wayland compositor-level vars — the shared vars above live here.
+
+# PATH entries. Listed front-to-back: first match wins on Linux.
+zsh_env_paths:
+  - "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin"
+  - "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy/bin"
+  - "{{ target_home }}/.local/bin"
+  - "/usr/bin/obsidian"
+
+# Extra PATH entries gated on the devenv feature flag.
+zsh_env_paths_devenv:
+  - "{{ target_home }}/go/bin"
+  - "{{ target_home }}/.luarocks/bin"
+  - "{{ target_home }}/.cargo/bin"
+
+# Scalar environment variables. Key is the variable name, value is the value.
+# These are exported in .zshenv and set (via environment.d) for all systemd
+# user services — including every uwsm session.
+zsh_env_vars:
+  PROTON_PASS_LINUX_KEYRING: "dbus"
+  PROTON_DLSS_UPGRADE: "1"
+  PROTON_DLSS_INDICATOR: "1"
+  PROTON_NVIDIA_LIBS: "1"
+  PROTON_ENABLE_WAYLAND: "1"
+  PROTON_NO_WM_DECORATION: "1"
+  PROTON_NO_NTSYNC: "1"
+  PROTON_LOCAL_SHADER_CACHE: "1"
+
+# Universal session vars placed in environment.d alongside the above. These
+# apply to every login session (TTY included) and complement the Wayland-only
+# block in the uwsm env files.
+zsh_env_session_vars:
+  XDG_CONFIG_HOME: "$HOME/.config"
+  BROWSER: "zen-twilight"
+  BAT_THEME: "Catppuccin Macchiato"

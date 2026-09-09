@@ -1,0 +1,12 @@
+# Wayland session environment. Shared vars (PATH, Proton, BROWSER, BAT_THEME)
+# live in ~/.config/environment.d/00-shell.conf — managed by the same role.
+export XDG_SESSION_TYPE=wayland
+export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+# QT_STYLE_OVERRIDE is deliberately NOT set: ~/.config/qt6ct/qt6ct.conf already
+# selects Kvantum, and this variable overrides whatever qt6ct decides — with
+# both in place the config file silently stops mattering. See roles/theming.
+export GDK_BACKEND=wayland,x11,*
+export MOZ_ENABLE_WAYLAND=1
+export XDG_DATA_DIRS="${XDG_DATA_DIRS}:/var/lib/flatpak/exports/share"

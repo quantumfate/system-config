@@ -1,12 +1,17 @@
 typeset -U path
-path=( "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin" $path )
-path=( "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy/bin/" $path )
-path=( "{{ target_home }}/.local/bin" $path )
-path=( "/usr/bin/obsidian" $path )
-{%- if devenv %}
-path=( "{{ target_home }}/go/bin" $path )
-path=( "{{ target_home }}/.luarocks/bin" $path )
-path=( "{{ target_home }}/.cargo/bin" $path )
-{%- endif %}
+{% for p in zsh_env_paths %}
+path=( "{{ p }}" $path )
+{% endfor %}
+{% if devenv %}
+{% for p in zsh_env_paths_devenv %}
+path=( "{{ p }}" $path )
+{% endfor %}
+{% endif %}
 
-export PROTON_PASS_LINUX_KEYRING="dbus"
+{% for key, value in zsh_env_vars.items() %}
+export {{ key }}="{{ value }}"
+{% endfor %}
+
+{% for key, value in zsh_env_session_vars.items() %}
+export {{ key }}="{{ value }}"
+{% endfor %}

@@ -1,0 +1,13 @@
+# Managed by ansible — roles/zsh. Single source of truth for PATH and scalar
+# env vars. Read by systemd --user at login; uwsm inherits these automatically.
+# ~/.zshenv is derived from the same variable lists for shells outside uwsm.
+
+PATH={{ zsh_env_paths | join(':') }}{% if devenv %}:{{ zsh_env_paths_devenv | join(':') }}{% endif %}:/usr/local/bin:${PATH}
+
+{% for key, value in zsh_env_vars.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+{% for key, value in zsh_env_session_vars.items() %}
+{{ key }}={{ value }}
+{% endfor %}

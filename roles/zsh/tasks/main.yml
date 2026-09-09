@@ -42,6 +42,43 @@
     dest: "{{ target_home }}/.zshenv"
     mode: "0644"
 
+# Centralised environment: ~/.config/environment.d/ is read by systemd --user
+# at login, so every uwsm session inherits these vars automatically. The same
+# variable lists drive .zshenv above (for shells outside uwsm).
+
+- name: Ensure the environment.d directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/environment.d"
+    state: directory
+    mode: "0755"
+
+- name: Render the centralised environment file
+  ansible.builtin.template:
+    src: environment.d.j2
+    dest: "{{ target_home }}/.config/environment.d/00-shell.conf"
+    mode: "0644"
+
+# uwsm session files: Wayland compositor-level vars only. Shared vars (PATH,
+# Proton, BROWSER, BAT_THEME) live in environment.d above.
+
+- name: Ensure the uwsm config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/uwsm"
+    state: directory
+    mode: "0755"
+
+- name: Render the uwsm session environment
+  ansible.builtin.template:
+    src: uwsm-env.j2
+    dest: "{{ target_home }}/.config/uwsm/env"
+    mode: "0644"
+
+- name: Render the uwsm niri session environment
+  ansible.builtin.template:
+    src: uwsm-env-niri.j2
+    dest: "{{ target_home }}/.config/uwsm/env-niri"
+    mode: "0644"
+
 - name: Render .zshrc
   ansible.builtin.template:
     src: zshrc.j2
