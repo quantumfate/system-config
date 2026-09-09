@@ -560,6 +560,17 @@ alias gdt='git -c diff.external=difft diff'
 alias gsh='git show'
 alias grl='git reflog --date=relative'    # the undo log for everything above
 
+## Searches
+# Files and Directories
+alias ffn='find . -type f -name'
+alias fdn='find . -type d -name'
+# Find files recently modified in the past i days
+for i in {1..9}; do alias "fft$i"="find . -type f -mtime -$i"; done; unset i
+for i in {1..9}; do alias "fdt$i"="find . -type d -mtime -$i"; done; unset i
+# Find files recently modified longer than i days
+for i in {1..9}; do alias "fft$i"="find . -type f -mtime +$i"; done; unset i
+for i in {1..9}; do alias "fdt$i"="find . -type d -mtime +$i"; done; unset i
+
 ## Delete the branches already merged into HEAD. Never main/master or the
 ## current branch.
 gbclean() {
