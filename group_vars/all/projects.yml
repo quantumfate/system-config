@@ -1,0 +1,53 @@
+---
+# Git checkouts roles/project_checkouts keeps in sync. Cloned if missing, then
+# pulled ff-only, and skipped entirely while dirty.
+#
+# Three of these — hypr, quickshell, nvim — carry their own ansible role, which
+# site.yml converges from the checkout after this role has updated it.
+
+projects_repos:
+  - name: hypr
+    repo: git@codeberg.org:quantumfate/hypr.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/hypr"
+  - name: quickshell
+    repo: git@codeberg.org:quantumfate/quickshell.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
+  - name: nvim
+    repo: git@codeberg.org:quantumfate/nvim.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/nvim"
+  - name: aiagent
+    repo: git@github.com:quantumfate/aiagent.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/aiagent"
+  - name: lance.nvim
+    repo: git@github.com:quantumfate/lance.nvim.git
+    dest: "{{ target_home }}/Projects/github/quantumfate/lance.nvim"
+  - name: scripts
+    repo: git@codeberg.org:quantumfate/scripts.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/scripts"
+  - name: security-and-privacy
+    repo: git@codeberg.org:quantumfate/security-and-privacy.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy"
+  - name: system-config
+    repo: git@codeberg.org:quantumfate/system-config.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/system-config"
+
+# Cloned only when the matching flag in group_vars/all/main.yml is set.
+projects_repos_gaming:
+  - name: dofus-scripts
+    repo: git@codeberg.org:quantumfate/dofus-scripts.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/dofus-scripts"
+
+projects_repos_desktop:
+  - name: kbd75-rev2
+    repo: git@codeberg.org:quantumfate/kbd75-rev2.git
+    dest: "{{ target_home }}/Projects/codeberg/quantumfate/kbd75-rev2"
+
+# Roles that live in a checkout above rather than in roles/. site.yml includes
+# them by name; ansible.cfg's roles_path is what makes them resolvable.
+projects_with_roles: [hypr, quickshell, nvim]
+
+# name -> dest, so site.yml can hand each external role its checkout path
+# without restating it.
+projects_dest: >-
+  {{ dict(projects_repos | map(attribute='name')
+          | zip(projects_repos | map(attribute='dest'))) }}

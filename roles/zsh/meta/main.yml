@@ -18,8 +18,6 @@ galaxy_info:
     - logging
 
 dependencies:
-  # antidote must exist before this role can render ~/.zsh_plugins.zsh, and the
-  # log-toolchain tasks here shell out to yay (which needs a valid sudo stamp).
-  # packages owns both: it installs zsh-antidote (from common_packages) and its
-  # become-run pacman tasks refresh the sudo timestamp yay relies on.
+  # antidote must exist before this role can render ~/.zsh_plugins.zsh, and
+  # packages is what installs zsh-antidote (from common_packages).
   - role: packages

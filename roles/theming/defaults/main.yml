@@ -42,3 +42,51 @@ theme_stale_files:
   - "{{ target_home }}/.config/gtk-4.0/dank-colors.css"
   - "{{ target_home }}/.config/kitty/dank-tabs.conf"
   - "{{ target_home }}/.config/kitty/dank-theme.conf"
+
+# Per-app catppuccin theme tarballs, unpacked into each app's theme dir.
+# archive_subdir is the directory inside the tarball whose contents land in dest.
+theme_archives:
+  - name: btop
+    url: https://github.com/catppuccin/btop/archive/refs/heads/main.tar.gz
+    archive_subdir: btop-main/themes
+    dest: "{{ target_home }}/.config/btop/themes"
+  - name: foot
+    url: https://github.com/catppuccin/foot/archive/refs/heads/main.tar.gz
+    archive_subdir: foot-main/themes
+    dest: "{{ target_home }}/.config/foot/themes"
+  - name: kitty
+    url: https://github.com/catppuccin/kitty/archive/refs/heads/main.tar.gz
+    archive_subdir: kitty-main/themes
+    dest: "{{ target_home }}/.config/kitty/themes"
+  - name: qt5ct
+    url: https://github.com/catppuccin/qt5ct/archive/refs/heads/main.tar.gz
+    archive_subdir: qt5ct-main/themes
+    dest: "{{ target_home }}/.config/qt5ct/colors"
+  - name: qt6ct
+    url: https://github.com/catppuccin/qt5ct/archive/refs/heads/main.tar.gz
+    archive_subdir: qt5ct-main/themes
+    dest: "{{ target_home }}/.config/qt6ct/colors"
+  - name: kvantum
+    url: https://github.com/catppuccin/kvantum/archive/refs/heads/main.tar.gz
+    archive_subdir: kvantum-main/themes
+    dest: "{{ target_home }}/.config/Kvantum"
+  - name: rofi
+    url: https://github.com/catppuccin/rofi/archive/refs/heads/main.tar.gz
+    archive_subdir: rofi-main/themes
+    dest: "{{ target_home }}/.local/share/rofi/themes"
+  - name: zathura
+    url: https://github.com/catppuccin/zathura/archive/refs/heads/main.tar.gz
+    archive_subdir: zathura-main/themes
+    dest: "{{ target_home }}/.config/zathura"
+  - name: spicetify
+    url: https://github.com/catppuccin/spicetify/archive/refs/heads/main.tar.gz
+    archive_subdir: spicetify-main/catppuccin
+    dest: "{{ target_home }}/.config/spicetify/Themes/catppuccin"
+  - name: wlogout-icons
+    url: https://github.com/catppuccin/wlogout/archive/refs/heads/main.tar.gz
+    archive_subdir: wlogout-main/icons
+    dest: "{{ target_home }}/.config/wlogout/catppuccin/icons"
+  - name: wlogout-themes
+    url: https://github.com/catppuccin/wlogout/archive/refs/heads/main.tar.gz
+    archive_subdir: wlogout-main/themes
+    dest: "{{ target_home }}/.config/wlogout/catppuccin/themes"

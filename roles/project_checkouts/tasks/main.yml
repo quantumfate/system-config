@@ -1,0 +1,22 @@
+---
+# Keeps the git checkouts under ~/Projects in sync. Nothing here configures an
+# app — three of these checkouts carry their own role, converged from site.yml.
+# The flag-gated sets are split here rather than in site.yml: the role always
+# runs, only parts of its repo list are conditional.
+
+- name: Check out personal projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ projects_repos }}"
+
+- name: Check out gaming projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ projects_repos_gaming }}"
+  when: gaming
+
+- name: Check out desktop projects
+  ansible.builtin.include_tasks: projects.yml
+  vars:
+    project_repos: "{{ projects_repos_desktop }}"
+  when: profile == 'desktop'

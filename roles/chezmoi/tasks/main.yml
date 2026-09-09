@@ -1,9 +1,6 @@
 ---
-- name: Install chezmoi
-  become: true
-  community.general.pacman:
-    name: chezmoi
-    state: present
+# chezmoi itself comes from common_packages — this role only runs after
+# roles/packages, so it never installs its own binary.
 
 # The source dir doubles as the dotfiles dev checkout, so a dirty tree is
 # normal. Pull only when it is clean — never discard uncommitted work.

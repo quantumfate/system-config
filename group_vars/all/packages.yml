@@ -1,5 +1,9 @@
 ---
 # Package sets. Everything installs through yay (repo + AUR), see roles/packages.
+#
+# Ownership rule: roles/packages installs everything the workstation needs. A
+# role installs a package itself only when it must run before roles/packages —
+# in practice that is roles/base alone (fetch tools + yay).
 common_packages:
   # Core utilities
   - base-devel

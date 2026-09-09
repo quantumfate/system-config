@@ -4,14 +4,14 @@
     path: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
     state: directory
     mode: "0755"
-  loop: "{{ externals_archives }}"
+  loop: "{{ theme_archives }}"
   loop_control:
     label: "{{ item.name }}"
 
 - name: Check cached theme archives
   ansible.builtin.stat:
     path: "{{ target_home }}/.cache/catppuccin/{{ item.name }}.tar.gz"
-  loop: "{{ externals_archives }}"
+  loop: "{{ theme_archives }}"
   loop_control:
     label: "{{ item.name }}"
   register: theme_cache
@@ -30,7 +30,7 @@
   ansible.builtin.unarchive:
     src: "{{ target_home }}/.cache/catppuccin/{{ item.name }}.tar.gz"
     dest: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
-  loop: "{{ externals_archives }}"
+  loop: "{{ theme_archives }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -39,6 +39,6 @@
     src: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}/{{ item.archive_subdir }}/"
     dest: "{{ item.dest }}/"
     checksum: true
-  loop: "{{ externals_archives }}"
+  loop: "{{ theme_archives }}"
   loop_control:
     label: "{{ item.name }}"

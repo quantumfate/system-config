@@ -1,0 +1,13 @@
+# Managed by ansible — roles/session_env. PATH and scalar env vars, read by
+# systemd --user at login; uwsm inherits these automatically. roles/zsh derives
+# ~/.zshenv from the same lists for shells started outside uwsm.
+
+PATH={{ env_paths | join(':') }}{% if devenv %}:{{ env_paths_devenv | join(':') }}{% endif %}:/usr/local/bin:${PATH}
+
+{% for key, value in env_vars.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+{% for key, value in env_session_vars.items() %}
+{{ key }}={{ value }}
+{% endfor %}

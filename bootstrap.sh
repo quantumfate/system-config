@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-role_paths=$(printf '%s:' "$HOME"/Projects/codeberg/quantumfate/{quickshell,hypr,nvim}/ansible/roles)
-export ANSIBLE_ROLES_PATH="./roles:$role_paths"
-
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
@@ -53,10 +50,10 @@ if [[ "$verbose" == "true" && ${#roles[@]} -eq 0 ]]; then
     export ANSIBLE_DEBUG=1
     exec ansible-playbook site.yml --ask-become-pass "$@" -vvvv
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "false" ]]; then
-    exec ansible-playbook site.yml --ask-become-pass -t "${roles[@]}" "$@"
+    exec ansible-playbook site.yml --ask-become-pass -t "$(IFS=,; echo "${roles[*]}")" "$@"
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "true" ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml --ask-become-pass -vvvv -t "${roles[@]}" "$@"
+    exec ansible-playbook site.yml --ask-become-pass -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
 else
     exec ansible-playbook site.yml --ask-become-pass "$@"
 fi

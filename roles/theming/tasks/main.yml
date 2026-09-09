@@ -10,6 +10,11 @@
   when: theme_packages | length > 0
   tags: [privileged]
 
+# Apps catppuccin ships as a tarball rather than a package.
+- name: Install the per-app theme archives
+  ansible.builtin.include_tasks: archives.yml
+  when: theme_archives | length > 0
+
 - name: Ensure the theming config directories exist
   ansible.builtin.file:
     path: "{{ item }}"

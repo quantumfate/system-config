@@ -1,17 +1,17 @@
 typeset -U path
-{% for p in zsh_env_paths %}
+{% for p in env_paths %}
 path=( "{{ p }}" $path )
 {% endfor %}
 {% if devenv %}
-{% for p in zsh_env_paths_devenv %}
+{% for p in env_paths_devenv %}
 path=( "{{ p }}" $path )
 {% endfor %}
 {% endif %}
 
-{% for key, value in zsh_env_vars.items() %}
+{% for key, value in env_vars.items() %}
 export {{ key }}="{{ value }}"
 {% endfor %}
 
-{% for key, value in zsh_env_session_vars.items() %}
+{% for key, value in env_session_vars.items() %}
 export {{ key }}="{{ value }}"
 {% endfor %}

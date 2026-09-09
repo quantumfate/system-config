@@ -1,5 +1,11 @@
 ---
-# Full workstation convergence. Role order matters:
+# Full workstation convergence.
+#
+# This file owns ordering and tags, nothing else. Hard requirements ("role A
+# cannot run without role B") live in the roles' meta/dependencies; feature
+# flags gate whole roles here and only partial repo/package lists inside a role.
+#
+# Order:
 #   1. bootstrap + credentials  (needed to clone anything over SSH)
 #   2. packages                 (everything below assumes binaries exist)
 #   3. system scope             (/etc, units, groups, bootloader)
@@ -9,9 +15,21 @@
   hosts: localhost
   gather_facts: true
 
+  # yay and papirus-folders shell out to sudo with no tty, so they need a live
+  # sudo timestamp. roles/sudoers makes it a global one; this is what fills it,
+  # and why a tagged `-t packages` run works standalone.
+  pre_tasks:
+    - name: Warm the sudo timestamp
+      ansible.builtin.command: "true"
+      become: true
+      changed_when: false
+      tags: [always]
+
   roles:
     - role: base
       tags: [base, bootstrap]
+    - role: sudoers
+      tags: [system, sudoers]
     - role: password_manager
       when: secrets_backend == 'pass-cli'
       tags: [secrets, bootstrap]
@@ -21,8 +39,6 @@
     - role: packages
       tags: [packages]
 
-    - role: sudoers
-      tags: [system, sudoers]
     - role: user_dirs
       tags: [user]
     - role: login_shell
@@ -34,13 +50,13 @@
     - role: desktop_entries
       tags: [system, sessions]
     - role: display_manager
-      tags: [system, sddm]
+      tags: [system, display_manager]
     - role: docker
       when: vms
       tags: [system, docker]
     - role: virtualization
       when: vms
-      tags: [system, vms]
+      tags: [system, virtualization]
     - role: power_profile
       when: gaming
       tags: [system, power]
@@ -52,10 +68,16 @@
       tags: [dotfiles, chezmoi]
     - role: yazi
       tags: [dotfiles, yazi]
-    - role: externals
-      tags: [dotfiles, externals]
+    - role: project_checkouts
+      tags: [dotfiles, projects]
+    - role: session_env
+      tags: [dotfiles, session_env]
     - role: zsh
       tags: [dotfiles, zsh, shell]
+    - role: theming
+      tags: [dotfiles, theming]
+    - role: browser_profiles
+      tags: [dotfiles, browser]
 
     - role: audio
       tags: [audio]
@@ -64,37 +86,18 @@
     - role: obsidian_linear
       tags: [obsidian, obsidian_linear]
 
+  # These roles ship inside their own checkout (see ansible.cfg's roles_path)
+  # and must run after project_checkouts has pulled them, hence the late
+  # include rather than a `roles:` entry.
   tasks:
     - name: Converge roles from external checkouts
       ansible.builtin.include_role:
-        name: "{{ item.name }}"
+        name: "{{ item }}"
         apply:
-          tags: "{{ item.tags }}"
+          tags: [dotfiles, "{{ item }}"]
       vars:
-        quickshell_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/quickshell"
-        hypr_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/hypr"
-        nvim_repo_path: "{{ target_home }}/Projects/codeberg/quantumfate/nvim"
-      loop:
-        - name: quickshell
-          tags: [dotfiles, quickshell]
-        - name: hypr
-          tags: [dotfiles, hypr]
-        - name: nvim
-          tags: [dotfiles, nvim]
-      loop_control:
-        label: "{{ item.name }}"
+        hypr_repo_path: "{{ projects_dest.hypr }}"
+        quickshell_repo_path: "{{ projects_dest.quickshell }}"
+        nvim_repo_path: "{{ projects_dest.nvim }}"
+      loop: "{{ projects_with_roles }}"
       tags: [dotfiles, quickshell, hypr, nvim]
-
-    - name: Converge browser profiles
-      ansible.builtin.include_role:
-        name: browser_profiles
-        apply:
-          tags: [dotfiles, browser]
-      tags: [dotfiles, browser]
-
-    - name: Converge theming
-      ansible.builtin.include_role:
-        name: theming
-        apply:
-          tags: [dotfiles, theming]
-      tags: [dotfiles, theming]

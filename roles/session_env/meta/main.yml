@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: session_env
+  namespace: local
+  author: local
+  description: >-
+    Login-session environment: ~/.config/environment.d for systemd --user, and
+    the uwsm Wayland session env files.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - environment
+    - uwsm
+    - systemd
+
+dependencies: []

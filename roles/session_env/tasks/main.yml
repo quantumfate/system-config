@@ -1,0 +1,37 @@
+---
+# Login-session environment, in two layers:
+#   environment.d — read by systemd --user at login, so every uwsm session and
+#                   user unit inherits it. Shell-agnostic.
+#   uwsm/env*     — Wayland compositor-level vars only, sourced per session.
+# The variable lists come from group_vars/all/environment.yml; roles/zsh renders
+# the same lists into ~/.zshenv for shells started outside uwsm.
+
+- name: Ensure the environment.d directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/environment.d"
+    state: directory
+    mode: "0755"
+
+- name: Render the centralised environment file
+  ansible.builtin.template:
+    src: environment.d.j2
+    dest: "{{ target_home }}/.config/environment.d/00-shell.conf"
+    mode: "0644"
+
+- name: Ensure the uwsm config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/uwsm"
+    state: directory
+    mode: "0755"
+
+- name: Render the uwsm session environment
+  ansible.builtin.template:
+    src: uwsm-env.j2
+    dest: "{{ target_home }}/.config/uwsm/env"
+    mode: "0644"
+
+- name: Render the uwsm niri session environment
+  ansible.builtin.template:
+    src: uwsm-env-niri.j2
+    dest: "{{ target_home }}/.config/uwsm/env-niri"
+    mode: "0644"

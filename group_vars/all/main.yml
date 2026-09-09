@@ -1,6 +1,8 @@
 ---
-# Machine profile and feature flags
-# Single source of truth
+# Variables shared by every host: machine profile, feature flags, identity.
+# Single source of truth. Role-specific values belong in
+# roles/<role>/defaults/main.yml instead — only values two or more roles read
+# belong here.
 
 profile: desktop # desktop | laptop
 

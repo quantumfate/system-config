@@ -45,7 +45,7 @@
     mode: "0644"
   when: audio_deploy_bluetooth_policy | bool
 
-# The unit points at a script from the scripts repo, cloned by roles/externals.
+# The unit points at a script from the scripts repo, cloned by roles/project_checkouts.
 - name: Ensure systemd user dir exists
   ansible.builtin.file:
     path: "{{ target_home }}/.config/systemd/user"

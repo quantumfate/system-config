@@ -1,4 +1,0 @@
----
-- name: Report the target platform
-  ansible.builtin.debug:
-    msg: "{{ system_config_message }} on {{ ansible_facts['distribution'] }}"

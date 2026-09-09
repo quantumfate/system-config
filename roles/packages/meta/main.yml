@@ -15,8 +15,7 @@ galaxy_info:
     - yay
     - aur
 
-# Required, not cosmetic: yay shells out to sudo with no tty, so it needs the
-# warm sudo timestamp base leaves behind. Without it a tagged `-t packages` run
-# fails with "sudo: a terminal is required" while a full converge works.
+# Real requirement: base installs yay, which every task here runs through.
+# (The sudo timestamp yay also needs is warmed by site.yml's pre_tasks.)
 dependencies:
   - role: base

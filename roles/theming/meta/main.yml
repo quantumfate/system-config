@@ -17,8 +17,5 @@ galaxy_info:
     - gtk
     - qt
 
-# Required, not cosmetic: yay shells out to sudo with no tty, so it needs the
-# warm sudo timestamp base leaves behind. Without it `-t theming` fails with
-# "sudo: a terminal is required" while a full converge works.
-dependencies:
-  - role: base
+# The sudo timestamp yay needs is warmed by site.yml's pre_tasks, not by a role.
+dependencies: []

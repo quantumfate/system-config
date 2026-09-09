@@ -1,6 +1,6 @@
 ---
 # The normalizer and its inotify wrapper come from the scripts repo, cloned by
-# roles/externals.
+# roles/project_checkouts.
 - name: Check the Obsidian vault exists
   ansible.builtin.stat:
     path: "{{ obsidian_index_vault }}"
