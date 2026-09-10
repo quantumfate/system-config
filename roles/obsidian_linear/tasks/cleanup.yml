@@ -1,0 +1,29 @@
+---
+# Inverse of main.yml. Notes the sync already mirrored into the vault stay —
+# the sync is one-way and never owned them exclusively.
+
+- name: Disable the sync timer and service
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    scope: user
+  loop:
+    - obsidian-linear-sync.timer
+    - obsidian-linear-sync.service
+  failed_when: false
+
+- name: Remove the units
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user/{{ item }}"
+    state: absent
+  loop:
+    - obsidian-linear-sync.timer
+    - obsidian-linear-sync.service
+  register: obsidian_linear_units_removed
+
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when: obsidian_linear_units_removed.changed

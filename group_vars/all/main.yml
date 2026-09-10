@@ -1,14 +1,20 @@
 ---
-# Variables shared by every host: machine profile, feature flags, identity.
+# Variables shared by every host: identity, secrets backend, look and feel.
 # Single source of truth. Role-specific values belong in
 # roles/<role>/defaults/main.yml instead — only values two or more roles read
 # belong here.
+#
+# Anything that differs per machine — profile, monitors, feature flags, role
+# overrides — lives in host_vars/<hostname>.yml instead. The defaults below are
+# the fallback for a host that has not declared them yet.
 
 profile: desktop # desktop | laptop
 
 primary_monitor: DP-1
 secondary_monitor: "" # empty = single-head
 
+# Feature flags. They gate package sets, parts of a role's own lists, and (via
+# group_vars/all/roles.yml) whole roles. Flip them per host in host_vars.
 gaming: true
 vms: true
 llms: true

@@ -1,0 +1,114 @@
+---
+# Lutris' libretro runner looks for its own RetroArch under
+# ~/.local/share/lutris/runners/retroarch: the binary at retroarch/retroarch,
+# cores at retroarch/cores/<core>_libretro.so, core metadata at retroarch/info.
+# Left alone it downloads all three from the libretro buildbot, unversioned.
+# Symlinking the pacman-installed copies instead keeps the runner reproducible,
+# updated by the same `yay -Syu` as everything else, and offline-safe — Lutris
+# sees an installed runner and never reaches for the buildbot.
+
+- name: Check the system RetroArch is installed
+  ansible.builtin.stat:
+    path: /usr/bin/retroarch
+  register: gaming_retroarch_bin
+
+- name: Report a missing RetroArch
+  ansible.builtin.debug:
+    msg: >-
+      /usr/bin/retroarch is missing — run the packages tag first, or Lutris
+      will offer no libretro runner.
+  when: not gaming_retroarch_bin.stat.exists
+
+- name: Ensure the Lutris retroarch runner directory exists
+  ansible.builtin.file:
+    path: "{{ gaming_lutris_retroarch_dir }}/cores"
+    state: directory
+    mode: "0755"
+
+- name: Link the system RetroArch as the Lutris runner
+  ansible.builtin.file:
+    src: /usr/bin/retroarch
+    dest: "{{ gaming_lutris_retroarch_dir }}/retroarch"
+    state: link
+    force: true
+  when: gaming_retroarch_bin.stat.exists
+
+# libretro-core-info ships the info files Lutris parses to build its core list;
+# without them the runner offers no cores at all.
+- name: Link the libretro core metadata
+  ansible.builtin.file:
+    src: /usr/share/libretro/info
+    dest: "{{ gaming_lutris_retroarch_dir }}/info"
+    state: link
+    force: true
+
+- name: Find the installed libretro cores
+  ansible.builtin.find:
+    paths: /usr/lib/libretro
+    patterns: "*_libretro.so"
+  register: gaming_libretro_cores
+
+- name: Link the libretro cores into the Lutris runner
+  ansible.builtin.file:
+    src: "{{ item.path }}"
+    dest: "{{ gaming_lutris_retroarch_dir }}/cores/{{ item.path | basename }}"
+    state: link
+    force: true
+  loop: "{{ gaming_libretro_cores.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+
+# Cores dropped from the package set leave a dangling symlink behind, which
+# Lutris still lists and then fails to launch.
+- name: Find the core symlinks already in the runner
+  ansible.builtin.find:
+    paths: "{{ gaming_lutris_retroarch_dir }}/cores"
+    patterns: "*_libretro.so"
+    file_type: link
+  register: gaming_linked_cores
+
+- name: Drop symlinks to cores that are no longer installed
+  ansible.builtin.file:
+    path: "{{ gaming_lutris_retroarch_dir }}/cores/{{ item }}"
+    state: absent
+  loop: >-
+    {{ gaming_linked_cores.files | map(attribute='path') | map('basename') | list
+       | difference(gaming_libretro_cores.files | map(attribute='path') | map('basename') | list) }}
+
+# Both DS cores declare firmware (melonDS 8 files, DeSmuME 3), and Lutris
+# aborts prelaunch with MissingBiosError when no BIOS folder is set at all —
+# regardless of whether the game needs one. Pointing it at ~/Games/firmware is
+# enough; the individual dumps stay optional, and melonDS boots retail carts
+# without them.
+- name: Ensure the Lutris config directory exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/lutris"
+    state: directory
+    mode: "0755"
+
+- name: Read the Lutris system config
+  ansible.builtin.slurp:
+    src: "{{ target_home }}/.config/lutris/system.yml"
+  register: gaming_lutris_system_raw
+  failed_when: false
+
+- name: Point Lutris at the firmware directory
+  ansible.builtin.copy:
+    content: >-
+      {{ {'system': (gaming_lutris_system_current.system | default({}))
+                    | combine({'bios_path': gaming_root ~ '/firmware'})}
+         | to_nice_yaml(indent=2) }}
+    dest: "{{ target_home }}/.config/lutris/system.yml"
+    mode: "0644"
+  vars:
+    gaming_lutris_system_current: >-
+      {{ (gaming_lutris_system_raw.content | default('') | b64decode | from_yaml) or {} }}
+
+# RetroArch looks for firmware in its own system directory, so the two point at
+# the same place and a dump only ever has to be dropped once.
+- name: Link the RetroArch system directory at the firmware directory
+  ansible.builtin.file:
+    src: "{{ gaming_root }}/firmware"
+    dest: "{{ gaming_lutris_retroarch_dir }}/system"
+    state: link
+    force: true

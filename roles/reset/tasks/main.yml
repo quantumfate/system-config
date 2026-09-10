@@ -1,0 +1,112 @@
+---
+# One-shot clean slate for a host whose $HOME has drifted from this repo.
+#
+# Archives ~/.config wholesale, tears every user unit back down to the vendor
+# preset, and lets the rest of the playbook rebuild from nothing. Opt-in twice
+# over: the host must set `reset_enabled`, and the run must carry
+# `-e reset_confirm=<hostname>`. See roles/reset/README.md.
+
+- name: Check whether this host was already reset
+  ansible.builtin.stat:
+    path: "{{ reset_marker }}"
+  register: reset_marker_stat
+
+- name: Flush the user environment
+  when: not reset_marker_stat.stat.exists
+  block:
+    - name: Refuse to flush underneath a live graphical session
+      ansible.builtin.assert:
+        that: reset_allow_graphical | bool or ansible_facts.env.XDG_SESSION_TYPE | default('tty') == 'tty'
+        fail_msg: >-
+          A graphical session is live (XDG_SESSION_TYPE={{ ansible_facts.env.XDG_SESSION_TYPE | default('unset') }}).
+          Hyprland, quickshell and the portals write their state back out on
+          exit — straight into the ~/.config this role just emptied. Log out,
+          run this from a TTY, then start the session again. Override with
+          `-e reset_allow_graphical=true` if you know the session is idle.
+
+    # Recorded before anything is torn down: the archive should say what the
+    # machine looked like, and preset-all below cannot report what it undid.
+    - name: Record the enabled user units
+      ansible.builtin.command: systemctl --user list-unit-files --state=enabled --no-legend
+      register: reset_enabled_units
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Stop and disable every enabled user unit
+      ansible.builtin.command: systemctl --user disable --now {{ item.split() | first }}
+      loop: "{{ reset_enabled_units.stdout_lines | default([]) }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Archive the current ~/.config
+      ansible.builtin.command: mv {{ target_home }}/.config {{ reset_archive }}
+      args:
+        creates: "{{ reset_archive }}"
+        removes: "{{ target_home }}/.config"
+
+    - name: Recreate an empty ~/.config
+      ansible.builtin.file:
+        path: "{{ target_home }}/.config"
+        state: directory
+        mode: "0700"
+
+    # mkdir -p because a keep entry may be nested (mozilla/firefox), and its
+    # parent went with the flush.
+    - name: Restore the keep-list from the archive
+      ansible.builtin.shell:
+        cmd: >-
+          set -euo pipefail;
+          mkdir -p "$(dirname '{{ target_home }}/.config/{{ item }}')";
+          cp -a '{{ reset_archive }}/{{ item }}' '{{ target_home }}/.config/{{ item }}'
+        executable: /bin/bash
+        creates: "{{ target_home }}/.config/{{ item }}"
+        removes: "{{ reset_archive }}/{{ item }}"
+      loop: "{{ reset_config_keep }}"
+
+    # daemon-reload first so systemd forgets the units whose files just moved,
+    # reset-failed clears the corpses that stopping them left behind, and
+    # preset-all puts the *packaged* units back exactly where a fresh install
+    # would have them. Roles re-enable their own units later in this same run.
+    - name: Reload the user manager
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        scope: user
+
+    - name: Clear failed user units
+      ansible.builtin.command: systemctl --user reset-failed
+      changed_when: true
+
+    - name: Restore the vendor preset for user units
+      ansible.builtin.command: systemctl --user preset-all
+      changed_when: true
+
+    - name: Ensure the state directory exists
+      ansible.builtin.file:
+        path: "{{ reset_marker | dirname }}"
+        state: directory
+        mode: "0755"
+
+    - name: Mark this host as reset
+      ansible.builtin.copy:
+        content: |
+          Reset on {{ ansible_facts.date_time.iso8601 }}
+          Archive: {{ reset_archive }}
+          Kept: {{ reset_config_keep | join(', ') | default('nothing', true) }}
+
+          Enabled user units at the time:
+          {{ reset_enabled_units.stdout | default('(none)') }}
+        dest: "{{ reset_marker }}"
+        mode: "0644"
+
+    - name: Report the archive location
+      ansible.builtin.debug:
+        msg: >-
+          ~/.config archived to {{ reset_archive }} — browser profiles and app
+          logins are in there, nothing was deleted. Delete it by hand once the
+          rebuilt session looks right.
+
+- name: Report an already-reset host
+  ansible.builtin.debug:
+    msg: "Already reset — see {{ reset_marker }}. Remove that file to run it again."
+  when: reset_marker_stat.stat.exists

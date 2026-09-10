@@ -1,0 +1,27 @@
+---
+# Inverse of main.yml. The unit pins the CPU to the performance EPP for as long
+# as the machine is up, so leaving it enabled on a host that disabled this role
+# is exactly the battery drain the toggle was meant to avoid.
+
+- name: Disable the EPP unit
+  become: true
+  ansible.builtin.systemd_service:
+    name: epp-performance.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+# No handler here — power_profile has no handlers/main.yml, and the reload has
+# to happen inside this run either way.
+- name: Remove the unit file
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/epp-performance.service
+    state: absent
+  register: epp_unit_removed
+
+- name: Reload systemd
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: epp_unit_removed.changed

@@ -1,0 +1,62 @@
+---
+# Tears down the roles this host has switched off.
+#
+# Turning a role off in `roles_override` stops it converging, but nothing it
+# already installed goes away on its own — a disabled display_manager leaves
+# sddm enabled, a disabled obsidian_linear leaves its timer firing. This role
+# closes that gap: for every disabled role that ships a `tasks/cleanup.yml`, it
+# runs that file.
+#
+# A cleanup file is the inverse of its role's main.yml and nothing more. It
+# never touches user data (roles/gaming/cleanup.yml unwires Lutris; ~/Games
+# stays), and it must be safe to run on a machine where the role never ran.
+
+- name: Select the disabled roles
+  ansible.builtin.set_fact:
+    cleanup_candidates: >-
+      {{ roles_enabled | dict2items | rejectattr('value')
+         | map(attribute='key') | reject('in', cleanup_skip) | list }}
+
+- name: Look for a cleanup file in each
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/roles/{{ item }}/tasks/cleanup.yml"
+  loop: "{{ cleanup_candidates }}"
+  register: cleanup_files
+
+- name: Keep the ones that have one
+  ansible.builtin.set_fact:
+    cleanup_targets: >-
+      {{ cleanup_files.results | selectattr('stat.exists')
+         | map(attribute='item') | list }}
+
+- name: Tear down disabled roles
+  ansible.builtin.include_role:
+    name: "{{ item }}"
+    tasks_from: cleanup
+    apply:
+      tags: [cleanup]
+  loop: "{{ cleanup_targets }}"
+
+- name: Remove the packages of disabled features
+  when: cleanup_remove_packages | bool
+  block:
+    # Only what no *enabled* feature also asks for — dev_packages and
+    # gaming_packages both want base-devel, and disabling one must not take it
+    # from the other.
+    - name: Build the removable package list
+      ansible.builtin.set_fact:
+        cleanup_packages: >-
+          {{ ((dev_packages if not roles_enabled.devenv else [])
+              + (gaming_packages if not roles_enabled.gaming else [])
+              + (vm_packages if not (roles_enabled.docker or roles_enabled.virtualization) else [])
+              + (desktop_packages if profile != 'desktop' else [])
+              + (laptop_packages if profile != 'laptop' else []))
+             | unique | difference(resolved_packages | default(common_packages)) }}
+
+    - name: Remove them
+      become: true
+      community.general.pacman:
+        name: "{{ cleanup_packages }}"
+        state: absent
+        extra_args: --recursive --nosave --unneeded
+      when: cleanup_packages | length > 0

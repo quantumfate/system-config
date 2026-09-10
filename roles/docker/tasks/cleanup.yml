@@ -1,0 +1,22 @@
+---
+# Inverse of main.yml. Containers, images and volumes under /var/lib/docker are
+# left alone — this stops the daemon, it does not throw away data.
+
+- name: Disable the container services
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop:
+    - docker.service
+    - docker.socket
+    - containerd.service
+  failed_when: false
+
+- name: Drop the user from the docker group
+  become: true
+  ansible.builtin.command: gpasswd --delete {{ target_user }} docker
+  register: docker_group_drop
+  changed_when: docker_group_drop.rc == 0
+  failed_when: false

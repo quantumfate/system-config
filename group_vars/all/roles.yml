@@ -1,0 +1,57 @@
+---
+# Which roles run on this host.
+#
+# `roles_default` is the answer for every machine, expressed in terms of the
+# feature flags in main.yml/host_vars. `roles_override` is the per-host escape
+# hatch: a host_vars file sets only the keys it disagrees with, and the two are
+# merged into `roles_enabled`, which is what site.yml gates on.
+#
+# Templated values arrive as the strings "True"/"False", where "False" is
+# truthy — so the merge below maps every value through `bool` and site.yml can
+# truth-test `roles_enabled` directly.
+#
+# Keys are role names; the three at the bottom live in their own checkout (see
+# group_vars/all/projects.yml) but gate the same way.
+roles_default:
+  # One-shot flush of ~/.config and every user unit, for a host whose $HOME has
+  # drifted. Needs the host to allow it (`reset_enabled`) *and* the run to name
+  # it (`-e reset_confirm=<hostname>`); see roles/reset/README.md.
+  reset: "{{ reset_enabled | default(false) and reset_confirm | default('') == inventory_hostname }}"
+  base: true
+  sudoers: true
+  password_manager: "{{ secrets_backend == 'pass-cli' }}"
+  secrets: true
+  packages: true
+  # Tears down whatever is switched off below. Always on: a role toggled off
+  # yesterday should not still be running today.
+  cleanup: true
+  user_dirs: true
+  login_shell: true
+  keyboard: true
+  console: true
+  desktop_entries: true
+  display_manager: true
+  docker: "{{ vms }}"
+  virtualization: "{{ vms }}"
+  power_profile: "{{ gaming }}"
+  gaming: "{{ gaming }}"
+  devenv: "{{ devenv }}"
+  chezmoi: true
+  yazi: true
+  project_checkouts: true
+  session_env: true
+  zsh: true
+  theming: true
+  browser_profiles: true
+  audio: true
+  obsidian_index: true
+  obsidian_linear: true
+  hypr: true
+  quickshell: true
+  nvim: true
+
+# Per-host disagreements. Overridden wholesale in host_vars/<hostname>.yml.
+roles_override: {}
+
+_roles_merged: "{{ roles_default | combine(roles_override) }}"
+roles_enabled: "{{ dict(_roles_merged.keys() | zip(_roles_merged.values() | map('bool'))) }}"

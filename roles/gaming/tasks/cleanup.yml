@@ -1,0 +1,18 @@
+---
+# Inverse of main.yml, minus the parts that are yours.
+#
+# {{ gaming_root }} stays: ROMs, saves, firmware and built ROM hacks are user
+# data this role only ever made directories for. Removing the Lutris runner
+# wiring is safe — it is symlinks into pacman's RetroArch, and Lutris rebuilds
+# its own runner dir on demand.
+
+- name: Unwire the libretro runner from Lutris
+  ansible.builtin.file:
+    path: "{{ gaming_lutris_retroarch_dir }}"
+    state: absent
+
+- name: Report what was kept
+  ansible.builtin.debug:
+    msg: >-
+      Lutris' libretro runner removed. {{ gaming_root }} kept — ROMs, saves and
+      firmware live there; delete it by hand if you mean to.

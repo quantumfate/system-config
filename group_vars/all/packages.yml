@@ -237,6 +237,20 @@ gaming_packages:
   - mangohud
   - ankama-launcher
   - cachyos-gaming-meta
+  - lutris
+  - wine
+  - winetricks
+  # Emulation runs through Lutris' libretro runner. The cores come from the
+  # repos rather than the libretro buildbot so pacman pins them; roles/gaming
+  # wires them into Lutris' runner directory.
+  - retroarch
+  - libretro-core-info
+  - libretro-mgba
+  - libretro-melonds
+  - libretro-desmume
+  # ROM hack patchers, see roles/gaming/README.md.
+  - flips
+  - xdelta3
 
 vm_packages:
   - cockpit

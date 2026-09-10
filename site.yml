@@ -2,8 +2,10 @@
 # Full workstation convergence.
 #
 # This file owns ordering and tags, nothing else. Hard requirements ("role A
-# cannot run without role B") live in the roles' meta/dependencies; feature
-# flags gate whole roles here and only partial repo/package lists inside a role.
+# cannot run without role B") live in the roles' meta/dependencies; whether a
+# role runs on this host at all is one lookup in `roles_enabled`
+# (group_vars/all/roles.yml + host_vars/<hostname>.yml), and only partial
+# repo/package lists stay gated on the raw feature flags inside a role.
 #
 # Order:
 #   1. bootstrap + credentials  (needed to clone anything over SSH)
@@ -12,7 +14,7 @@
 #   4. chezmoi                  ($HOME dotfiles)
 #   5. roles consuming dotfiles (they read files chezmoi just wrote)
 - name: Converge workstation
-  hosts: localhost
+  hosts: all
   gather_facts: true
 
   # yay and papirus-folders shell out to sudo with no tty, so they need a live
@@ -25,65 +27,110 @@
       changed_when: false
       tags: [always]
 
+    - name: Fail when the inventory host is not this machine
+      ansible.builtin.assert:
+        that: inventory_hostname == ansible_facts.hostname
+        fail_msg: >-
+          Running as {{ inventory_hostname }} on {{ ansible_facts.hostname }}.
+          Every host converges itself over a local connection — pass
+          `--limit {{ ansible_facts.hostname }}` (bootstrap.sh does this for you).
+      tags: [always]
+
   roles:
+    # First, and almost always skipped: the one-shot flush for a host whose
+    # $HOME has drifted. Everything below it then rebuilds from nothing.
+    - role: reset
+      when: roles_enabled.reset
+      tags: [reset]
+
     - role: base
+      when: roles_enabled.base
       tags: [base, bootstrap]
     - role: sudoers
+      when: roles_enabled.sudoers
       tags: [system, sudoers]
     - role: password_manager
-      when: secrets_backend == 'pass-cli'
+      when: roles_enabled.password_manager
       tags: [secrets, bootstrap]
     - role: secrets
+      when: roles_enabled.secrets
       tags: [secrets, bootstrap]
 
     - role: packages
+      when: roles_enabled.packages
       tags: [packages]
 
+    # After packages (so a removal pass has the package lists) and before the
+    # system roles, so a disabled role is torn down before its neighbours
+    # converge on top of it.
+    - role: cleanup
+      when: roles_enabled.cleanup
+      tags: [cleanup]
+
     - role: user_dirs
+      when: roles_enabled.user_dirs
       tags: [user]
     - role: login_shell
+      when: roles_enabled.login_shell
       tags: [system, shell]
     - role: keyboard
+      when: roles_enabled.keyboard
       tags: [system, keyboard]
     - role: console
+      when: roles_enabled.console
       tags: [system, console]
     - role: desktop_entries
+      when: roles_enabled.desktop_entries
       tags: [system, sessions]
     - role: display_manager
+      when: roles_enabled.display_manager
       tags: [system, display_manager]
     - role: docker
-      when: vms
+      when: roles_enabled.docker
       tags: [system, docker]
     - role: virtualization
-      when: vms
+      when: roles_enabled.virtualization
       tags: [system, virtualization]
     - role: power_profile
-      when: gaming
+      when: roles_enabled.power_profile
       tags: [system, power]
+    - role: gaming
+      when: roles_enabled.gaming
+      tags: [gaming]
     - role: devenv
-      when: devenv
+      when: roles_enabled.devenv
       tags: [devenv]
 
     - role: chezmoi
+      when: roles_enabled.chezmoi
       tags: [dotfiles, chezmoi]
     - role: yazi
+      when: roles_enabled.yazi
       tags: [dotfiles, yazi]
     - role: project_checkouts
+      when: roles_enabled.project_checkouts
       tags: [dotfiles, projects]
     - role: session_env
+      when: roles_enabled.session_env
       tags: [dotfiles, session_env]
     - role: zsh
+      when: roles_enabled.zsh
       tags: [dotfiles, zsh, shell]
     - role: theming
+      when: roles_enabled.theming
       tags: [dotfiles, theming]
     - role: browser_profiles
+      when: roles_enabled.browser_profiles
       tags: [dotfiles, browser]
 
     - role: audio
+      when: roles_enabled.audio
       tags: [audio]
     - role: obsidian_index
+      when: roles_enabled.obsidian_index
       tags: [obsidian, obsidian_index]
     - role: obsidian_linear
+      when: roles_enabled.obsidian_linear
       tags: [obsidian, obsidian_linear]
 
   # These roles ship inside their own checkout (see ansible.cfg's roles_path)
@@ -100,4 +147,5 @@
         quickshell_repo_path: "{{ projects_dest.quickshell }}"
         nvim_repo_path: "{{ projects_dest.nvim }}"
       loop: "{{ projects_with_roles }}"
+      when: roles_enabled[item] | default(true)
       tags: [dotfiles, quickshell, hypr, nvim]

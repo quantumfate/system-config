@@ -1,0 +1,121 @@
+---
+# One pass over gaming_rom_hacks: stat both inputs, patch the pairs that are
+# complete, report the ones that are not. See README.md for why neither the
+# base ROMs nor the patches are carried in this repo.
+
+- name: Look for the base ROMs
+  ansible.builtin.stat:
+    path: "{{ gaming_root }}/roms/{{ item.system }}/{{ item.base }}"
+    checksum_algorithm: sha1
+    get_checksum: "{{ item.base_sha1 is defined }}"
+  register: gaming_base_stat
+  loop: "{{ gaming_rom_hacks }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Look for the patches
+  ansible.builtin.stat:
+    path: "{{ gaming_root }}/patches/{{ item.patch }}"
+  register: gaming_patch_stat
+  loop: "{{ gaming_rom_hacks }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# A hack is buildable only with both halves present. Zipping the two stat
+# results back onto the entries keeps the rest of the file free of index math.
+- name: Split the hacks into buildable and incomplete
+  ansible.builtin.set_fact:
+    gaming_hacks_ready: >-
+      {{ gaming_rom_hacks | zip(gaming_base_stat.results, gaming_patch_stat.results)
+         | selectattr('1.stat.exists') | selectattr('2.stat.exists')
+         | map(attribute=0) | list }}
+    gaming_hacks_missing: >-
+      {{ gaming_rom_hacks | zip(gaming_base_stat.results, gaming_patch_stat.results)
+         | rejectattr('1.stat.exists') | map(attribute=0) | list
+       + gaming_rom_hacks | zip(gaming_base_stat.results, gaming_patch_stat.results)
+         | selectattr('1.stat.exists') | rejectattr('2.stat.exists')
+         | map(attribute=0) | list }}
+
+- name: Report the hacks missing an input
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.name }} skipped — needs
+      roms/{{ item.system }}/{{ item.base }} and patches/{{ item.patch }}
+      under {{ gaming_root }}.
+  loop: "{{ gaming_hacks_missing }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# A patch is cut against one exact dump. When the entry pins base_sha1, saying
+# so up front beats xdelta3's "target window checksum mismatch" ten seconds in.
+- name: Report base ROMs that do not match the pinned checksum
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.0.name }} base ROM is not the dump this patch was cut against —
+      expected sha1 {{ item.0.base_sha1 }}, got {{ item.1.stat.checksum }}.
+  loop: >-
+    {{ gaming_rom_hacks | zip(gaming_base_stat.results)
+       | selectattr('1.stat.exists')
+       | selectattr('0.base_sha1', 'defined') | list }}
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: item.0.base_sha1 != item.1.stat.checksum
+
+# flips speaks BPS/IPS/UPS, xdelta3 the .xdelta patches most DS hacks ship.
+# creates: makes this a no-op once the ROM is built.
+- name: Apply BPS/IPS/UPS patches
+  ansible.builtin.command:
+    argv:
+      - flips
+      - --apply
+      - "{{ gaming_root }}/patches/{{ item.patch }}"
+      - "{{ gaming_root }}/roms/{{ item.system }}/{{ item.base }}"
+      - "{{ gaming_root }}/roms/{{ item.system }}/{{ item.output }}"
+    creates: "{{ gaming_root }}/roms/{{ item.system }}/{{ item.output }}"
+  loop: "{{ gaming_hacks_ready | rejectattr('patch', 'search', '\\.xdelta$') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: gaming_patch_flips
+  failed_when: false
+
+- name: Apply xdelta patches
+  ansible.builtin.command:
+    argv:
+      - xdelta3
+      - -d
+      - -s
+      - "{{ gaming_root }}/roms/{{ item.system }}/{{ item.base }}"
+      - "{{ gaming_root }}/patches/{{ item.patch }}"
+      - "{{ gaming_root }}/roms/{{ item.system }}/{{ item.output }}"
+    creates: "{{ gaming_root }}/roms/{{ item.system }}/{{ item.output }}"
+  loop: "{{ gaming_hacks_ready | selectattr('patch', 'search', '\\.xdelta$') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: gaming_patch_xdelta
+  failed_when: false
+
+# A patch that will not apply is a wrong base ROM, not a broken playbook: it
+# must not take the rest of the converge down with it.
+- name: Report the patches that would not apply
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.item.name }} not built — {{ item.stderr | default('') | trim }}
+  loop: >-
+    {{ (gaming_patch_flips.results | default([]))
+       + (gaming_patch_xdelta.results | default([])) }}
+  loop_control:
+    label: "{{ item.item.name | default('') }}"
+  when: item.rc | default(0) != 0
+
+# xdelta3 cleans up after itself, flips does not always: a half-written ROM
+# would satisfy the `creates:` guard and never be rebuilt.
+- name: Remove the half-written output of a failed patch
+  ansible.builtin.file:
+    path: "{{ gaming_root }}/roms/{{ item.item.system }}/{{ item.item.output }}"
+    state: absent
+  loop: >-
+    {{ (gaming_patch_flips.results | default([]))
+       + (gaming_patch_xdelta.results | default([])) }}
+  loop_control:
+    label: "{{ item.item.name | default('') }}"
+  when: item.rc | default(0) != 0

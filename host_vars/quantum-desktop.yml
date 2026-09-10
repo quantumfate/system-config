@@ -1,0 +1,23 @@
+---
+# The main workstation: two DisplayPort heads, NVIDIA, everything on.
+# Monitor names match the `quantum-desktop` entry in the hypr checkout's
+# hyprland.lua, which is the other consumer of these.
+
+profile: desktop
+
+primary_monitor: DP-1
+secondary_monitor: DP-2
+
+gaming: true
+vms: true
+llms: true
+devenv: true
+
+# The one-shot ~/.config flush is refused on this host, whatever is passed on
+# the command line. This is the machine that defines what "converged" means;
+# nothing here has drifted from the repo, and its browser profiles and app
+# logins are not worth the archive-and-restore dance.
+reset_enabled: false
+
+# Nothing else to disagree with — roles_default already describes this machine.
+roles_override: {}

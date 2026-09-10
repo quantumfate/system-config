@@ -46,14 +46,23 @@ command -v ansible-playbook >/dev/null || sudo pacman -S --needed --noconfirm an
 
 ansible-galaxy collection install -r requirements.yml
 
+# Every host converges itself over a local connection, so a run is always
+# limited to this machine's own inventory entry (and its host_vars).
+host="$(hostname)"
+if ! grep -q "^        ${host}:$" inventory/hosts.yml; then
+    echo "No inventory entry for '${host}'. Add it to inventory/hosts.yml and create host_vars/${host}.yml." >&2
+    exit 1
+fi
+limit=(--limit "$host")
+
 if [[ "$verbose" == "true" && ${#roles[@]} -eq 0 ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml --ask-become-pass "$@" -vvvv
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "$@" -vvvv
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "false" ]]; then
-    exec ansible-playbook site.yml --ask-become-pass -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass -t "$(IFS=,; echo "${roles[*]}")" "$@"
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "true" ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml --ask-become-pass -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
 else
-    exec ansible-playbook site.yml --ask-become-pass "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "$@"
 fi

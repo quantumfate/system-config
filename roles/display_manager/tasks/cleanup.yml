@@ -1,0 +1,22 @@
+---
+# Inverse of main.yml: hand the console back. Not to be confused with
+# teardown.yml, which main.yml runs to remove *competing* greeters while sddm
+# stays. A host that lands here wants something else to own the login screen —
+# on a laptop, greetd/tuigreet from laptop_packages.
+
+- name: Disable sddm
+  become: true
+  ansible.builtin.systemd_service:
+    name: sddm.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: Remove the sddm drop-ins this role wrote
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/sddm.conf.d/theme.conf
+    - /etc/sddm/Xsetup

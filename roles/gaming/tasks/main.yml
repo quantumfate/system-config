@@ -1,0 +1,18 @@
+---
+# Directory layout and ROM-hack patching. Package installs live in
+# roles/packages; this role assumes the binaries exist.
+
+- name: Ensure the games directory layout exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ gaming_dirs }}"
+
+- name: Wire the pacman libretro cores into Lutris
+  ansible.builtin.include_tasks: lutris_libretro.yml
+  when: gaming_lutris_libretro | bool
+
+- name: Build ROM hacks
+  ansible.builtin.include_tasks: rom_hacks.yml
+  when: gaming_rom_hacks | length > 0

@@ -1,0 +1,29 @@
+---
+# Inverse of main.yml: the notify unit and the WirePlumber drop-ins. PipeWire
+# and WirePlumber themselves are packaged and preset-enabled — untouched, so
+# sound keeps working without this role's opinions layered on top.
+
+- name: Disable the audio-notify user unit
+  ansible.builtin.systemd_service:
+    name: audio-notify.service
+    enabled: false
+    state: stopped
+    scope: user
+  failed_when: false
+
+- name: Remove the files this role deployed
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ target_home }}/.config/systemd/user/audio-notify.service"
+    - "{{ target_home }}/.config/wireplumber/wireplumber.conf.d/90-bt-auto-switch.conf"
+    - "{{ target_home }}/.config/wireplumber/wireplumber.conf.d/50-bluetooth-policy.conf"
+    - "{{ target_home }}/.local/share/wireplumber/scripts/90-bt-auto-switch.lua"
+  register: audio_files_removed
+
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when: audio_files_removed.changed

@@ -1,0 +1,41 @@
+---
+# Inverse of main.yml. Domains and storage pools under /var/lib/libvirt survive;
+# this only stops the daemons and gives back the privileges.
+
+- name: Disable libvirt and cockpit
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop:
+    - libvirtd.service
+    - libvirtd.socket
+    - cockpit.socket
+  failed_when: false
+
+# wheel is deliberately absent: main.yml appends it, but sudo access is not
+# this role's to take away.
+- name: Drop the user from the virtualization groups
+  become: true
+  ansible.builtin.command: gpasswd --delete {{ target_user }} {{ item }}
+  loop: [libvirt, kvm]
+  register: libvirt_group_drop
+  changed_when: libvirt_group_drop.rc == 0
+  failed_when: false
+
+- name: Withdraw the libvirt bridge rules
+  become: true
+  community.general.ufw:
+    rule: allow
+    delete: true
+    direction: "{{ item.direction }}"
+    interface: virbr0
+    route: "{{ item.route }}"
+  loop:
+    - {direction: in, route: false}
+    - {direction: out, route: false}
+    - {direction: in, route: true}
+    - {direction: out, route: true}
+  failed_when: false
+  notify: Reload ufw

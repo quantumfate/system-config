@@ -1,0 +1,11 @@
+---
+# Uninstall the package sets belonging to disabled features too, not just their
+# units and config. Off by default: pacman removals are the one part of a
+# teardown that can take a shared dependency with them, so it stays a decision
+# you make per run (`-e cleanup_remove_packages=true`) or per host.
+cleanup_remove_packages: false
+
+# Never dispatched into. The external ones (see ansible.cfg's roles_path) live
+# in a checkout that may not exist yet; `reset` and `cleanup` are the machinery
+# itself, and "reset is off" is the normal state, not something to tear down.
+cleanup_skip: "{{ projects_with_roles + ['reset', 'cleanup'] }}"

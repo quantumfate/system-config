@@ -1,6 +1,10 @@
 ---
-# Assembles the package set from the feature flags, then hands the whole list
-# to yay in one transaction (repo + AUR alike).
+# Assembles the package set from the host's profile and enabled roles, then
+# hands the whole list to yay in one transaction (repo + AUR alike).
+#
+# The optional sets follow `roles_enabled`, not the raw feature flags, so a
+# host that turns a role off in its roles_override does not still get that
+# role's packages installed.
 
 - name: Build package list
   ansible.builtin.set_fact:
@@ -8,9 +12,10 @@
       {{ (common_packages
           + (desktop_packages if profile == 'desktop' else [])
           + (laptop_packages if profile == 'laptop' else [])
-          + (dev_packages if devenv else [])
-          + (gaming_packages if gaming else [])
-          + (vm_packages if vms else []))
+          + (dev_packages if roles_enabled.devenv | bool else [])
+          + (gaming_packages if roles_enabled.gaming | bool else [])
+          + (vm_packages if (roles_enabled.docker | bool
+                             or roles_enabled.virtualization | bool) else []))
          | unique }}
 
 - name: Install packages

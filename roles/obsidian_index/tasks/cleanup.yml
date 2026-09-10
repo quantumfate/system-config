@@ -1,0 +1,23 @@
+---
+# Inverse of main.yml. The vault is untouched — this only stops the watcher
+# that re-pins index callouts.
+
+- name: Disable the normalizer watcher
+  ansible.builtin.systemd_service:
+    name: obsidian-index-normalize.service
+    enabled: false
+    state: stopped
+    scope: user
+  failed_when: false
+
+- name: Remove the unit
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user/obsidian-index-normalize.service"
+    state: absent
+  register: obsidian_index_unit_removed
+
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when: obsidian_index_unit_removed.changed

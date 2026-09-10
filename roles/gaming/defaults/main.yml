@@ -1,0 +1,51 @@
+---
+# Emulation goes through Lutris' libretro runner rather than standalone
+# emulators, so one launcher owns every game and Lutris owns the runtime.
+gaming_lutris_libretro: true
+
+# Everything under one root so saves, ROMs and patches are one backup target.
+gaming_root: "{{ target_home }}/Games"
+
+gaming_dirs:
+  - "{{ gaming_root }}/roms/gba"
+  - "{{ gaming_root }}/roms/nds"
+  - "{{ gaming_root }}/patches"
+  - "{{ gaming_root }}/saves"
+  # Console BIOS/firmware dumps. The DS cores declare firmware, so Lutris
+  # refuses to launch them until a BIOS folder is configured — even for the
+  # games that boot fine without one.
+  - "{{ gaming_root }}/firmware"
+
+# ROM hacks are distributed as patches, never as playable ROMs: the patch is
+# the author's own diff, the base cartridge dump is Nintendo's. So this role
+# carries neither. You drop a legally dumped base ROM in roms/<system>/ and the
+# author's patch in patches/, and the role runs flips over the pair — nothing
+# copyrighted ever enters this repo or leaves your machine.
+#
+#   base:   filename under {{ gaming_root }}/roms/<system>
+#   patch:  filename under {{ gaming_root }}/patches (.bps / .ips / .ups)
+#   output: filename written next to the base ROM
+#
+# An entry whose base or patch is missing is reported and skipped, so a partial
+# collection still converges.
+gaming_rom_hacks:
+  - name: Run and Bun
+    system: gba
+    base: pokemon-emerald.gba
+    patch: run-and-bun.bps
+    output: run-and-bun.gba
+  - name: Emerald Kaizo
+    system: gba
+    base: pokemon-emerald.gba
+    patch: emerald-kaizo.ips
+    output: emerald-kaizo.gba
+  - name: Platinum Kaizo
+    system: nds
+    base: pokemon-platinum.nds
+    patch: platinum-kaizo.xdelta
+    output: platinum-kaizo.nds
+
+# Where Lutris keeps the libretro runner. roles/gaming fills it with symlinks
+# to the pacman-installed RetroArch and cores instead of letting Lutris pull
+# unversioned builds from the libretro buildbot.
+gaming_lutris_retroarch_dir: "{{ target_home }}/.local/share/lutris/runners/retroarch"
