@@ -326,4 +326,4 @@ desktop_packages:
   - catppuccin-sddm-theme-macchiato
 
 laptop_packages:
-  - greetd-tuigreet-fork-bin
+  - greetd-tuigreet
