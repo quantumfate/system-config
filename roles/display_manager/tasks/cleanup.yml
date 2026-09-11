@@ -1,8 +1,9 @@
 ---
 # Inverse of main.yml: hand the console back. Not to be confused with
 # teardown.yml, which main.yml runs to remove *competing* greeters while sddm
-# stays. A host that lands here wants something else to own the login screen —
-# on a laptop, greetd/tuigreet from laptop_packages.
+# stays. A host that wants a different login screen sets `display_manager:
+# false`; making that run mid-session stops sddm (and with it the live seat),
+# so it must be undone only from outside the graphical session.
 
 - name: Disable sddm
   become: true

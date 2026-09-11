@@ -2,8 +2,8 @@
 # The laptop. Internal panel plus an occasional HDMI head; same names as the
 # `quantum-laptop` entry in the hypr checkout's hyprland.lua.
 #
-# greetd/tuigreet comes in through laptop_packages (profile == 'laptop'), so
-# the sddm-owning display_manager role is off here.
+# SDDM owns the greeter here just like on the desktop, so the display_manager
+# role runs on this host too (no override below).
 #
 # `gaming: false` also takes power_profile with it (roles_default derives it
 # from the flag) — epp-performance pins the CPU to the performance governor,
@@ -25,6 +25,4 @@ devenv: true
 # afterwards.
 reset_enabled: true
 
-roles_override:
-  # SDDM is the desktop greeter; the laptop boots into tuigreet.
-  display_manager: false
+roles_override: {}

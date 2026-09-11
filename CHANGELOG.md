@@ -20,3 +20,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   out of chezmoi. Theme archives are no longer re-extracted on every run.
 - `roles/reset` moves the dotfiles source clone into the reset archive instead
   of deleting it, so uncommitted or unpushed dotfiles work survives a flush.
+- `quantum-laptop` no longer disables the `display_manager` role. The laptop
+  kept sddm (nothing had enabled greetd in its place), so the always-on
+  `cleanup` role stopped and disabled a live sddm mid-run — killing the
+  graphical seat and black-screening the session. The laptop now converges on
+  sddm exactly like the desktop, and the now-empty `laptop_packages` set no
+  longer drags in greetd-tuigreet.

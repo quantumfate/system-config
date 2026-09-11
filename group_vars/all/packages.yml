@@ -325,5 +325,4 @@ desktop_packages:
   - catppuccin-sddm-theme-latte
   - catppuccin-sddm-theme-macchiato
 
-laptop_packages:
-  - greetd-tuigreet
+laptop_packages: []
