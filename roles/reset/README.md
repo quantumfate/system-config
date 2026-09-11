@@ -6,7 +6,9 @@ Archives `~/.config` wholesale, tears every user unit back down to its vendor
 preset, and lets the rest of the same run rebuild from nothing — so no unit,
 drop-in or config file that this repo no longer installs can linger.
 
-**Nothing is deleted.** `~/.config` is _moved_ to
+**Almost nothing is deleted.** The dotfiles source clone under
+`~/.local/share/chezmoi` is removed (it regenerates itself), but everything
+else of value — `~/.config` first and foremost — is _moved_ to
 `~/.config-pre-reset-<timestamp>`. Delete that by hand once the rebuilt session
 looks right.
 
@@ -16,11 +18,14 @@ looks right.
    what the machine looked like).
 2. `systemctl --user disable --now` on each of them.
 3. Moves `~/.config` aside and recreates it empty.
-4. Copies `reset_config_keep` back out of the archive.
-5. `daemon-reload`, `reset-failed`, then `preset-all` — which puts the
+4. Removes `~/.local/share/chezmoi` — the dotfiles source clone, the one chezmoi
+   leftover that lives outside `~/.config` and would survive the flush. The
+   chezmoi role re-clones it later in the same run.
+5. Copies `reset_config_keep` back out of the archive.
+6. `daemon-reload`, `reset-failed`, then `preset-all` — which puts the
    _packaged_ user units back exactly where a fresh install would have them.
    Roles re-enable their own units later in the same run.
-6. Writes `~/.local/state/system-config/reset-<hostname>.done`.
+7. Writes `~/.local/state/system-config/reset-<hostname>.done`.
 
 ## What is not covered
 

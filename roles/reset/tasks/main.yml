@@ -51,6 +51,14 @@
         state: directory
         mode: "0700"
 
+    # chezmoi's source clone lives outside ~/.config and would survive the
+    # flush. Tear it down so the chezmoi role re-clones from scratch on the
+    # next run. ~/.config/chezmoi/ is already gone with the archive.
+    - name: Remove the chezmoi dotfiles source
+      ansible.builtin.file:
+        path: "{{ chezmoi_source }}"
+        state: absent
+
     # mkdir -p because a keep entry may be nested (mozilla/firefox), and its
     # parent went with the flush.
     - name: Restore the keep-list from the archive
@@ -93,6 +101,7 @@
           Reset on {{ ansible_facts.date_time.iso8601 }}
           Archive: {{ reset_archive }}
           Kept: {{ reset_config_keep | join(', ') | default('nothing', true) }}
+          Chezmoi source: removed (re-cloned on the next run)
 
           Enabled user units at the time:
           {{ reset_enabled_units.stdout | default('(none)') }}
