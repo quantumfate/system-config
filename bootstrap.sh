@@ -9,14 +9,16 @@ Options:
   -h, --help      Show this help
   -v              Verbose mode
   -r "role [role ...]"  Only run the given roles (tags); space-separated, quoted
+  -e "VAR=VALUE"  Pass an extra ansible variable (e.g. reset_confirm=<host>); repeatable
 EOF
 }
 
 verbose=false
 roles=()
+extra_vars=()
 
 # Parse options
-while getopts "hvr:" opt; do
+while getopts "hvr:e:" opt; do
     case "${opt}" in
     h)
         usage
@@ -27,6 +29,9 @@ while getopts "hvr:" opt; do
         ;;
     r)
         read -r -a roles <<<"$OPTARG"
+        ;;
+    e)
+        extra_vars+=(-e "$OPTARG")
         ;;
     [?])
         echo "Invalid option: -${OPTARG}" >&2
@@ -57,12 +62,12 @@ limit=(--limit "$host")
 
 if [[ "$verbose" == "true" && ${#roles[@]} -eq 0 ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "$@" -vvvv
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" "$@" -vvvv
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "false" ]]; then
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -t "$(IFS=,; echo "${roles[*]}")" "$@"
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "true" ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
 else
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" "$@"
 fi
