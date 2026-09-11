@@ -52,12 +52,15 @@
         mode: "0700"
 
     # chezmoi's source clone lives outside ~/.config and would survive the
-    # flush. Tear it down so the chezmoi role re-clones from scratch on the
-    # next run. ~/.config/chezmoi/ is already gone with the archive.
-    - name: Remove the chezmoi dotfiles source
-      ansible.builtin.file:
-        path: "{{ chezmoi_source }}"
-        state: absent
+    # flush, so it joins the archive and the chezmoi role re-clones it later in
+    # this run. Moved, never deleted: the clone doubles as the dotfiles dev
+    # checkout, and uncommitted or unpushed work there exists nowhere else.
+    # ~/.config/chezmoi/ already went with the archive above.
+    - name: Archive the chezmoi dotfiles source
+      ansible.builtin.command: mv {{ chezmoi_source }} {{ reset_archive }}/.chezmoi-source
+      args:
+        creates: "{{ reset_archive }}/.chezmoi-source"
+        removes: "{{ chezmoi_source }}"
 
     # mkdir -p because a keep entry may be nested (mozilla/firefox), and its
     # parent went with the flush.
@@ -101,7 +104,7 @@
           Reset on {{ ansible_facts.date_time.iso8601 }}
           Archive: {{ reset_archive }}
           Kept: {{ reset_config_keep | join(', ') | default('nothing', true) }}
-          Chezmoi source: removed (re-cloned on the next run)
+          Chezmoi source: moved to {{ reset_archive }}/.chezmoi-source (re-cloned by the chezmoi role)
 
           Enabled user units at the time:
           {{ reset_enabled_units.stdout | default('(none)') }}
@@ -111,9 +114,10 @@
     - name: Report the archive location
       ansible.builtin.debug:
         msg: >-
-          ~/.config archived to {{ reset_archive }} — browser profiles and app
-          logins are in there, nothing was deleted. Delete it by hand once the
-          rebuilt session looks right.
+          ~/.config archived to {{ reset_archive }} — browser profiles, app
+          logins and the old dotfiles clone (.chezmoi-source) are in there,
+          nothing was deleted. Delete it by hand once the rebuilt session looks
+          right.
 
 - name: Report an already-reset host
   ansible.builtin.debug:

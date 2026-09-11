@@ -45,15 +45,12 @@ theme_stale_files:
 
 # Per-app catppuccin theme tarballs, unpacked into each app's theme dir.
 # archive_subdir is the directory inside the tarball whose contents land in dest.
+#
+# Only themes a role-rendered config points at: kitty.conf (roles/zsh), the
+# qt5ct/qt6ct/Kvantum files here. Themes a chezmoi-owned config includes — btop,
+# foot, rofi, zathura, spicetify, wlogout — are .chezmoiexternal entries in the
+# dotfiles instead, so each theme lives with the config that needs it.
 theme_archives:
-  - name: btop
-    url: https://github.com/catppuccin/btop/archive/refs/heads/main.tar.gz
-    archive_subdir: btop-main/themes
-    dest: "{{ target_home }}/.config/btop/themes"
-  - name: foot
-    url: https://github.com/catppuccin/foot/archive/refs/heads/main.tar.gz
-    archive_subdir: foot-main/themes
-    dest: "{{ target_home }}/.config/foot/themes"
   - name: kitty
     url: https://github.com/catppuccin/kitty/archive/refs/heads/main.tar.gz
     archive_subdir: kitty-main/themes

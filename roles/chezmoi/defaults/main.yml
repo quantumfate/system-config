@@ -2,3 +2,8 @@
 # Dotfiles source. Also the remote chezmoi updates and auto-pushes to.
 chezmoi_repo: git@codeberg.org:quantumfate/dotfiles.git
 chezmoi_source: "{{ target_home }}/.local/share/chezmoi"
+
+# How often chezmoi-externals.timer checks the externals, as an OnCalendar
+# expression. A check is free until an entry's refreshPeriod (set per entry in
+# .chezmoiexternal.toml) lapses, so this only bounds how late a refresh lands.
+chezmoi_externals_interval: daily

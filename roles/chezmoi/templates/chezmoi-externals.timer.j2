@@ -1,0 +1,13 @@
+[Unit]
+Description=Periodic check of the chezmoi externals
+
+[Timer]
+# Wall-clock rather than monotonic: Persistent= only applies to OnCalendar, and
+# a monotonic OnBootSec= stops rescheduling once it has elapsed.
+OnCalendar={{ chezmoi_externals_interval }}
+# A check missed while suspended or powered off runs once on resume.
+Persistent=true
+Unit=chezmoi-externals.service
+
+[Install]
+WantedBy=timers.target

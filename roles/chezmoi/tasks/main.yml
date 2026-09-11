@@ -71,3 +71,31 @@
     scope: user
     daemon_reload: true
   failed_when: false
+
+# Keeps .chezmoiexternal.toml fresh between playbook runs; the apply above
+# already refreshes anything stale.
+- name: Ensure the systemd user dir exists
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user"
+    state: directory
+    mode: "0755"
+
+- name: Deploy the chezmoi-externals user units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ target_home }}/.config/systemd/user/{{ item }}"
+    mode: "0644"
+  loop:
+    - chezmoi-externals.service
+    - chezmoi-externals.timer
+  notify: Restart chezmoi-externals timer
+
+# Only the timer is enabled; the oneshot service stays trigger-driven so
+# `systemctl --user start chezmoi-externals` is a clean manual check.
+- name: Enable the chezmoi-externals timer
+  ansible.builtin.systemd_service:
+    name: chezmoi-externals.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+    scope: user

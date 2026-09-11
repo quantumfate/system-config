@@ -30,6 +30,8 @@
     - "{{ target_home }}/.config/environment.d"
     - "{{ target_home }}/.icons/default"
     - "{{ target_home }}/.local/share/nwg-look"
+    # Used to come from chezmoi; nothing else creates it since user.js moved here.
+    - "{{ browser_config_src }}"
 
 - name: Render the toolkit settings
   ansible.builtin.template:

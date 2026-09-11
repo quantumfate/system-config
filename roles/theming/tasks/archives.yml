@@ -25,11 +25,34 @@
   loop: "{{ theme_cache.results }}"
   loop_control:
     label: "{{ item.item.name }}"
+  register: theme_download
 
+- name: Check extracted theme archives
+  ansible.builtin.stat:
+    path: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}/{{ item.archive_subdir }}"
+  loop: "{{ theme_archives }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: theme_extracted
+
+# Only after a fresh download or a wiped cache; unarchive cannot tell on its
+# own and re-extracts every run.
 - name: Extract theme archives
   ansible.builtin.unarchive:
-    src: "{{ target_home }}/.cache/catppuccin/{{ item.name }}.tar.gz"
-    dest: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.name }}"
+    src: "{{ target_home }}/.cache/catppuccin/{{ item.0.item.item.name }}.tar.gz"
+    dest: "{{ target_home }}/.cache/catppuccin/extracted/{{ item.0.item.item.name }}"
+  loop: "{{ theme_download.results | zip(theme_extracted.results) }}"
+  loop_control:
+    label: "{{ item.0.item.item.name }}"
+  when: item.0 is changed or not item.1.stat.exists
+
+# rsync creates only the last path component, and main.yml creates the
+# qt5ct/qt6ct parents only after this file runs.
+- name: Ensure the theme destination directories exist
+  ansible.builtin.file:
+    path: "{{ item.dest }}"
+    state: directory
+    mode: "0755"
   loop: "{{ theme_archives }}"
   loop_control:
     label: "{{ item.name }}"

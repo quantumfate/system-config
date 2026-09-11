@@ -6,11 +6,9 @@ Archives `~/.config` wholesale, tears every user unit back down to its vendor
 preset, and lets the rest of the same run rebuild from nothing — so no unit,
 drop-in or config file that this repo no longer installs can linger.
 
-**Almost nothing is deleted.** The dotfiles source clone under
-`~/.local/share/chezmoi` is removed (it regenerates itself), but everything
-else of value — `~/.config` first and foremost — is _moved_ to
-`~/.config-pre-reset-<timestamp>`. Delete that by hand once the rebuilt session
-looks right.
+**Nothing is deleted.** `~/.config` is _moved_ to
+`~/.config-pre-reset-<timestamp>`, and the dotfiles source clone goes in with it.
+Delete that by hand once the rebuilt session looks right.
 
 ## What it does
 
@@ -18,9 +16,12 @@ looks right.
    what the machine looked like).
 2. `systemctl --user disable --now` on each of them.
 3. Moves `~/.config` aside and recreates it empty.
-4. Removes `~/.local/share/chezmoi` — the dotfiles source clone, the one chezmoi
-   leftover that lives outside `~/.config` and would survive the flush. The
-   chezmoi role re-clones it later in the same run.
+4. Moves `~/.local/share/chezmoi` — the dotfiles source clone, the one chezmoi
+   leftover that lives outside `~/.config` and would survive the flush — into
+   the archive as `.chezmoi-source`. The chezmoi role re-clones it later in the
+   same run. Moved rather than deleted because the clone doubles as the dotfiles
+   dev checkout: uncommitted or unpushed work there exists nowhere else. Anything
+   you had not pushed is in the archive's `.chezmoi-source`.
 5. Copies `reset_config_keep` back out of the archive.
 6. `daemon-reload`, `reset-failed`, then `preset-all` — which puts the
    _packaged_ user units back exactly where a fresh install would have them.
@@ -79,7 +80,7 @@ the marker.
 | ----------------------- | ------------------------------------------------ | ------------------------------------------------- |
 | `reset_config_keep`     | `[]`                                             | paths under `~/.config` restored from the archive |
 | `reset_allow_graphical` | `false`                                          | run despite a live graphical session              |
-| `reset_archive`         | `~/.config-pre-reset-<timestamp>`                | where `~/.config` goes                            |
+| `reset_archive`         | `~/.config-pre-reset-<timestamp>`                | where `~/.config` and the dotfiles clone go       |
 | `reset_marker`          | `~/.local/state/system-config/reset-<host>.done` | proof it already ran                              |
 
 See also [`cleanup`](../cleanup/README.md), which is the recurring counterpart:

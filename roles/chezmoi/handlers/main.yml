@@ -1,0 +1,7 @@
+---
+- name: Restart chezmoi-externals timer
+  ansible.builtin.systemd_service:
+    name: chezmoi-externals.timer
+    state: restarted
+    daemon_reload: true
+    scope: user

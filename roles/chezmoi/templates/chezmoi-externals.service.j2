@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh chezmoi externals whose refreshPeriod has lapsed
+Documentation=https://www.chezmoi.io/reference/special-files/chezmoiexternal-format/
+# Externals are downloads. Offline, the check fails and the timer tries again
+# at the next {{ chezmoi_externals_interval }} tick.
+
+[Service]
+Type=oneshot
+# --include externals: only the files chezmoi downloads, never a dotfile.
+# --force: those files are chezmoi's alone, and with no tty a "changed since
+# chezmoi last wrote it" prompt would fail the run instead of restoring them.
+ExecStart=/usr/bin/chezmoi apply --source {{ chezmoi_source }} --include externals --refresh-externals=auto --force --no-tty

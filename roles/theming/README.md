@@ -2,7 +2,10 @@
 
 GTK, Qt, cursor and browser theming — one flavour, one accent, one type scale,
 published to every toolkit and to the XDG portals. Also installs the per-app
-catppuccin tarballs (`archives.yml`). Supersedes chezmoi for the GTK, Qt,
+catppuccin tarballs for kitty, qt5ct/qt6ct and Kvantum (`archives.yml`) — the
+themes a role-rendered config points at. Themes that chezmoi-owned configs
+include are `.chezmoiexternal` entries in the dotfiles (see
+[`roles/chezmoi`](../chezmoi/README.md)). Supersedes chezmoi for the GTK, Qt,
 Kvantum, xsettingsd and Zen `user.js` files.
 
 - **Vars** `theme_flavour`, `theme_accent`, `theme_packages`, `theme_archives`

@@ -1,0 +1,30 @@
+---
+# Inverse of the timer half of main.yml. The dotfiles, and the externals already
+# applied, stay — they are the user's files, and a disabled role only stops
+# converging them.
+
+- name: Disable the chezmoi-externals timer and service
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    scope: user
+  loop:
+    - chezmoi-externals.timer
+    - chezmoi-externals.service
+  failed_when: false
+
+- name: Remove the units
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/systemd/user/{{ item }}"
+    state: absent
+  loop:
+    - chezmoi-externals.timer
+    - chezmoi-externals.service
+  register: chezmoi_units_removed
+
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when: chezmoi_units_removed.changed

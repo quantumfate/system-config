@@ -15,8 +15,10 @@ Ansible playbook that provisions my CachyOS/Arch system end to end, then hands
 | Quickshell desktop shell, hypr, nvim                   | Ansible, from a role inside each checkout                                |
 | Prompted values (profile, monitors, feature flags)     | Ansible → rendered into `~/.config/chezmoi/chezmoi.toml`                 |
 
-chezmoi no longer prompts and no longer carries `.chezmoiscripts` or
-`.chezmoiexternal`. All of it lives in `roles/`.
+chezmoi no longer prompts and no longer carries `.chezmoiscripts`; that lives in
+`roles/`. Its one `.chezmoiexternal` pulls the catppuccin themes that
+chezmoi-owned configs include, kept fresh by a timer from
+[`roles/chezmoi`](roles/chezmoi/README.md).
 
 `site.yml` owns ordering and tags, nothing else. Hard requirements live in a
 role's `meta/dependencies`; `roles_enabled` gates whole roles in `site.yml`, and
