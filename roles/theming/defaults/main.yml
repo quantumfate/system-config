@@ -1,7 +1,18 @@
 ---
-# Catppuccin Macchiato + mauve, the same palette roles/zsh and quickshell use.
+# Which flavour a freshly provisioned machine starts on. It is a SEED, not the
+# answer: the live choice lives in the theme store ($XDG_STATE_HOME/theme.json)
+# and is applied by `,theme.sh`, which this role calls at the end of a converge
+# so a playbook run re-asserts the store rather than this value.
 theme_flavour: macchiato
 theme_accent: mauve
+
+# Every flavour is installed, because switching at runtime can only pick from
+# what is on disk. Adding one here is the whole of "make it switchable to X".
+theme_flavours:
+  - latte
+  - frappe
+  - macchiato
+  - mocha
 
 # Derived theme directory names — one dir per flavour+accent pair.
 theme_gtk: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}-standard+default"
@@ -19,14 +30,28 @@ theme_ui_font_size: 12
 theme_mono_font: "Hack Nerd Font Mono"
 theme_mono_font_size: 12
 
+# The fan-out that applies the theme store to kitty, GTK, Qt and the wallpaper.
+# Lives in the scripts checkout, which is on PATH for a login shell but not for
+# an Ansible command.
+theme_apply_script: "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/,theme.sh"
+
+# How often the sun timer re-resolves the palette. The script decides day vs
+# night; this only sets how soon after the boundary the desk notices.
+theme_auto_interval: hourly
+
 # Pointer size. Nothing else scales the cursor, so it is set large here.
 theme_cursor_size: 28
 
 # Theme assets. Repo and AUR in one yay transaction; the `base` dependency in
 # meta/main.yml is what leaves a valid sudo timestamp for it.
-theme_packages:
-  - catppuccin-gtk-theme-{{ theme_flavour }}
-  - catppuccin-cursors-{{ theme_flavour }}
+theme_packages: >-
+  {{
+    theme_flavours | map('regex_replace', '^', 'catppuccin-gtk-theme-') | list
+    + theme_flavours | map('regex_replace', '^', 'catppuccin-cursors-') | list
+    + theme_extra_packages
+  }}
+
+theme_extra_packages:
   - papirus-icon-theme
   - papirus-folders
   - kvantum

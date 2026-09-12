@@ -41,7 +41,11 @@ map ctrl+0 change_font_size all 0
 
 shell_integration enabled
 
-# Catppuccin Macchiato, installed by roles/theming. The source of the ANSI 16
-# that tspin, grep and ls colour against. A missing include is a startup error,
-# so never point this at a file another role might remove.
-include themes/macchiato.conf
+# The active Catppuccin flavour. The source of the ANSI 16 that tspin, grep and
+# ls colour against.
+#
+# This is a symlink into themes/, repointed by `,theme.sh apply` and answered by
+# kitty on SIGUSR1 — which is why remote control can stay off. A missing include
+# is a startup error, so roles/theming seeds the link before this file lands and
+# never points it at a file another role might remove.
+include current-theme.conf
