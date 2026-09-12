@@ -271,19 +271,30 @@ Dotfiles that live outside this repo.
 
 C-b is the prefix. The session chip fills mauve while it is held.
 
-|           |                                              |
-| --------- | -------------------------------------------- |
-| `C-b ?`   | a menu of these bindings, which runs them    |
-| `C-b /`   | every binding tmux has, the raw list         |
-| `C-b C-o` | tms: open or create a session for a project  |
-| `C-b C-s` | pick a session                               |
-| `C-b C-w` | pick a window, from any session              |
-| `C-b s`   | the session tree, most recently active first |
-| `C-b (`   | previous session                             |
-| `C-b )`   | next session                                 |
-| `C-b C-e` | rename this session                          |
-| `C-b C-r` | refresh the session list                     |
-| `C-b C-k` | kill this session (it asks)                  |
+A project is a tmux session, and it starts on a server of its own
+(`,proj.sh`, socket `proj-<name>`) — so projects stay apart unless you put them
+together. `C-b C-o` does exactly that: it adds the project you pick to THIS
+window's server, and from then on `C-b C-s` switches between them without
+leaving the terminal. `C-b o` (SUPER+p) keeps them apart instead, opening the
+project in a window of its own.
+
+Killing is per project, never per server: the neighbours you gathered on one
+server survive it.
+
+|           |                                               |
+| --------- | --------------------------------------------- |
+| `C-b ?`   | a menu of these bindings, which runs them     |
+| `C-b /`   | every binding tmux has, the raw list          |
+| `C-b C-o` | open a project in THIS window                 |
+| `C-b o`   | open a project in a new window                |
+| `C-b C-s` | switch project, among those on this server    |
+| `C-b C-w` | pick a window, on this server                 |
+| `C-b s`   | the session tree, most recently active first  |
+| `C-b (`   | previous session                              |
+| `C-b )`   | next session                                  |
+| `C-b C-d` | close this window, leave the project running  |
+| `C-b C-r` | refresh the project list                      |
+| `C-b C-k` | kill this project (it asks); others survive   |
 | `t`       | tmux                                         |
 | `tl`      | list sessions                                |
 | `tm`      | attach, or start one if there is none        |

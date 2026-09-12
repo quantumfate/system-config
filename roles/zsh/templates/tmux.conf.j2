@@ -1,4 +1,4 @@
-# ~/.tmux.conf — CODING tmux server. Rendered by roles/zsh.
+# ~/.tmux.conf — PROJECT tmux servers. Rendered by roles/zsh.
 # The log server lives on its own socket (~/.config/tmux/logs.conf, same role).
 # Same scheme, same C-b prefix, different socket: no shared state between them.
 
@@ -59,15 +59,32 @@ set -g menu-border-style "fg=#363a4f"
 run ~/.config/tmux/plugins/tmux-cpu/cpu.tmux
 run ~/.config/tmux/plugins/tmux-battery/battery.tmux
 
+# Pickers below stay inside this server — which means this project plus any
+# others `C-b C-o` has gathered onto it, and the grouped views extra windows
+# attach to.
 # Pickers run in a throwaway window, not a popup — a popup bleeds the pane
 # beneath until the picker repaints. No #{...} in the shell strings: tmux would
 # expand them before the shell runs.
-bind C-o new-window -n tms "tms"
+# The project picker runs OUT of this server, never into it: `,proj.sh` owns one
+# server per project, and `tms` started from a pane would attach another
+# project's session onto whichever server you happened to be sitting in — the
+# cross-talk that made "kill this project" reach two of them. `env -u TMUX` is
+# what forces the split; `-b` keeps the pane free while the picker is up.
+# The prefix binding re-points THIS terminal: the client here is detached and
+# the window attaches to the chosen project's server instead. TMUX stays in the
+# environment on purpose — it is how the script finds the client to move.
+bind C-o run-shell -b ",proj.sh --here pick"
+# The same picker, but it leaves this window alone and opens the project in one
+# of its own. `env -u TMUX` is what keeps the new terminal off this server.
+bind o run-shell -b "env -u TMUX ,proj.sh pick"
 bind C-s new-window -n tms "zsh -ic \"tmux list-sessions -F '#S' | fzf --reverse --no-preview | xargs -r tmux switch-client -t\""
 bind C-w new-window -n tms "zsh -ic \"tmux list-windows -a -F '#{session_name}:#{window_index} #{window_name}' | fzf --reverse --no-preview | cut -d' ' -f1 | xargs -r tmux select-window -t\""
-bind C-e command-prompt -p "Rename active session to: " "run-shell 'tms rename %1'"
-bind C-r "run-shell 'tms refresh'"
-bind C-k confirm -p "Kill current session? (y/N):" "run-shell 'tms kill'"
+# No rename binding: the session name IS the project (`,proj.sh` looks the
+# session up by it), so renaming would strand the server and make the next open
+# build a second session beside it.
+bind C-r "run-shell ',proj.sh list --refresh'"
+bind C-k confirm -p "Kill this project and every window of it? (y/N):" "run-shell ',proj.sh -y kill'"
+bind C-d "run-shell ',proj.sh close'"
 bind -r '(' switch-client -p\; refresh-client -S
 bind -r ')' switch-client -n\; refresh-client -S
 
@@ -81,7 +98,8 @@ bind s choose-tree -Zs -O activity -N \
 # middle field is the key that selects it, so the menu teaches the shortcut.
 # tmux's own list-keys dump moves to `C-b /`. Empty "" rows are separators.
 bind ? display-menu -T "#[fg={{ zsh_log_accent }},bold] tmux " -x C -y C \
-  "open or create a project session"  o  "new-window -n tms 'tms'" \
+  "open a project in THIS window"     C-o "run-shell -b ',proj.sh --here pick'" \
+  "open a project in a new window"    o  "run-shell -b \"env -u TMUX ,proj.sh pick\"" \
   "" \
   "pick a session"                    s  "new-window -n tms \"zsh -ic 'tmux list-sessions -F \\\"#S\\\" | fzf --reverse --no-preview | xargs -r tmux switch-client -t'\"" \
   "pick a window, anywhere"           w  "new-window -n tms \"zsh -ic 'tmux list-windows -a -F \\\"#{session_name}:#{window_index} #{window_name}\\\" | fzf --reverse --no-preview | cut -d\\\" \\\" -f1 | xargs -r tmux select-window -t'\"" \
@@ -90,9 +108,9 @@ bind ? display-menu -T "#[fg={{ zsh_log_accent }},bold] tmux " -x C -y C \
   "previous session"                  p  "switch-client -p" \
   "next session"                      n  "switch-client -n" \
   "" \
-  "rename this session"               e  "command-prompt -p 'Rename active session to: ' \"run-shell 'tms rename %1'\"" \
-  "refresh the session list"          r  "run-shell 'tms refresh'" \
-  "kill this session"                 k  "confirm -p 'Kill current session? (y/N):' \"run-shell 'tms kill'\"" \
+  "close this window (project lives)" d  "run-shell ',proj.sh close'" \
+  "refresh the project list"          r  "run-shell ',proj.sh list --refresh'" \
+  "kill this project"                 k  "confirm -p 'Kill this project? (y/N):' \"run-shell ',proj.sh -y kill'\"" \
   "" \
   "all key bindings"                  /  "list-keys -N"
 
