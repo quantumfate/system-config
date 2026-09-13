@@ -72,6 +72,12 @@ theme_extra_packages:
   - qt5ct
   - xsettingsd
   - adwaita-fonts
+  # hyprpaper cannot crossfade. `swww` is the tool that can, but its upstream
+  # repo (github.com/LGFae/swww) is archived; the same author, LGFae, continued
+  # it on Codeberg under the name `awww` (extra/awww). This is that project's
+  # maintained continuation, not a third-party fork — do not "fix" this back to
+  # `swww`, it is gone. `,theme.sh` drives it; see apply_wallpaper there.
+  - awww
 
 # Leftover matugen overrides. User-level, so they win over the theme until removed.
 theme_stale_files:

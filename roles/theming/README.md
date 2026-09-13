@@ -28,6 +28,11 @@ Every toolkit needs telling separately, and the portals read none of those files
 `templates/zen-user.js.j2` renders the shared browser prefs;
 `roles/browser_profiles` links them into each profile.
 
+`awww` (installed via `theme_extra_packages`) is `,theme.sh`'s wallpaper
+backend — swww's maintained continuation under a new name, not a fork. The
+package lands on converge; the daemon swap itself happens the next time
+`,theme.sh` applies a wallpaper, not during the playbook run.
+
 ```sh
 ansible-playbook site.yml -t theming --ask-become-pass         # repo + AUR packages
 ansible-playbook site.yml -t theming --skip-tags privileged    # dotfiles only, no sudo
