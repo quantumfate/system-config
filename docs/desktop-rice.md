@@ -170,9 +170,29 @@ suppresses across four dimensions:
   same map, so which-key can dim a blocked scene's binds.
 
 The check that keeps the store honest is the same lockstep the palette tests
-use: the stored moods must be byte-for-byte equal to Focus.qml's table until
-LEO-237 makes the store the source that Focus mirrors. Until enforcement
-lands, the store is a definition with no teeth — that is deliberate.
+use: the stored moods must be byte-for-byte equal to Focus.qml's table. Since
+LEO-238 the policy has teeth — enforcement is dispatch-time oracles plus one
+systemd seam, never a second interpretation of the store:
+
+- **Oracles.** `focus scene <name>` and `focus bg <task>` are the shell's
+  verdicts: reachability (`reachable`/`blocked`) and task level
+  (`allow`/`defer`/`prevent`/`unset`). The mood panel and every gate read the
+  same functions the IPC exposes.
+- **Notifications.** Every toast history entry carries a `route`
+  (`shown`/`dnd`/`mood`), the queue positions itself per the mood's
+  `position`, and a mood that queues + digests folds its suppressed work into
+  one digest toast on exit.
+- **Background seam.** A mood transition spawns `,scene-apply.sh` (detached,
+  failing open) in the **scripts** repo, which stops/restarts user units per
+  the contract the actor ships with (`etc/scene-managed.json`): units mapped
+  from the mood's reachable scenes and deferred/prevented background tasks,
+  a `protected` rail that is never touched, SIGTERM-only stops, and a
+  decision log at `$XDG_STATE_HOME/scene-policy/log.jsonl`.
+
+Two deliberate policy decisions live in the defaults: **gaming does not refuse
+media** (a Zen media browser stays launchable mid-game), and the **gaming
+scene stops the Obsidian suite** (app + index + Linear sync) to reclaim focus
+and compute — handing it all back when the mood ends.
 
 ## Phases
 
