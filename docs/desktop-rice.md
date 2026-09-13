@@ -60,11 +60,15 @@ dials, not constants: set them per monitor through workspace rules and tune by
 eye over a week.
 
 **Column width.** A tiling layout cannot leave a lone window at half width
-unless the layout is built for it. `hyprscrolling` is — it is installed and
-already configured with `column_width = 0.5` and
-`fullscreen_on_one_column = false`. A single window occupies half the panel and
-the rest stays wallpaper. It is simply not the default on the primary
-workspaces, which are `monocle` and `dwindle`. This is a configuration change.
+unless the layout is built for it. Scrolling is — and since 0.55 it ships with
+Hyprland itself, so there is no plugin to install. With
+`fullscreen_on_one_column = false` a single window takes one column and the rest
+of the tape stays wallpaper.
+
+Widths are declared rather than dragged. The `scrolling_width` window rule gives
+each class a starting column width, so a project terminal opens wider than a
+browser and the pair fills the panel exactly — the work larger than the
+reference, the same way every time, with nothing to adjust by hand.
 
 **Shell spacing.** `Theme.gap` is 12 and `Theme.pad` is 16, but modules mostly
 ignore them in favour of literals. The scale work in phase 1 is what makes shell
