@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodic state backup
+
+[Timer]
+# Wall-clock rather than monotonic: Persistent= only applies to OnCalendar,
+# and a monotonic OnBootSec= stops rescheduling once it has elapsed.
+OnCalendar={{ state_backup_interval }}
+Persistent=true
+Unit=state-backup.service
+
+[Install]
+WantedBy=timers.target

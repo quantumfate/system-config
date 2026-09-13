@@ -1,0 +1,19 @@
+---
+# Inverse of main.yml: stop and remove the units this role deployed. The
+# recipients file, the encrypted blobs, and age itself are left alone —
+# none of them are this role's to delete.
+- name: Disable the state-backup timer
+  ansible.builtin.systemd_service:
+    name: state-backup.timer
+    enabled: false
+    state: stopped
+    scope: user
+  failed_when: false
+
+- name: Remove the units this role deployed
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ target_home }}/.config/systemd/user/state-backup.service"
+    - "{{ target_home }}/.config/systemd/user/state-backup.timer"

@@ -46,6 +46,7 @@ roles_default:
   audio: true
   obsidian_index: true
   obsidian_linear: true
+  state_backup: true
   hypr: true
   quickshell: true
   nvim: true

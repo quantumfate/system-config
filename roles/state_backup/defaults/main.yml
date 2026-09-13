@@ -1,0 +1,13 @@
+---
+state_backup_deploy: true
+
+# Local by default — pushing the blob anywhere else (a remote box, cloud
+# storage) is not decided yet, so this is the one line to change once it is.
+# The blob is already encrypted, so widening this is a location change only.
+state_backup_dest: "{{ target_home }}/Backups/state"
+
+state_backup_recipients_file: "{{ target_home }}/.config/state-backup/recipients.txt"
+
+# Wall-clock, matching obsidian_linear's timer: a window missed while
+# suspended/logged out runs once on resume (Persistent=true).
+state_backup_interval: daily
