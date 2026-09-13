@@ -141,7 +141,38 @@ Scenes run from `$XDG_STATE_HOME/scenes.json` — a definitional store seeded
 from the repo on first run, editable at runtime without a reload, read by
 hypr's event manager and written by the scene editor. The editor contract is
 LEO-239; the mood-mode policy store that decides *which* scenes are reachable
-is the section after this.
+is the next section.
+
+## Modes: the policy store
+
+`focus.json` names the mood that is on; `mood-policy.json` says what that
+means. One definitional store — same seed-from-repo, edit-at-runtime pattern
+as scenes, same split between pointer and policy: `focus.json` is the active
+state that changes by the minute, the policy is the definition that changes by
+configuration. Keyed by the six moods, holding what each allows, changes, or
+suppresses across four dimensions:
+
+- **Notifications** — the toast policy Focus.qml already carried (`all` /
+  `critical-only` / `none`, queue, digest-on-exit), inspectable by any
+  runtime instead of living in QML.
+- **Launches** — media and game launchers refuse to start while a mood that
+  blocks them is on. Open decision #3 resolves here, per mood: *soft* (notify,
+  let through), *firm* (refuse, with the override key), *hard* (refuse until
+  the mood ends). The baseline stays firm — the behavior that is live today —
+  and a mood never lists itself: entering `game` is how you start gaming.
+- **Background** — the desk's user timers (theme-auto, obsidian index/sync,
+  state-backup, chezmoi, audio-notify) are allowed, deferred, or prevented.
+  The defaults allow everything; restricting is what the shell does (LEO-237),
+  and enforcing what the shell acts on (LEO-238).
+- **Scenes** — reachability of named scenes while the mood is on. Absent means
+  reachable, so `deep` names only `gaming: blocked, media: blocked`, and the
+  ringing bar still knows where it may take you. Binding context reads the
+  same map, so which-key can dim a blocked scene's binds.
+
+The check that keeps the store honest is the same lockstep the palette tests
+use: the stored moods must be byte-for-byte equal to Focus.qml's table until
+LEO-237 makes the store the source that Focus mirrors. Until enforcement
+lands, the store is a definition with no teeth — that is deliberate.
 
 ## Phases
 
@@ -343,7 +374,10 @@ touches a running session.
    gives one source of truth and means editing `,proj.sh`; mirroring is safer
    and means two files that can disagree, which is the failure mode `,proj.sh`
    already warns about in its own comments.
-3. **How aggressive focus mode is** — soft (notify, let through), firm (refuse,
-   with an override key), or hard (refuse until the timer expires).
+3. **How aggressive focus mode is** — resolved in `mood-policy.json` (LEO-236):
+   per mood, `soft` (notify, let through) | `firm` (refuse, with the override
+   key) | `hard` (refuse until the mood ends). The baseline is firm — the
+   behavior live today — and a mood never refuses launching itself. See
+   "Modes" above.
 4. **Where encrypted state backups go** — the recipe is easy, the remote is a
    preference.
