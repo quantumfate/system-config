@@ -23,7 +23,7 @@ Every toolkit needs telling separately, and the portals read none of those files
 | Qt      | `qt6ct.conf` / `qt5ct.conf` + Kvantum                            | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                             |
 | X11     | `xsettingsd.conf`                                                | XWayland clients                                                                                    |
 | Portals | **dconf** `/org/gnome/desktop/interface/*`                       | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not |
-| Session | `~/.config/environment.d/50-theming.conf`                        | reaches every systemd user unit, which is how portal popups spawned without a shell get `XCURSOR_*` |
+| Session | `~/.config/environment.d/50-theming.conf`                        | palette-invariant only now — `XCURSOR_*` moved to `,theme.sh`'s live fan-out, see its `apply_cursor` step |
 
 `templates/zen-user.js.j2` renders the shared browser prefs;
 `roles/browser_profiles` links them into each profile.

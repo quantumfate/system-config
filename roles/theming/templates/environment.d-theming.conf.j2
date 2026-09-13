@@ -3,6 +3,22 @@
 # Reaches every user unit, including xdg-desktop-portal-gtk and its file
 # choosers — they start without a shell and inherit nothing from ~/.zshenv.
 #
+# Only palette-invariant values belong here — anything that changes with the
+# palette needs a fresh login to take effect from this file, and this desk
+# switches palette without one. QT_QPA_PLATFORMTHEME picks the qt6ct platform
+# plugin, not a colour scheme; the scheme lives in qt6ct.conf, which
+# `,theme.sh` rewrites live, so this line is never the thing standing between
+# a switch and the result.
+#
+# XCURSOR_THEME/SIZE are the exception: they ARE per-palette, and were the one
+# genuine next-login value this file held. They stay, but only as a SEED for a
+# fresh login before any apply has run. `,theme.sh apply` owns them after that,
+# writing all three places a cursor has to reach — `hyprctl setcursor` for the
+# running compositor, `systemctl --user set-environment` for apps launched
+# afterwards (uwsm app scopes inherit the user manager, not a shell), and this
+# file for next time. Without the middle write, a browser opened after a switch
+# would still come up with the old cursor.
+#
 # QT_STYLE_OVERRIDE stays unset: it would override qt6ct.conf's own choice.
 QT_QPA_PLATFORMTHEME=qt6ct
 XCURSOR_THEME={{ theme_cursor }}
