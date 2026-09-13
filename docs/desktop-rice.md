@@ -151,6 +151,28 @@ every flavour plus the fan-out. Ansible provisions the capability; the store
 picks at runtime. Day/night is a systemd user timer calling `,theme.sh auto`,
 which honours a manual override until it is cleared.
 
+#### Zen is the exception
+
+Zen follows the light/dark switch already: its `user.js` opts into
+`widget.use-xdg-desktop-portal.color-scheme`, and the portal's
+`org.freedesktop.appearance` tracks the same GTK key `,theme.sh` sets. Nothing
+had to be built for that.
+
+What it cannot do is follow live in full. `user.js` is read once at launch and
+overwrites `about:config` on every restart, so the accent and any baked colour
+are fixed for the life of the session. That makes Zen the one surface where "one
+button" cannot mean "immediately", and the design has to account for it rather
+than pretend otherwise:
+
+- Page content follows the system instead of being forced dark. Forcing it meant
+  a light palette produced light chrome around dark pages, which reads as broken
+  rather than as light.
+- The accent is a single value chosen to work on both grounds, not the active
+  palette's mauve — either flavour's own mauve is nearly invisible on the
+  other's base.
+- Nothing else in the browser is themed per palette. A find bar pinned to one
+  flavour's surface colour is worse than one that takes the theme's own.
+
 ### P3 · Space on the ultrawide
 
 - Flip the primary-monitor workspace specs in `hyprland.lua` to

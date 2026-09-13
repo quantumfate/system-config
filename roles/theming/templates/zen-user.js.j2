@@ -284,8 +284,13 @@ user_pref("font.minimum-size.x-western", {{ theme_ui_font_size }});
 user_pref("font.size.variable.x-western", {{ theme_ui_font_size + 5 }});
 user_pref("font.size.monospace.x-western", {{ theme_mono_font_size + 1 }});
 user_pref("browser.display.use_document_fonts", 0);
-// === Dark mode ===
-user_pref("layout.css.prefers-color-scheme.content-override", 0); // dark
+// === Colour scheme ===
+// Follow the system rather than forcing page content dark. Zen's chrome already
+// follows it, through widget.use-xdg-desktop-portal.color-scheme below and the
+// portal's org.freedesktop.appearance, which tracks the GTK color-scheme key
+// that ,theme.sh sets. Forcing content to 0 meant a light palette produced
+// light chrome around dark pages, which reads as broken rather than as light.
+user_pref("layout.css.prefers-color-scheme.content-override", 3); // follow system
 
 // === Passwords / autofill (all disabled) ===
 user_pref("signon.autofillForms", false);
@@ -369,8 +374,10 @@ user_pref("mod.lean.pinned-ext.workspaces", false);
 user_pref("mod.lean.show-pageactions", false);
 user_pref("mod.lean.show-translation", true);
 
-user_pref("theme-better_find_bar-enable_custom_background", true);
-user_pref("theme.better_find_bar.custom_background", "#363a4f");
+// No custom background: the value here was macchiato's surface0, which stayed
+// dark behind a light chrome. Letting the find bar take the theme's own surface
+// is the only version that is correct in both palettes.
+user_pref("theme-better_find_bar-enable_custom_background", false);
 user_pref("theme.better_find_bar.hide_find_status", false);
 user_pref("theme.better_find_bar.hide_found_matches", false);
 user_pref("theme.better_find_bar.hide_highlight", "not_hide");
