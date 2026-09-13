@@ -100,6 +100,49 @@ because kitty, Qt and GTK need a process to poke them, and because the theme
 must apply even while the shell is restarting — and because a script on `$PATH`
 is runnable from tmux without a compositor.
 
+## Scenes: the workspace-level contract
+
+The one idea widened one store so every *surface* reads it. Scenes widen the
+other direction — one store so every *workspace* reads it. Today a workspace's
+behavior is scattered across `workspace_specs`, `windowrules.lua`, and the
+event layers (layout_opts, solo_gaps, opacity) that emulate what Hyprland will
+not do natively. A scene is that behavior collected into one named, editable
+record. The contract lives at `quickshell/schemas/scenes.schema.json`; the
+seed (`scenes.default.json`) is distilled from the live config so the model is
+grounded in behavior that exists today rather than designed for an empty desk.
+
+The decisions that make it work, each pinned by tests:
+
+- **Keyed by name, not workspace id.** The gaming scene sits on workspace 5 on
+  the laptop and 4 on the desk. A scene is named (the workspace's
+  `default_name`: `code`, `gaming`, `media`) so it is host-independent; which
+  workspace id it runs on is host data. `workspace_specs` will gain a `scene`
+  field, exactly the way `monitor` is already a host-resolved sentinel rather
+  than a scene property.
+- **Members are class-aware window behavior.** A scene carries `members` —
+  the same predicate objects `windowrules.lua` already matches against, each
+  with the hypr window-rule options it gets. Dofus is a member of the `gaming`
+  scene (group set always, opacity 1.0 override, content game), not a special
+  path of its own. That is the precedent that makes gaming a scene like any
+  other.
+- **The profile boundary lives in `geometry`.** The same scene can scroll the
+  desk and fit-or-float the lid — code is dwindled on desk-dual, monocled on
+  laptop-solo. `desk-dual` is regioned (one 5120x1440 primary, one
+  normal-aspect secondary, each with its own gaps); `laptop-solo` is
+  fit-or-float with nothing given away. Only the divergent keys are listed;
+  the base `layout`/`gaps` hold wherever a profile says nothing.
+- **Static vs reactive is split the way it already is.** Grouping and
+  workspace pinning compile at config load; layout options, gaps and opacity
+  re-apply on the events a scene lists in `reevaluate_on` — the events the
+  existing event layers already hook, plus `profile.switch` and
+  `configreloaded`.
+
+Scenes run from `$XDG_STATE_HOME/scenes.json` — a definitional store seeded
+from the repo on first run, editable at runtime without a reload, read by
+hypr's event manager and written by the scene editor. The editor contract is
+LEO-239; the mood-mode policy store that decides *which* scenes are reachable
+is the section after this.
+
 ## Phases
 
 Ordered so daily irritations go first, and nothing later depends on anything not
