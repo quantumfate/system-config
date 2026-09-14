@@ -1,9 +1,9 @@
 [Unit]
 Description=Pin Obsidian index-notes callouts under the note H1
-Documentation=https://codeberg.org/quantumfate/scripts
+Documentation=https://github.com/quantumfate/hypr
 
 [Service]
-ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/obsidian-index-watch
+ExecStart={{ projects_dest.hypr }}/bin/obsidian-index-watch
 Environment=OBSIDIAN_VAULT={{ obsidian_index_vault }}
 Environment=OBSIDIAN_INDEX_DEBOUNCE={{ obsidian_index_debounce }}
 Restart=on-failure

@@ -1,9 +1,9 @@
 [Unit]
 Description=Encrypt $XDG_STATE_HOME to an age blob
-Documentation=https://codeberg.org/quantumfate/scripts
+Documentation=https://github.com/quantumfate/hypr
 
 [Service]
 Type=oneshot
-ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/,state-backup
+ExecStart={{ projects_dest.hypr }}/bin/,state-backup
 Environment=STATE_BACKUP_RECIPIENTS_FILE={{ state_backup_recipients_file }}
 Environment=STATE_BACKUP_DEST={{ state_backup_dest }}

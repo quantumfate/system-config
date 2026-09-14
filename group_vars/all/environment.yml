@@ -5,8 +5,8 @@
 # Wayland-only vars are not here; they belong to session_env's uwsm templates.
 
 env_paths:
-  - "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin"
-  - "{{ target_home }}/Projects/codeberg/quantumfate/security-and-privacy/bin"
+  - "{{ target_home }}/Projects/github/quantumfate/scripts/bin"
+  - "{{ target_home }}/Projects/github/quantumfate/security-and-privacy/bin"
   - "{{ target_home }}/.local/bin"
   - "/usr/bin/obsidian"
 

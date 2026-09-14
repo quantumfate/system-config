@@ -46,7 +46,7 @@ theme_mono_font_size: 12
 # The fan-out that applies the theme store to kitty, GTK, Qt and the wallpaper.
 # Lives in the scripts checkout, which is on PATH for a login shell but not for
 # an Ansible command.
-theme_apply_script: "{{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/,theme.sh"
+theme_apply_script: "{{ projects_dest.hypr }}/bin/,theme.sh"
 
 # How often the sun timer re-resolves the palette. The script decides day vs
 # night; this only sets how soon after the boundary the desk notices.

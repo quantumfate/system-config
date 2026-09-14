@@ -11,7 +11,7 @@ switched on, and what to do next.
 Entering a mode is one action and drives both halves of the desk.
 
 ```sh
-,hyprfocus seed ~/Projects/codeberg/quantumfate/quickshell/assets/hyprfocus.default.json
+,hyprfocus seed ~/Projects/github/quantumfate/quickshell/assets/hyprfocus.default.json
 hyprctl reload
 ```
 

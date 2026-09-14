@@ -109,7 +109,7 @@ profiles, Proton sessions and app logins **are** inside it — read
 
 ```sh
 sudo pacman -S --needed ansible git
-git clone git@codeberg.org:quantumfate/system-config.git
+git clone git@github.com:quantumfate/system-config.git
 cd system-config
 ansible-galaxy install -r requirements.yml
 ./bootstrap.sh            # == ansible-playbook site.yml --limit "$(hostname)" --ask-become-pass
@@ -197,7 +197,7 @@ ansible-playbook site.yml $L --ask-become-pass --skip-tags bootstrap
 
   ```yaml
   vault_ssh_keys:
-    codeberg: { private: "-----BEGIN…", public: "ssh-ed25519 …" }
+    github: { private: "-----BEGIN…", public: "ssh-ed25519 …" }
   vault_gpg: { public: "…", private: "…", fingerprint: "…" }
   ```
 

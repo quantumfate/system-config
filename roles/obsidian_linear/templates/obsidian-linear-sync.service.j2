@@ -1,13 +1,13 @@
 [Unit]
 Description=Mirror Linear issues into the Obsidian vault
-Documentation=https://codeberg.org/quantumfate/scripts
+Documentation=https://github.com/quantumfate/hypr
 # Note creation goes through Templater over the Obsidian CLI, so the app must
 # be up. A failed start here is harmless: the timer retries in {{ obsidian_linear_interval }}.
 After=obsidian.service
 
 [Service]
 Type=oneshot
-ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/obsidian-linear-sync --apply
+ExecStart={{ projects_dest.hypr }}/bin/obsidian-linear-sync --apply
 Environment=OBSIDIAN_VAULT={{ obsidian_linear_vault }}
 Environment=LINEAR_PASS_VAULT={{ obsidian_linear_pass_vault }}
 Environment=LINEAR_PASS_ITEM={{ obsidian_linear_pass_item }}

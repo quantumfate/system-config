@@ -4,7 +4,7 @@ After=pipewire.service wireplumber.service
 Requires=pipewire.service
 
 [Service]
-ExecStart={{ target_home }}/Projects/codeberg/quantumfate/scripts/bin/audio-notify.sh
+ExecStart={{ projects_dest.hypr }}/bin/audio-notify.sh
 Restart=on-failure
 RestartSec=5
 
