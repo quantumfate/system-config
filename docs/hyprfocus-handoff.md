@@ -82,6 +82,23 @@ Three things that cannot be settled without a running compositor:
    `hyprland.lua` and reload. The provider stays registered; nothing else
    depends on it.
 
+## The gate that now covers this
+
+`tests/config_smoke_spec.lua` loads `hyprland.lua` for both hosts through the
+stub. Every other spec loads one module, which is why three separate
+config-load failures reached a live desk instead of the suite.
+
+It only works because the stub carries two pieces of the runtime's own
+strictness — without them the spec passes on a config that cannot start:
+
+- **keys are validated**, because Hyprland rejects a bind it cannot parse
+- **`hl` refuses assignment** (opt-in per spec), because the runtime's table is
+  read-only
+
+If you add anything to the config that the stub does not implement, the smoke
+spec fails with a nil-call rather than a useful message. Add the method to the
+stub; that failure is the spec doing its job.
+
 ## Lessons the hard way
 
 Both of these cost a broken desk, so they are worth not relearning.
