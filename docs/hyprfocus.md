@@ -195,6 +195,58 @@ there, so a requirement contradicting it is reported rather than resolved
 either way: adding it ignores what the mode said, and omitting it breaks
 whatever needed it. Neither is a safe default.
 
+## Colour is part of the declaration
+
+A mode changes what may have your attention, and colour is how the desk says
+so before you have consciously read anything. That makes the palette a
+declared resource rather than decoration — but it is the one resource with an
+existing owner, and that is what needs settling.
+
+Today `presentation` carries `accent_role`, `surface_alpha`, `density`,
+`motion_energy` and `bar_autohide`. A mode can therefore **tint** the desk, but
+`accent_role` names a role _within whatever palette is active_ — it cannot
+select a palette. The palette lives in the theme store and is driven by a sun
+timer through `day` and `night`.
+
+### A mode leases the palette, it does not own it
+
+The rule is the same shape as the mode pointer's, for the same reason: two
+writers, one value, and the one that must not be silently destroyed is the
+user's own baseline.
+
+```text
+baseline    the palette you chose, and the sun timer's day/night
+lease       the palette a mode asks for, while it runs
+in effect   lease if a mode holds one, otherwise baseline
+```
+
+**A mode never writes the baseline.** If it did, the next sun tick would either
+fight it or bury it, and leaving the mode would restore the wrong thing — the
+user would lose the palette they actually picked to a mood they were in an hour
+ago. A mode's palette is held for its duration and given back, exactly as a
+held window is.
+
+The sun timer keeps running underneath. Entering a mode at noon and leaving it
+after dark should land on the night palette, not on the one that was in effect
+when the mode began, because the baseline moved while the lease was held.
+
+### One fan-out, not two
+
+`,theme.sh apply` already reaches kitty, GTK, Qt, Hyprland, Neovim and the
+wallpaper. A mode-driven palette goes through it. A second path would mean the
+shell following the mode while every other surface follows the store, which is
+worse than not theming by mode at all — a desk that half-changes reads as
+broken rather than as signalling.
+
+### Legibility is a constraint, not a preference
+
+Tying colour to attention state is effective precisely because it bypasses
+deliberate reading, which is also why an unreadable combination is worse here
+than elsewhere: the signal is trusted before it is examined. Any palette a mode
+can select has to clear the same contrast floor as the rest of the palette
+work, and a mode that can only be entered into an illegible desk is a bug, not
+a taste question.
+
 ## Not everything belongs to a mode
 
 Two axes, and confusing them drags transition machinery into things that should
