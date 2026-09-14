@@ -208,6 +208,64 @@ Today `presentation` carries `accent_role`, `surface_alpha`, `density`,
 select a palette. The palette lives in the theme store and is driven by a sun
 timer through `day` and `night`.
 
+### Themes are packs, adapted into one interchange language
+
+There is no abstraction that accounts for every theme. Ecosystems speak their
+own vocabularies — Catppuccin's `base`/`mantle`/`crust`/`surface0` is not
+anyone else's — so an adapter is needed whatever we do. Accepting that up front
+is what keeps the architecture small: define one internal language, adapt
+everything into it, and let each ecosystem keep its own names on its own side
+of the boundary.
+
+The language is a **slot set**, not semantic names: a background ramp and the
+named hues. Surfaces then reference _roles_ derived from slots rather than
+colours directly, which is what gives consistency between elements — not every
+combination of colours works, and a role indirection is what stops one being
+assembled by accident.
+
+**A pack is a family; a variant is one palette in it.** Every variant declares
+whether it is light or dark, and the day/night cycle picks between them. A pack
+that offers only one kind is not an error: the cycle takes what is there.
+
+```text
+pack  catppuccin
+  frappe     dark    ─┐
+  macchiato  dark    ─┼─→  light counterpart: latte
+  mocha      dark    ─┘
+  latte      light
+```
+
+Catppuccin is the shape that proves the model: three dark variants and one
+light, so each dark names the same counterpart rather than the pack pretending
+to four pairs it does not have.
+
+Resolution never fails. Wanting a kind, take the variant's own counterpart, or
+the pack's fallback for that kind, or any variant of that kind, or the variant
+already in hand. A desk with a theme it cannot pair is better than a desk with
+no theme.
+
+### Sixteen slots is one too few
+
+The obvious interchange language is base16, and it is the wrong size here for a
+specific reason: this desk uses colour to signal which mode is on, and base16
+has eight hues with no lavender and no pink.
+
+`neutral` is lavender and `deep` is blue; `reflect` is mauve and `media` is
+pink. Through base16 each pair collapses to one slot, so two pairs of modes
+become visually identical — which defeats the entire purpose of tying colour to
+attention state. The background ramp fares no better: nine Catppuccin levels
+flatten to about four, and the shell distinguishes six.
+
+**base24** is a superset that resolves both. Its extra dark slots restore the
+`mantle`/`crust` depth, and its bright hue variants are where lavender and pink
+land without colliding with blue and mauve. Same adapters, same ecosystem, no
+collapse.
+
+The general rule this is an instance of: an interchange format must be at least
+as expressive as the distinctions the system actually relies on. Colour here is
+not decoration, so losing two distinguishable modes is a functional regression,
+not a cosmetic one.
+
 ### A mode leases the palette, it does not own it
 
 The rule is the same shape as the mode pointer's, for the same reason: two
