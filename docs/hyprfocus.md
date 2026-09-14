@@ -385,13 +385,32 @@ is a diary.
 
 Recorded so the design is not mistaken for the implementation.
 
-| Area              | Today                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------- |
-| Policy keying     | policy is keyed by mode; enforcement is keyed by scene, so the two cannot express the same intent       |
-| Background policy | every mode ships `allow: ["*"]` — the section is inert, and all real stopping happens off the scene key |
-| Binding context   | a synchronous subprocess call to the shell inside bind handlers, on every press                         |
-| Grace             | declared in the contract, "only requested and logged" — no deadline, no veto                            |
-| Modes             | six exist; `llm` is not among them, and `deep` is what is elsewhere called focus                        |
-| Notifications     | routed by urgency and mode only; source identity is captured but never used                             |
-| Geometry          | four mechanisms emulating a per-workspace layout, racing at event time                                  |
-| Workspaces        | fixed at config load; special workspaces used to compensate                                             |
+### Built, and inert
+
+These exist, are tested, and change nothing until something calls them. That is
+deliberate: the step where a mistake is felt should land while someone is
+watching a reload, not as a side effect of a config load.
+
+| Piece                                    | State                                       |
+| ---------------------------------------- | ------------------------------------------- |
+| The declaration schema and a seeded desk | shipped                                     |
+| Resolving a mode into a complete desk    | shipped, with dependency closure            |
+| Planning a transition                    | shipped                                     |
+| Scene geometry as a layout provider      | registered; **no workspace selects it yet** |
+| Binding trees held by name               | captured at load; **nothing calls admit**   |
+| Workspaces held by name                  | recorded at load; **nothing calls admit**   |
+| The command-line way in                  | `resolve`, `plan`, `explain`, `modes`       |
+
+### Still true of the running desk
+
+| Area                  | Today                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------- |
+| What the desk reads   | nothing reads the declaration at runtime; behaviour still comes from the old stores                     |
+| Policy keying         | policy is keyed by mode; enforcement is keyed by scene, so the two cannot express the same intent       |
+| Background policy     | every mode ships `allow: ["*"]` — the section is inert, and all real stopping happens off the scene key |
+| Binding context       | a synchronous subprocess call to the shell inside bind handlers, on every press                         |
+| Grace                 | declared in the contract, "only requested and logged" — no deadline, no veto                            |
+| Notifications         | identity is resolved and recorded; **routing still keys on the old policy**                             |
+| Geometry              | the corrective engine still runs; the provider is registered beside it, unused                          |
+| Workspaces            | fixed at config load; special workspaces used to compensate                                             |
+| Services and projects | untouched by the compositor, by design — they belong to the CLI and the unit files                      |
