@@ -15,7 +15,7 @@ directory by default — no remote is decided yet.** Once one is, this is the
 variable to point at it (rsync/rclone/whatever, over the same already-encrypted
 blob); nothing else about the role changes.
 
-The age *identity* (the private key that decrypts the blob) is never referenced
+The age _identity_ (the private key that decrypts the blob) is never referenced
 here and must not live in `state_backup_recipients_file` — that file holds
 public recipients only, generated once via `age-keygen` and kept safe
 elsewhere (a password manager, printed, a second machine). Losing it means the

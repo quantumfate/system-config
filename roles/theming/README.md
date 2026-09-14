@@ -15,14 +15,14 @@ Kvantum, xsettingsd and Zen `user.js` files.
 
 Every toolkit needs telling separately, and the portals read none of those files:
 
-| Layer   | File                                                             | Note                                                                                                |
-| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| GTK2    | `~/.gtkrc-2.0.mine`                                              | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0`                                              |
-| GTK3    | `~/.config/gtk-3.0/settings.ini`                                 |                                                                                                     |
-| GTK4    | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely                                                        |
-| Qt      | `qt6ct.conf` / `qt5ct.conf` + Kvantum                            | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                             |
-| X11     | `xsettingsd.conf`                                                | XWayland clients                                                                                    |
-| Portals | **dconf** `/org/gnome/desktop/interface/*`                       | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not |
+| Layer   | File                                                             | Note                                                                                                      |
+| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| GTK2    | `~/.gtkrc-2.0.mine`                                              | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0`                                                    |
+| GTK3    | `~/.config/gtk-3.0/settings.ini`                                 |                                                                                                           |
+| GTK4    | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely                                                              |
+| Qt      | `qt6ct.conf` / `qt5ct.conf` + Kvantum                            | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                                   |
+| X11     | `xsettingsd.conf`                                                | XWayland clients                                                                                          |
+| Portals | **dconf** `/org/gnome/desktop/interface/*`                       | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not       |
 | Session | `~/.config/environment.d/50-theming.conf`                        | palette-invariant only now — `XCURSOR_*` moved to `,theme.sh`'s live fan-out, see its `apply_cursor` step |
 
 `templates/zen-user.js.j2` renders the shared browser prefs;

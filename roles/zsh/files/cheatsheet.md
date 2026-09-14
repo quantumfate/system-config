@@ -18,12 +18,12 @@ greeting live in `roles/zsh/defaults/main.yml` (`fastfetch_*`); the logo images
 ship in `roles/zsh/files/fastfetch/` — drop a new one there and point
 `fastfetch_logo` at it.
 
-| Command                        | Effect                                 |
-| ------------------------------ | -------------------------------------- |
-| `fastfetch`                    | print the banner again                 |
-| `fastfetch --list-modules`     | module types available for a new row   |
-| `fastfetch --list-logos`       | built-in logos, for `fastfetch_logo_type` other than `kitty` |
-| `fastfetch --logo none`        | the text block alone, e.g. to check alignment |
+| Command                    | Effect                                                       |
+| -------------------------- | ------------------------------------------------------------ |
+| `fastfetch`                | print the banner again                                       |
+| `fastfetch --list-modules` | module types available for a new row                         |
+| `fastfetch --list-logos`   | built-in logos, for `fastfetch_logo_type` other than `kitty` |
+| `fastfetch --logo none`    | the text block alone, e.g. to check alignment                |
 
 ## prompt
 
@@ -132,7 +132,7 @@ Every fzf in the shell shares one theme and one navigation key.
 | ------- | ------------------------------------------------------ |
 | `^R`    | search history                                         |
 | `^T`    | insert a file path, picked                             |
-| `Alt-c` | cd into a directory, picked — in both modes                |
+| `Alt-c` | cd into a directory, picked — in both modes            |
 | `Tab`   | move down a list — and mark, where marking is possible |
 | `S-Tab` | move up                                                |
 | `^/`    | toggle the preview pane                                |
@@ -281,20 +281,20 @@ project in a window of its own.
 Killing is per project, never per server: the neighbours you gathered on one
 server survive it.
 
-|           |                                               |
-| --------- | --------------------------------------------- |
-| `C-b ?`   | a menu of these bindings, which runs them     |
-| `C-b /`   | every binding tmux has, the raw list          |
-| `C-b C-o` | open a project in THIS window                 |
-| `C-b o`   | open a project in a new window                |
-| `C-b C-s` | switch project, among those on this server    |
-| `C-b C-w` | pick a window, on this server                 |
-| `C-b s`   | the session tree, most recently active first  |
-| `C-b (`   | previous session                              |
-| `C-b )`   | next session                                  |
-| `C-b C-d` | close this window, leave the project running  |
-| `C-b C-r` | refresh the project list                      |
-| `C-b C-k` | kill this project (it asks); others survive   |
+|           |                                              |
+| --------- | -------------------------------------------- |
+| `C-b ?`   | a menu of these bindings, which runs them    |
+| `C-b /`   | every binding tmux has, the raw list         |
+| `C-b C-o` | open a project in THIS window                |
+| `C-b o`   | open a project in a new window               |
+| `C-b C-s` | switch project, among those on this server   |
+| `C-b C-w` | pick a window, on this server                |
+| `C-b s`   | the session tree, most recently active first |
+| `C-b (`   | previous session                             |
+| `C-b )`   | next session                                 |
+| `C-b C-d` | close this window, leave the project running |
+| `C-b C-r` | refresh the project list                     |
+| `C-b C-k` | kill this project (it asks); others survive  |
 | `t`       | tmux                                         |
 | `tl`      | list sessions                                |
 | `tm`      | attach, or start one if there is none        |
@@ -302,18 +302,18 @@ server survive it.
 
 ## search
 
-|                  |                                                            |
-| ---------------- | ---------------------------------------------------------- |
-| `rg`             | ripgrep, smart-case                                        |
-| `rg!`            | the same, but also ignored and hidden files                |
-| `fd`             | find files by name                                         |
-| `fd!`            | the same, but also ignored and hidden files                |
-| `sd a b file`    | replace, with no regex dialect surprises                   |
-| `loc`            | tokei: lines of code, by language                          |
-| `**/*.go`        | zsh globs recursively on its own — no find needed          |
-| `*.go~*_test.go` | EXTENDED_GLOB: everything matching, except                 |
-| `*(.)`           | only plain files — (/) dirs, (@) symlinks, (*) executables |
-| `*(om[1])`       | the newest match — (Om[1]) the oldest, (.Lm+10) over 10MB  |
+|                  |                                                             |
+| ---------------- | ----------------------------------------------------------- |
+| `rg`             | ripgrep, smart-case                                         |
+| `rg!`            | the same, but also ignored and hidden files                 |
+| `fd`             | find files by name                                          |
+| `fd!`            | the same, but also ignored and hidden files                 |
+| `sd a b file`    | replace, with no regex dialect surprises                    |
+| `loc`            | tokei: lines of code, by language                           |
+| `**/*.go`        | zsh globs recursively on its own — no find needed           |
+| `*.go~*_test.go` | EXTENDED_GLOB: everything matching, except                  |
+| `*(.)`           | only plain files — (/) dirs, (@) symlinks, (\*) executables |
+| `*(om[1])`       | the newest match — (Om[1]) the oldest, (.Lm+10) over 10MB   |
 
 ## files
 
@@ -399,8 +399,8 @@ du, df, ps and top are dust, duf, procs and btop. `command du` reaches the origi
 
 Global aliases: they expand anywhere on the line, not just in front.
 
-|       |                                       |
-| ----- | ------------------------------------- |
+|       |                                        |
+| ----- | -------------------------------------- |
 | `G`   | \| rg                                  |
 | `L`   | \| less                                |
 | `D`   | \| delta — any diff on stdin, themed   |
@@ -412,10 +412,10 @@ Global aliases: they expand anywhere on the line, not just in front.
 | `J`   | \| jq                                  |
 | `X`   | \| xargs -r                            |
 | `CP`  | \| wl-copy — straight to the clipboard |
-| `NOW` | an ISO timestamp, expanded in place   |
-| `NE`  | 2>/dev/null                           |
-| `DN`  | >/dev/null                            |
-| `NUL` | both, silenced                        |
+| `NOW` | an ISO timestamp, expanded in place    |
+| `NE`  | 2>/dev/null                            |
+| `DN`  | >/dev/null                             |
+| `NUL` | both, silenced                         |
 
 ## history
 

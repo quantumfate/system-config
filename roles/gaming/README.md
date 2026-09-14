@@ -31,7 +31,7 @@ hacks melonDS mis-emulates). Per-game core choice stays in Lutris.
 
 ## ROM hacks and what this repo will not hold
 
-A hack like Run and Bun or Emerald Kaizo ships as a *patch* — the author's own
+A hack like Run and Bun or Emerald Kaizo ships as a _patch_ — the author's own
 diff against a retail cartridge. The patch is theirs to distribute; the base
 ROM is not. A patched ROM is a derivative of the copyrighted game, so it is no
 more distributable than the original.
