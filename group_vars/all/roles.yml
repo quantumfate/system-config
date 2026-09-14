@@ -47,6 +47,7 @@ roles_default:
   obsidian_index: true
   obsidian_linear: true
   state_backup: true
+  user_units: true
   hypr: true
   quickshell: true
   nvim: true

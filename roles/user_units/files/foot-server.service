@@ -1,0 +1,13 @@
+[Unit]
+Description=Foot terminal server
+After=graphical-session.target
+BindsTo=graphical-session.target
+PartOf=theme-reload.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+ExecStart=/usr/bin/foot --server -c %h/.config/foot/foot.ini
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

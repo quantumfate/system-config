@@ -1,0 +1,13 @@
+[Unit]
+Description=CKB Next Service
+After=graphical-session.target
+BindsTo=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+ExecStart=/usr/local/bin/ckb-next
+
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

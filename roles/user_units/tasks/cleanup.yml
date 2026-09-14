@@ -1,0 +1,42 @@
+---
+# Inverse of main.yml. The packaged units are only disabled, never removed —
+# their files belong to a package, not to this role.
+
+- name: Disable the user units
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    scope: user
+  loop: "{{ user_units_enabled + user_units_packaged_enabled }}"
+  failed_when: false
+
+- name: Remove the files this role deployed
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: >-
+    {{ (user_units_enabled + user_units_passive)
+       | map('regex_replace', '^', target_home ~ '/.config/systemd/user/')
+       | list + [target_home ~ '/.config/systemd/user.conf.d/timeout.conf'] }}
+  register: user_units_removed
+
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when: user_units_removed.changed
+
+- name: Remove the generated capability targets
+  ansible.builtin.find:
+    paths: "{{ target_home }}/.config/systemd/user"
+    patterns: "hyprfocus-*.target"
+  register: user_units_targets_stale
+
+- name: Delete them
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ user_units_targets_stale.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"

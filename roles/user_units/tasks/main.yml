@@ -1,0 +1,91 @@
+---
+- name: Ensure the systemd user dirs exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ target_home }}/.config/systemd/user"
+    - "{{ target_home }}/.config/systemd/user.conf.d"
+  when: user_units_deploy | bool
+
+- name: Deploy the user units
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ target_home }}/.config/systemd/user/{{ item }}"
+    mode: "0644"
+  loop: "{{ user_units_enabled + user_units_passive }}"
+  register: user_units_written
+  when: user_units_deploy | bool
+
+- name: Deploy the user manager drop-in
+  ansible.builtin.template:
+    src: timeout.conf.j2
+    dest: "{{ target_home }}/.config/systemd/user.conf.d/timeout.conf"
+    mode: "0644"
+  register: user_units_dropin_written
+  when: user_units_deploy | bool
+
+# Before enabling: enabling reads [Install] off disk, and the drop-in only
+# takes effect once the manager has re-read its own configuration.
+- name: Reload the user manager
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    scope: user
+  when:
+    - user_units_deploy | bool
+    - user_units_written.changed or user_units_dropin_written.changed
+
+- name: Enable the user units
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    scope: user
+  loop: "{{ user_units_enabled + user_units_packaged_enabled }}"
+  when: user_units_deploy | bool
+
+# The capability targets come from the scripts checkout, so everything below
+# is skipped on a first run, before roles/project_checkouts has cloned it.
+- name: Check for the generated capability targets
+  ansible.builtin.stat:
+    path: "{{ user_units_targets_src }}"
+  register: user_units_targets_stat
+  when: user_units_deploy | bool
+
+- name: Converge the capability targets
+  when:
+    - user_units_deploy | bool
+    - user_units_targets_stat.stat.isdir | default(false)
+  block:
+    # Before installing, not after: a declaration edited without regenerating
+    # would otherwise be discovered at the next mode change instead of here.
+    - name: Verify the targets match the contract
+      ansible.builtin.command: "{{ user_units_targets_generator }} check"
+      changed_when: false
+
+    - name: Verify every declared unit has exactly one owner
+      ansible.builtin.command: "{{ user_units_targets_generator }} verify"
+      changed_when: false
+
+    - name: Find the generated capability targets
+      ansible.builtin.find:
+        paths: "{{ user_units_targets_src }}"
+        patterns: "hyprfocus-*.target"
+      register: user_units_targets_found
+
+    - name: Install the capability targets
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ target_home }}/.config/systemd/user/{{ item.path | basename }}"
+        mode: "0644"
+        remote_src: true
+      loop: "{{ user_units_targets_found.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      register: user_units_targets_installed
+
+    - name: Reload the user manager
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        scope: user
+      when: user_units_targets_installed.changed

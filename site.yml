@@ -135,6 +135,9 @@
     - role: state_backup
       when: roles_enabled.state_backup
       tags: [state_backup]
+    - role: user_units
+      when: roles_enabled.user_units
+      tags: [user_units]
 
   # These roles ship inside their own checkout (see ansible.cfg's roles_path)
   # and must run after project_checkouts has pulled them, hence the late

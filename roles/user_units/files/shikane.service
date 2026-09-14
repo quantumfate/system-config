@@ -1,0 +1,12 @@
+[Unit]
+Description=Shikane dynamic display configuration
+After=graphical-session.target
+BindsTo=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+ExecStart=/usr/bin/shikane
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

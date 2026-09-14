@@ -118,14 +118,40 @@ removed can mean no terminal and no way back.
 ## Known-wrong, already recorded
 
 - **`theme-auto.*` and `state-backup.*` do not exist on this machine**
-  (`LoadState=not-found`). The contract has named them for as long as it has
-  existed. This is the missing-owner problem and it is urgent in the tracker.
+  (`LoadState=not-found`) — but they are not fiction. `roles/theming` and
+  `roles/state_backup` both template and enable them, and both roles are on.
+  They are absent because the playbook has not been applied since those roles
+  landed. Running it installs them.
 - The resolver exists **twice** — Lua for the compositor, Python for the CLI —
   because the CLI must work with no compositor. Nothing compares them. Either
   share conformance fixtures or have the CLI shell out to `lua`.
 - A **timer cannot override a schedule-set mode**. Inferred while building
   precedence, never specified. If a pomodoro ends while the calendar says
   "deep", the timer cannot return you to neutral.
+
+## Who owns a unit
+
+Every unit the contract names is provisioned by `system-config`. A unit that
+backs a _capability_ belongs to that capability's role (`audio`,
+`obsidian_index`, `obsidian_linear`, `state_backup`, `theming`); everything
+else — the session apps, the clipboard and display daemons, the targets other
+units hang off — is `roles/user_units`. chezmoi no longer holds any of them.
+
+The capability targets are generated, not written: `,hyprfocus-units generate`
+turns `scene-managed.json` into `scripts/etc/systemd/user/hyprfocus-*.target`,
+committed, and `roles/user_units` installs them. Generation is deliberately not
+a runtime act — the CLI must work from tmux with no compositor, and
+`daemon-reload` races a transition in flight.
+
+Two gates run in `just check` and again from the role before it installs:
+
+| Verb                      | Fails when                                      |
+| ------------------------- | ----------------------------------------------- |
+| `,hyprfocus-units check`  | the committed targets and the contract disagree |
+| `,hyprfocus-units verify` | a contract-named unit has no owner, or has two  |
+
+`verify` answers _owned_, not _installed_. A role that is switched on but never
+applied passes it, which is exactly the case that hid `theme-auto` for so long.
 
 ## Where the code is
 
@@ -148,7 +174,8 @@ pure half.
 ## Next, in order
 
 1. Confirm the `code` workspace lays out correctly, or fall back.
-2. Decide where user units live — nothing owns them, and two are fiction.
+2. Apply the playbook, so the units the contract names are actually installed
+   (`-t user_units`). Needs a password, so it is a run at the machine.
 3. Hold-and-restore across a shell restart, with real windows.
 4. The mode panel: edit the declaration from the shell.
 5. Palette lease, then theme packs.

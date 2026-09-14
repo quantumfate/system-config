@@ -1,0 +1,13 @@
+[Unit]
+Description=Obsidian Notetaking App
+After=graphical-session.target
+BindsTo=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/obsidian
+Restart=on-failure
+KillMode=mixed
+SendSIGHUP=yes
+
+[Install]
+WantedBy=graphical-session.target
