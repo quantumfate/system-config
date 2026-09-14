@@ -20,6 +20,13 @@
 # would still come up with the old cursor.
 #
 # QT_STYLE_OVERRIDE stays unset: it would override qt6ct.conf's own choice.
+#
+# QF_STORE is the desk's shared quantum-store directory; every runtime keeps
+# its state under it and resolves the same env, so systemd --user units (timed
+# collectors, the syncs) answer the same path the compositor and shell do.
+# Palette-invariant by construction: renaming it changes where files live,
+# not what they mean.
 QT_QPA_PLATFORMTHEME=qt6ct
 XCURSOR_THEME={{ theme_cursor }}
 XCURSOR_SIZE={{ theme_cursor_size }}
+QF_STORE={{ qf_store_dir | default(target_home ~ '/.local/state/quantum-store') }}
