@@ -493,34 +493,74 @@ is a diary.
 
 ## The gap between this and what runs today
 
-Recorded so the design is not mistaken for the implementation.
+Recorded so the design is not mistaken for the implementation. Updated Sep 14,
+after the store-directory move and the live admission round-trip.
 
-### Built, and inert
+### Live
 
-These exist, are tested, and change nothing until something calls them. That is
-deliberate: the step where a mistake is felt should land while someone is
-watching a reload, not as a side effect of a config load.
-
-| Piece                                    | State                                       |
-| ---------------------------------------- | ------------------------------------------- |
-| The declaration schema and a seeded desk | shipped                                     |
-| Resolving a mode into a complete desk    | shipped, with dependency closure            |
-| Planning a transition                    | shipped                                     |
-| Scene geometry as a layout provider      | registered; **no workspace selects it yet** |
-| Binding trees held by name               | captured at load; **nothing calls admit**   |
-| Workspaces held by name                  | recorded at load; **nothing calls admit**   |
-| The command-line way in                  | `resolve`, `plan`, `explain`, `modes`       |
+| Piece                                    | State                                                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| The declaration schema and a seeded desk | shipped; the store is under `$QF_STORE` and seeds itself on first run                                       |
+| Resolving a mode into a complete desk    | shipped, with dependency closure; consumed per converge                                                     |
+| Planning a transition                    | shipped; the watcher drives it and the shell dispatches `converge` straight into the compositor             |
+| Scene geometry as a layout provider      | live — the scene IS the layout; the correction engine's extras are gated on the workspace running the scene |
+| Binding trees held by name               | admit runs per converge; withholding a tree removes its entering leaf with it                               |
+| Workspaces held by name                  | admit runs per converge (verified live: entering gaming withdrew five workspaces, windows held)             |
+| The command-line way in                  | `resolve`, `plan`, `apply` (services), `explain`, `modes`                                                   |
+| Launch/scene gates at dispatch           | resolved from the store locally (no per-press subprocess)                                                   |
+| Contract shape                           | `etc/scene-managed.json` is protected + tasks only; mode service policy lives in the declaration            |
 
 ### Still true of the running desk
 
-| Area                  | Today                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------- |
-| What the desk reads   | nothing reads the declaration at runtime; behaviour still comes from the old stores                     |
-| Policy keying         | policy is keyed by mode; enforcement is keyed by scene, so the two cannot express the same intent       |
-| Background policy     | every mode ships `allow: ["*"]` — the section is inert, and all real stopping happens off the scene key |
-| Binding context       | a synchronous subprocess call to the shell inside bind handlers, on every press                         |
-| Grace                 | declared in the contract, "only requested and logged" — no deadline, no veto                            |
-| Notifications         | identity is resolved and recorded; **routing still keys on the old policy**                             |
-| Geometry              | the corrective engine still runs; the provider is registered beside it, unused                          |
-| Workspaces            | fixed at config load; special workspaces used to compensate                                             |
-| Services and projects | untouched by the compositor, by design — they belong to the CLI and the unit files                      |
+| Area                  | Today                                                                                                                             |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Background policy     | `defer`/`prevent` task keys are live (the mood panel's cycle consumes them); the wildcard `allow` shape is inert (LEO-252)        |
+| Grace                 | the graceful list vanished from the contract with the scenes key; the announce/deadline/veto protocol is still LEO-242's to build |
+| Notifications         | identity is resolved and recorded; routing still keys on the old policy                                                           |
+| Geometry engine       | scheduled correction passes still exist beside the provider; timers currently do not fire (LEO-302)                               |
+| Workspaces            | declared; the last manual strays (specials, the unpinned `1`) are LEO-265/299                                                     |
+| Services and projects | services enforce from the declaration per mode; projects still untouched                                                          |
+| Mode panel            | the shell's mode editor reads/patches the policy store; full read/explain contract is LEO-280                                     |
+
+## Services: why not systemd targets
+
+Spike decision (LEO-272): **modes stay a computed plan, not a target.** A mode
+is a set of units that should run together — what a target is for — so the
+question was whether `hyprfocus-gaming.target` with `Wants=`/`Conflicts=`
+expresses the desk better than the CLI's resolved stop/start list.
+
+Worked example, game mode both ways:
+
+```ini
+# the target way
+[Unit]
+Description=hyprfocus gaming desk
+Conflicts=hyprfocus-work.target
+Wants=obsidian.service                 # read: NOT built from the declaration?
+# ...every admitted and retired unit, edited every time the declaration moves
+```
+
+- **The target way**: entering the mode is `systemctl --user isolate
+hyprfocus-gaming.target`, and systemd gives ordering, dependency resolution,
+  readiness and failure handling for free; conflicting targets make modes
+  mutually exclusive by construction.
+- **The cost: authority moves out of the store.** Targets are static files, so
+  a declaration edited at runtime must regenerate the file and `daemon-reload`
+  — and every converge then ends with a state the store does not describe. The
+  whole design rests on the declaration being what the desk reads; this would
+  put a compiled artifact back between them, replacing an atomic store write
+  with a compile step plus a reload.
+- **The protected rail survives this way, and dies that way.** Today protected
+  units are subtraction from a computed set — the isolated target cannot stop
+  something its `Conflicts=` never named. To reach them, targets would have to
+  carry the protected list _into_ every mode's file, which is rail maintenance
+  duplicated per mode.
+- **Partial application loses its report.** Today's plan is explicit:
+  stop-after-grace, oneshot timers skipped-for-readiness, missing units named
+  in the log, refusals recorded — the reconcile contract's phases
+  (announce/grace/veto, LEO-253) need exactly that sequence in-process. An
+  isolate transaction is all-or-nothing with a single read-unfriendly error.
+
+The reading (not the mechanism) is what a target buys; `systemctl list-dependencies` and the mode report already answer it. **Kept: the
+computed plan with the store as the only declaration.** A target may OBTAIN a
+future role as a read-only status convenience, never as the enforcing path.
