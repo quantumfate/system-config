@@ -6,6 +6,12 @@
 Four repos make one desk. This is the shape it is being taken toward, the order
 the work happens in, and the tests that keep each step from undoing the last.
 
+> **Superseded in part.** Phases P0–P6 below are largely delivered and remain
+> accurate as history. The scenes and modes sections have since been replaced
+> by one engine — **hyprfocus** — where a _mode_ declares what may exist on the
+> desk and a reconciler converges on that declaration. Read
+> [hyprfocus.md](hyprfocus.md) first; where the two disagree, it wins.
+
 | Repo            | Owns                                               | Where work lands             |
 | --------------- | -------------------------------------------------- | ---------------------------- |
 | `hypr`          | Compositor config, keybinds, submaps, window rules | `hypr/*.lua`, `hypr/events/` |
@@ -102,8 +108,14 @@ is runnable from tmux without a compositor.
 
 ## Scenes: the workspace-level contract
 
-The one idea widened one store so every *surface* reads it. Scenes widen the
-other direction — one store so every *workspace* reads it. Today a workspace's
+> Superseded by [hyprfocus.md](hyprfocus.md). A scene is now geometry alone —
+> how windows sit on one workspace — and is registered as a compositor layout
+> rather than realised by a correction loop. Whether a workspace exists at all
+> is a mode's decision. The reasoning below still explains why scenes are keyed
+> by name and why the profile boundary lives in geometry.
+
+The one idea widened one store so every _surface_ reads it. Scenes widen the
+other direction — one store so every _workspace_ reads it. Today a workspace's
 behavior is scattered across `workspace_specs`, `windowrules.lua`, and the
 event layers (layout_opts, solo_gaps, opacity) that emulate what Hyprland will
 not do natively. A scene is that behavior collected into one named, editable
@@ -140,10 +152,21 @@ The decisions that make it work, each pinned by tests:
 Scenes run from `$XDG_STATE_HOME/scenes.json` — a definitional store seeded
 from the repo on first run, editable at runtime without a reload, read by
 hypr's event manager and written by the scene editor. The editor contract is
-LEO-239; the mood-mode policy store that decides *which* scenes are reachable
+LEO-239; the mood-mode policy store that decides _which_ scenes are reachable
 is the next section.
 
 ## Modes: the policy store
+
+> Superseded by [hyprfocus.md](hyprfocus.md). The model below is a _permission_
+> one — it asks whether an action is allowed. hyprfocus is a _materialisation_
+> one: a mode declares what exists, so outside game mode the Dofus submap is
+> not loaded and there is nothing to ask about. The mood/mode wording is also
+> settled there: the engine is hyprfocus, a state is a mode.
+>
+> Two specifics recorded here proved wrong in practice and are corrected there:
+> the `background` policy section is inert (every mood ships `allow: ["*"]`, and
+> real stopping happens off a scene key instead), and `graceful` was never
+> implemented beyond a logged request.
 
 `focus.json` names the mood that is on; `mood-policy.json` says what that
 means. One definitional store — same seed-from-repo, edit-at-runtime pattern
@@ -156,8 +179,8 @@ suppresses across four dimensions:
   `critical-only` / `none`, queue, digest-on-exit), inspectable by any
   runtime instead of living in QML.
 - **Launches** — media and game launchers refuse to start while a mood that
-  blocks them is on. Open decision #3 resolves here, per mood: *soft* (notify,
-  let through), *firm* (refuse, with the override key), *hard* (refuse until
+  blocks them is on. Open decision #3 resolves here, per mood: _soft_ (notify,
+  let through), _firm_ (refuse, with the override key), _hard_ (refuse until
   the mood ends). The baseline stays firm — the behavior that is live today —
   and a mood never lists itself: entering `game` is how you start gaming.
 - **Background** — the desk's user timers (theme-auto, obsidian index/sync,
