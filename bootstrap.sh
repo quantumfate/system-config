@@ -64,10 +64,16 @@ if [[ "$verbose" == "true" && ${#roles[@]} -eq 0 ]]; then
     export ANSIBLE_DEBUG=1
     exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" "$@" -vvvv
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "false" ]]; then
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -t "$(
+        IFS=,
+        echo "${roles[*]}"
+    )" "$@"
 elif [[ ${#roles[@]} -gt 0 && "$verbose" == "true" ]]; then
     export ANSIBLE_DEBUG=1
-    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -vvvv -t "$(IFS=,; echo "${roles[*]}")" "$@"
+    exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" -vvvv -t "$(
+        IFS=,
+        echo "${roles[*]}"
+    )" "$@"
 else
     exec ansible-playbook site.yml "${limit[@]}" --ask-become-pass "${extra_vars[@]}" "$@"
 fi

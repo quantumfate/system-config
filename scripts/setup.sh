@@ -11,22 +11,22 @@ log_info "Wiring repository into your environment..."
 
 # Git hooks via pre-commit.
 if have pre-commit; then
-  pre-commit install --hook-type pre-commit --hook-type commit-msg -f
-  log_ok "Git hooks installed"
+    pre-commit install --hook-type pre-commit --hook-type commit-msg -f
+    log_ok "Git hooks installed"
 else
-  log_warn "pre-commit not found - provided by: just provision / just dev"
+    log_warn "pre-commit not found - provided by: just provision / just dev"
 fi
 
 # Conventional-commit message template.
 if [[ -f ".gitmessage" ]]; then
-  git config commit.template .gitmessage
-  log_ok "Commit template enabled"
+    git config commit.template .gitmessage
+    log_ok "Commit template enabled"
 fi
 
 # Enable direnv so the nix shell and tool PATHs load on cd.
 if have direnv && [[ -f .envrc ]]; then
-  direnv allow
-  log_ok "direnv enabled (.envrc)"
+    direnv allow
+    log_ok "direnv enabled (.envrc)"
 fi
 
 log_ok "Repository wired."

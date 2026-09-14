@@ -15,7 +15,10 @@
          | reject('search', '/(' ~ (browser_profile_excludes | join('|')) ~ ')$')
          | list }}
 
-- name: Link user.js
+- name: Link user.js (idempotent across profile ages)
+  # An existing-but-unlinked profile (created by a browser upgrade or by hand,
+  # like the GamingMedia seed on the desk) gets its links laid on re-run, not
+  # only freshly created ones.
   ansible.builtin.file:
     src: "{{ browser_config_src }}/user.js"
     dest: "{{ item }}/user.js"

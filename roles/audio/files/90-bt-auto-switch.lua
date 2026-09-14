@@ -3,15 +3,14 @@ nutils = require("node-utils")
 
 local function set_default_sink(source, node_name)
   local om = source:call("get-object-manager", "metadata")
-  local metadata = om:lookup {
-    Constraint { "metadata.name", "=", "default" },
-  }
+  local metadata = om:lookup({
+    Constraint({ "metadata.name", "=", "default" }),
+  })
   if not metadata then
     log:warning("default metadata not found")
     return
   end
-  metadata:set(0, "default.audio.sink", "Spa:String:JSON",
-    Json.Object { name = node_name }:to_string())
+  metadata:set(0, "default.audio.sink", "Spa:String:JSON", Json.Object({ name = node_name }):to_string())
   log:info("default audio sink set to " .. node_name)
 end
 
@@ -19,10 +18,12 @@ local function find_best_fallback_sink(source, exclude_name)
   local si_om = source:call("get-object-manager", "session-item")
   local best_name, best_prio = nil, -1
 
-  for linkable in si_om:iterate {
-    type = "SiLinkable",
-    Constraint { "media.class", "c", "Audio/Sink", "Audio/Duplex" },
-  } do
+  for linkable in
+    si_om:iterate({
+      type = "SiLinkable",
+      Constraint({ "media.class", "c", "Audio/Sink", "Audio/Duplex" }),
+    })
+  do
     local node = linkable:get_associated_proxy("node")
     if node and node.properties then
       local name = node.properties["node.name"]
@@ -39,13 +40,13 @@ local function find_best_fallback_sink(source, exclude_name)
   return best_name
 end
 
-SimpleEventHook {
+SimpleEventHook({
   name = "bt-auto-switch/on-connect",
   interests = {
-    EventInterest {
-      Constraint { "event.type", "=", "node-added" },
-      Constraint { "node.name", "#", "bluez_output.*" },
-    },
+    EventInterest({
+      Constraint({ "event.type", "=", "node-added" }),
+      Constraint({ "node.name", "#", "bluez_output.*" }),
+    }),
   },
   execute = function(event)
     local node = event:get_subject()
@@ -54,15 +55,15 @@ SimpleEventHook {
     log:info(node, "bluetooth audio connected: " .. node_name)
     set_default_sink(source, node_name)
   end,
-}:register()
+}):register()
 
-SimpleEventHook {
+SimpleEventHook({
   name = "bt-auto-switch/on-disconnect",
   interests = {
-    EventInterest {
-      Constraint { "event.type", "=", "node-removed" },
-      Constraint { "node.name", "#", "bluez_output.*" },
-    },
+    EventInterest({
+      Constraint({ "event.type", "=", "node-removed" }),
+      Constraint({ "node.name", "#", "bluez_output.*" }),
+    }),
   },
   execute = function(event)
     local node = event:get_subject()
@@ -71,10 +72,12 @@ SimpleEventHook {
     log:info(node, "bluetooth audio disconnected: " .. node_name)
 
     local si_om = source:call("get-object-manager", "session-item")
-    for linkable in si_om:iterate {
-      type = "SiLinkable",
-      Constraint { "media.class", "c", "Audio/Sink" },
-    } do
+    for linkable in
+      si_om:iterate({
+        type = "SiLinkable",
+        Constraint({ "media.class", "c", "Audio/Sink" }),
+      })
+    do
       local n = linkable:get_associated_proxy("node")
       if n and n.properties then
         local name = n.properties["node.name"]
@@ -92,4 +95,4 @@ SimpleEventHook {
       log:warning("no fallback sink available")
     end
   end,
-}:register()
+}):register()
