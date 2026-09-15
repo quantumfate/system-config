@@ -40,8 +40,8 @@ table disagree, or when a schema ships without a class at all.
 | obsidian/ui.json + tags.json | observation | editor state and tags derived from use (owned by the scripts repo's stores)    |
 | hypr/monitor-profile.json    | declaration | host monitor data                                                              |
 
-Schemas without a row here are a defect of the registry, not of the
-store: the gate test pins them against each other, and the un-schemad
-observation files (the scene-policy trio, hyprfocus-held) carry their
-kind in this table until their own curation issue names them in schemas
-(LEO-241 for the log workspace).
+Schemas without a row here, or a row without a schema, are a defect of
+the registry, not of the store: the gate test pins the schemas and the
+table against each other. The scene-policy workspace's rows/applied/last
+are named in schemas/scene-policy.schema.json (LEO-241); veto.json and
+hyprfocus-held.json still carry their kind from this table only.
