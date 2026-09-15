@@ -1,0 +1,24 @@
+# ~/.config/zathura/zathurarc — rendered by roles/theming.
+# The include line is the seed flavour; `,theme.sh apply_zathura` rewrites
+# it to the live palette.
+include catppuccin-{{ theme_flavour }}
+
+set font "Hack Nerd Font Mono 14"
+set incremental-search	"true"
+set page-padding	"1"
+set sandbox	"none"
+set selection-clipboard	"clipboard"
+set statusbar-h-padding	"0"
+set statusbar-v-padding	"0"
+map <C-j>   navigate_index down
+map <C-k>   navigate_index up
+map D   toggle_page_mode
+map J   zoom out
+map K   zoom in
+map R   rotate
+map d   scroll half-down
+map g   goto top
+map i   recolor
+map p   print
+map r   reload
+map u   scroll half-up

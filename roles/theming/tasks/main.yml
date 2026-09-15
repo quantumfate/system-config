@@ -32,6 +32,14 @@
     - "{{ target_home }}/.local/share/nwg-look"
     # Used to come from chezmoi; nothing else creates it since user.js moved here.
     - "{{ browser_config_src }}"
+    # Skeletons previously shipped by chezmoi (btop, rofi, wlogout, zathura);
+    # now rendered here so a converge owns them exactly once, and the live
+    # palette seam is written by `,theme.sh` at the end of the run.
+    - "{{ target_home }}/.config/btop"
+    - "{{ target_home }}/.config/rofi"
+    - "{{ target_home }}/.config/wlogout"
+    - "{{ target_home }}/.config/zathura"
+    - "{{ target_home }}/.local/share/rofi/themes"
 
 - name: Render the toolkit settings
   ansible.builtin.template:
@@ -52,6 +60,23 @@
   loop_control:
     label: "{{ item.dest | basename }}"
   notify: Reload xsettingsd
+
+# App skeletons whose palette seam `,theme.sh` owns, re-pointed at the end of
+# the run. Rendered here, not chezmoi, so a converge cannot fight chezmoi's
+# login-time re-apply of an older seed.
+- name: Render the app skeleton configs
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - {src: btop.conf.j2, dest: "{{ target_home }}/.config/btop/btop.conf"}
+    - {src: rofi-config.rasi.j2, dest: "{{ target_home }}/.config/rofi/config.rasi"}
+    - {src: custom-rasi.j2, dest: "{{ target_home }}/.local/share/rofi/themes/custom.rasi"}
+    - {src: wlogout-style.css.j2, dest: "{{ target_home }}/.config/wlogout/style.css"}
+    - {src: zathurarc.j2, dest: "{{ target_home }}/.config/zathura/zathurarc"}
+  loop_control:
+    label: "{{ item.dest | basename }}"
 
 # libadwaita ignores gtk-theme-name; only the stylesheet under ~/.config/gtk-4.0
 # themes a GTK4 app. Links, so a theme update lands without re-running the role.
@@ -113,11 +138,18 @@
     force: true
     follow: false
 
-- name: Render the shared browser prefs
+- name: Render the shared Zen config
   ansible.builtin.template:
-    src: zen-user.js.j2
-    dest: "{{ browser_config_src }}/user.js"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     mode: "0644"
+  loop:
+    - {src: zen-user.js.j2, dest: "{{ browser_config_src }}/user.js"}
+    - {src: zen-userChrome.css.j2, dest: "{{ browser_config_src }}/userChrome.css"}
+    - {src: zen-userContent.css.j2, dest: "{{ browser_config_src }}/userContent.css"}
+    - {src: zen-palette.css.j2, dest: "{{ browser_config_src }}/zen-palette.css"}
+  loop_control:
+    label: "{{ item.dest | basename }}"
 
 # Everything above renders the SEED flavour. The live choice belongs to the
 # theme store, so the last thing a converge does is hand the decision back to

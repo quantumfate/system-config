@@ -91,9 +91,10 @@ theme_stale_files:
 # archive_subdir is the directory inside the tarball whose contents land in dest.
 #
 # Only themes a role-rendered config points at: kitty.conf (roles/zsh), the
-# qt5ct/qt6ct/Kvantum files here. Themes a chezmoi-owned config includes — btop,
-# foot, rofi, zathura, spicetify, wlogout — are .chezmoiexternal entries in the
-# dotfiles instead, so each theme lives with the config that needs it.
+# qt5ct/qt6ct/Kvantum files, and the btop/rofi/wlogout/zathura skeletons here.
+# Those skeletons used to be chezmoi-owned configs that @imported these themes
+# as `.chezmoiexternal` entries; they are rendered by this role now, so each
+# theme lives with the config that needs it.
 theme_archives:
   - name: kitty
     url: https://github.com/catppuccin/kitty/archive/refs/heads/main.tar.gz

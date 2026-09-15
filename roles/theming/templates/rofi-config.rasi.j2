@@ -1,0 +1,24 @@
+# ~/.config/rofi/config.rasi — rendered by roles/theming.
+# The icon line is the seed flavour; `,theme.sh apply_rofi` rewrites it to the
+# live store, and the palette lives in the @import inside custom.rasi.
+configuration {
+  cycle: true;
+  disable-history: true;
+  display-drun: " Apps ";
+  display-run: " Run ";
+  display-window: " Window ";
+  drun-display-format: "{icon} {name}";
+  font: "Hack Nerd Font Mono 18";
+  hide-scrollbar: true;
+  icon-theme: "{{ 'Papirus-Light' if theme_flavour == 'latte' else 'Papirus-Dark' }}";
+  lines: 5;
+  location: 0;
+  modes: [ "run","drun","window" ];
+  show-icons: true;
+  sidebar-mode: true;
+  sorting-method: "fzf";
+  terminal: "kitty";
+  xoffset: 0;
+  yoffset: 0;
+}
+@theme "custom"

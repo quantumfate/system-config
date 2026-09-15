@@ -1,0 +1,57 @@
+# ~/.config/wlogout/style.css — rendered by roles/theming.
+# The flavour inside every icon path is the seed flavour; `,theme.sh
+# apply_wlogout` rewrites those paths to the live palette.
+/* ──────────────────────────────────────────────────────────────
+   wlogout — minimal Macchiato, matched to the waybar redesign.
+   Neutral surface0 cards; @mauve is reserved for the focused/hovered
+   button (border + label + icon all shift to mauve together).
+   ────────────────────────────────────────────────────────────── */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "JetBrainsMono Nerd Font Mono";
+  font-weight: 600;
+  font-size: 15px;
+  background-image: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+window {
+  background-color: rgba(24, 25, 38, 0.55); /* crust @ 55%, lets blur through */
+}
+
+button {
+  color: #b8c0e0;                 /* subtext1 */
+  background-color: #363a4f;      /* surface0 */
+  border: 2px solid transparent;
+  border-radius: 22px;
+  margin: 0;                      /* spacing handled by launcher -c/-r */
+  background-repeat: no-repeat;
+  background-position: center 30%; /* icon sits above the centered label */
+  background-size: 26%;
+  outline: none;
+}
+
+/* hover only — wlogout focuses the first button on open, so styling
+   :focus would leave the lock button permanently highlighted */
+button:hover {
+  color: #c6a0f6;                 /* mauve */
+  background-color: #494d64;      /* surface1 */
+  border-color: #c6a0f6;          /* mauve */
+}
+
+/* default (neutral) icons */
+#lock      { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/lock.svg"); }
+#logout    { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/logout.svg"); }
+#suspend   { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/suspend.svg"); }
+#hibernate { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/hibernate.svg"); }
+#shutdown  { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/shutdown.svg"); }
+#reboot    { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/text/reboot.svg"); }
+
+/* accent (mauve) icons on hover */
+#lock:hover      { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/lock.svg"); }
+#logout:hover    { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/logout.svg"); }
+#suspend:hover   { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/suspend.svg"); }
+#hibernate:hover { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/hibernate.svg"); }
+#shutdown:hover  { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/shutdown.svg"); }
+#reboot:hover    { background-image: url("/home/{{ n }}/.config/wlogout/catppuccin/icons/wlogout/{{ theme_flavour }}/mauve/reboot.svg"); }

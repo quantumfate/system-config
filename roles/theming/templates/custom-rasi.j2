@@ -1,0 +1,105 @@
+# ~/.local/share/rofi/themes/custom.rasi — rendered by roles/theming.
+# The @import line is the seed flavour; `,theme.sh apply_rofi` rewrites it
+# to the live palette. Everything else is the user's own launcher theming,
+# so apply_rofi touches only the import, never this body.
+@theme "catppuccin-default"
+
+@import "catppuccin-{{ theme_flavour }}"
+
+#inputbar {
+border-radius: 0;
+children: [ prompt,entry ];
+padding: 0;
+}
+
+#textbox-prompt-colon {
+expand: false;
+margin: 0px 0.3em 0em 0em;
+str: ":";
+}
+
+* {
+}
+
+button {
+border-radius: 0;
+horizontal-align: 0.5;
+padding: 10;
+vertical-align: 0.5;
+}
+
+button selected {
+background-color: @base;
+text-color: @mauve;
+}
+
+element {
+border-radius: 0;
+padding: 8px 24px 8px 24px;
+}
+
+element selected.active {
+background-color: @mauve;
+text-color: @crust;
+}
+
+element selected.normal {
+background-color: @mauve;
+text-color: @crust;
+}
+
+element selected.urgent {
+background-color: @red;
+text-color: @crust;
+}
+
+element-icon {
+size: 28;
+}
+
+element-text, element-icon , mode-switcher {
+background-color: inherit;
+text-color: inherit;
+}
+
+entry {
+background-color: @base;
+border-radius: 0;
+margin: 10px 10px 10px 10px;
+padding: 4;
+text-color: @text;
+}
+
+listview {
+border: 0;
+columns: 2;
+cycle: true;
+padding: 0px 0px 10px 0px;
+scrollbar: false;
+}
+
+mainbox {
+background-color: @base;
+text-color: @surface1;
+}
+
+mode-switcher {
+spacing: 0;
+}
+
+prompt {
+border-radius: 0;
+margin: 10px 10px 10px 10px;
+padding: 4;
+text-color: @mauve;
+}
+
+window {
+background-color: @base;
+border: 2;
+border-color: @mauve;
+border-radius: 0;
+height: 600;
+padding: 10px 0px 10px 0px;
+width: 800;
+}
