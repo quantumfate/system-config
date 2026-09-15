@@ -491,6 +491,10 @@ The distinction to hold onto: a declaration says what the desk should be, an
 observation says what was actually done. The first is configuration; the second
 is a diary.
 
+See also `docs/bindings.md` — the binding architecture (LEO-303): why
+root and modes are structural, why a withheld tree takes its door and
+its rendering with it, and where contextual binds get their context.
+
 ## The gap between this and what runs today
 
 Recorded so the design is not mistaken for the implementation. Updated Sep 14,
@@ -504,7 +508,7 @@ after the store-directory move and the live admission round-trip.
 | Resolving a mode into a complete desk    | shipped, with dependency closure; consumed per converge                                                     |
 | Planning a transition                    | shipped; the watcher drives it and the shell dispatches `converge` straight into the compositor             |
 | Scene geometry as a layout provider      | live — the scene IS the layout; the correction engine's extras are gated on the workspace running the scene |
-| Binding trees held by name               | admit runs per converge; withholding a tree removes its entering leaf with it                               |
+| Binding trees held by name               | admit runs per converge, door and rendering included (docs/bindings.md)        |                               |
 | Workspaces held by name                  | admit runs per converge (verified live: entering gaming withdrew five workspaces, windows held)             |
 | The command-line way in                  | `resolve`, `plan`, `apply` (services), `explain`, `modes`                                                   |
 | Launch/scene gates at dispatch           | resolved from the store locally (no per-press subprocess)                                                   |
