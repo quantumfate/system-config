@@ -33,9 +33,10 @@
     --toolbox-bgcolor-inactive: #e6e9ef !important;
   }
 
-  /* Right-click menus inherit color-scheme: dark from zen.view.window.scheme=0,
-     so their system text stays near-white on the now-light panel. Re-point the
-     popup scheme and its text color to the light palette (latte). */
+  /* Right-click menus can still resolve system text against the scheme pinned
+     by zen.view.window.scheme (now 2 = follow system). Re-point the popup and
+     its text to the light palette (latte) explicitly so the menu is always
+     dark-on-light regardless of the window scheme. */
   menupopup,
   panel {
     color-scheme: light !important;
