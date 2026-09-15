@@ -31,6 +31,8 @@ test:
 
 # CI/pre-commit gate: formatting + tests (lint is advisory)
 check: fmt-check test
+	@../hypr/bin/,privacy-check
+
 
 # Enter the reproducible nix dev shell
 dev:
