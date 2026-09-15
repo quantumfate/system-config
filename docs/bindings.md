@@ -24,14 +24,28 @@ the user needed — including its own exit.
 ## 2. Contextual binds — keyed by what is focused
 
 Class-aware binding trees (the Dofus in-group keys, media-window keys, tmux
-client keys) are submaps with a window condition: Hyprland's own
-`binds` handle the window-filter grammar, so a contextual tree is written
-like any submap tree and _its context is a runtime fact of the focused
-window_, not a desk-wide admission state.
+client keys, the alt-tab picker) are submaps with a window condition:
+Hyprland's own `binds` handle the window-filter grammar, so a contextual tree
+is written like any submap tree and _its context is a runtime fact of the
+focused window_, not a desk-wide admission state. Some contextual trees are
+entered programmatically (the alt-tab picker dispatches `hl.dsp.submap` when
+it opens) rather than by a leader key, but they are still defined at config
+load through the same grammar so admission and which-key see one creation
+fact.
 
 Which-key's breadcrumb rendering describes this class; the old
 tag-and-context-filter heuristic (LEO-223) is retired — the window grammar
 picks the keys, not a list that could otherwise drift from them.
+
+The which-key overlay is a recursive submap HUD, not a modal: it opens after
+a short dwell when you enter any submap, stays open while you move from submap
+to submap, and disappears the moment you return to the root map (LEO-300).
+There is no dim backdrop. The bar carries a submap indicator pill that names
+the active submap while one is active.
+
+Direct tree leaders no longer exist — every group tree is reached only through
+the SUPER Space hub — so there is exactly one delayed which-key popup, and no
+separate peek HUD.
 
 ## 3. Mode-scoped binds — the declaration admits and withholds
 
@@ -53,8 +67,10 @@ Withholding takes the WHOLE tree: its binds, its door, and its rendering —
   rendered" is the regression pin).
 
 The acceptance case: in `work`, the Dofus key does nothing (no menu, no
-empty submap — the leaf its door carries goes dead with the room); in
-`gaming` everything works as today.
+empty submap — the `opens` leaf into the dofus tree goes dead with the room);
+in `gaming`, SUPER Space → `d` nests into the Dofus group and the overlay
+follows. At boot the first document on disk is the admitted set, not the full
+registry, so the shell never reads a key the current mode has not loaded.
 
 ## The rules these hold
 

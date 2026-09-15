@@ -48,7 +48,7 @@ Every complaint traces to a hardcoded value, not a design flaw.
 | ------------------------ | --------------------------------------------------------------------------- | --------------------------- | ------------- |
 | Shell text too small     | 75 literal `pixelSize:` values; `Theme` exposes no scale                    | `quickshell/modules/**`     | 10–17px       |
 | No space between things  | Gaps tuned for a laptop, applied to a 5120×1440 panel                       | `hypr/hypr/conf.lua`        | in 2 / out 5  |
-| Cheatsheet vanishes      | A fade timer that runs while you are still navigating the tree              | `hypr/hypr/events/peek.lua` | 2000 / 6000ms |
+| Cheatsheet vanishes      | Overlay closed when nesting left the SUPER-Space hub session                | `quickshell/modules/whichkey/WhichKey.qml` | immediate |
 | Theme switch is partial  | `theme.json` drives the shell only; GTK/Qt/kitty/nvim are pinned in Ansible | `roles/theming/defaults`    | `macchiato`   |
 | Bar is noisy             | 14 always-on modules on an opaque ground                                    | `modules/bar/Bar.qml`       | h 30, α 1.0   |
 | Nothing is transparent   | Opacity globally disabled, though the event hook to drive it exists         | `hypr/events/opacity.lua`   | 1.0 / 1.0     |
@@ -230,16 +230,15 @@ Value changes only, no new code.
 | -------------------------------- | ---------------------------- | --------------- |
 | `hypr/hypr/conf.lua`             | `general.gaps_in / gaps_out` | 2 / 5 → 12 / 40 |
 | `hypr/hypr/conf.lua`             | `decoration.rounding`        | 4 → 6           |
-| `hypr/hyprland.lua`              | `config.peek_delay_ms`       | 2000 → 350      |
-| `hypr/hypr/events/peek.lua`      | `arm_fade` on navigation     | remove          |
 | `quickshell/modules/bar/Bar.qml` | bar `Rectangle.color`        | opaque → α 0    |
 | `quickshell/modules/bar/Bar.qml` | `implicitHeight`             | 30 → 38         |
 
-The peek change matters most. The cheatsheet currently fades on a timer that
-does not care whether you are still deciding. Replace it with: appear after
-350 ms of dwell, **stay for as long as you are in the submap**, fade 400 ms
-after leaving. That is which-key's contract, and it fixes "doesn't stay long
-enough" by deleting the timer rather than lengthening it.
+The which-key overlay is the single delayed reference surface: appear after
+350 ms of dwell in any submap, stay open while you move from submap to submap,
+and dismiss immediately on reset. The card sits at the bottom of the screen
+and the bar carries a submap indicator pill. The separate CheatSheetPeek panel
+is retired so there is exactly one which-key popup rather than two surfaces
+competing to explain the same submap.
 
 ### P1 · One scale knob
 
