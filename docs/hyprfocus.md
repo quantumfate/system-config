@@ -512,15 +512,15 @@ after the store-directory move and the live admission round-trip.
 
 ### Still true of the running desk
 
-| Area                  | Today                                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Background policy     | `defer`/`prevent` task keys are live (the mood panel's cycle consumes them); the wildcard `allow` shape is inert (LEO-252)        |
-| Grace                 | the graceful list vanished from the contract with the scenes key; the announce/deadline/veto protocol is still LEO-242's to build |
-| Notifications         | identity is resolved and recorded; routing still keys on the old policy                                                           |
-| Geometry engine       | scheduled correction passes still exist beside the provider; timers currently do not fire (LEO-302)                               |
-| Workspaces            | declared; the last manual strays (specials, the unpinned `1`) are LEO-265/299                                                     |
-| Services and projects | services enforce from the declaration per mode; projects still untouched                                                          |
-| Mode panel            | the shell's mode editor reads/patches the policy store; full read/explain contract is LEO-280                                     |
+| Area                  | Today                                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Background policy     | `defer`/`prevent` task keys are live (the mood panel's cycle consumes them); the wildcard `allow` shape is inert (LEO-252)                                                                                         |
+| Grace                 | live: the shell announces what a transition takes before it takes it (LEO-242), and a resource's veto window holds a stop and surfaces once (LEO-256); the deadline half of refusals is the resource's own `until` |
+| Notifications         | identity resolved and recorded; routing per mode is live (LEO-273/275)                                                                                                                                             |
+| Geometry engine       | scheduled correction passes still exist beside the provider; timers currently do not fire (LEO-302)                                                                                                                |
+| Workspaces            | declared; the last manual strays (specials, the unpinned `1`) are LEO-265/299                                                                                                                                      |
+| Services and projects | services enforce from the declaration per mode; projects still untouched                                                                                                                                           |
+| Mode panel            | the shell's mode editor reads/patches the policy store; full read/explain contract is LEO-280                                                                                                                      |
 
 ## Services: why not systemd targets
 
