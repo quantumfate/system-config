@@ -30,6 +30,7 @@ env_vars:
 # Universal session vars. These apply to every login session (TTY included) and
 # complement the Wayland-only block in session_env's uwsm env files.
 env_session_vars:
+  QF_STORE: "${XDG_STATE_HOME:-$HOME/.local/state}/quantum-store"
   XDG_CONFIG_HOME: "$HOME/.config"
   BROWSER: "zen-twilight"
   BAT_THEME: "Catppuccin Macchiato"
