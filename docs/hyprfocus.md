@@ -96,7 +96,7 @@ The old `scenes.json` store is retired and folded in once on load.
 ```text
 base
   scenes      code proton obsidian-linear logs dofus pokemon media …
-  bindings    global nav window layout dofus
+  bindings    global nav window layout dofus shelf-ankama shelf-steam shelf-lutris
   services    theme-auto obsidian obsidian-index linear-sync state-backup
 
 mode gaming
@@ -105,8 +105,8 @@ mode gaming
   notify      none
 
 mode neutral  (hidden)
-  scenes      code@primary proton@primary communication@secondary logs@secondary
-  bindings    − dofus
+  scenes      code@primary proton@primary logs@secondary
+  bindings    − dofus − shelf-ankama − shelf-steam − shelf-lutris
 ```
 
 The workspaces a mode admits are derived from its scene set (a scene's name is
