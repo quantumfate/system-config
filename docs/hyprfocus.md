@@ -89,6 +89,10 @@ service and project. Each mode names its **scene set** outright, each scene on a
 monitor role, and states everything else as a difference from the base
 (declaration version 3).
 
+`base.scenes` is the desk's only scene table: the hypr scene layout, rule
+compiler and companions read it, and so do scene bindings and the resolver.
+The old `scenes.json` store is retired and folded in once on load.
+
 ```text
 base
   scenes      code proton obsidian-linear logs dofus pokemon media …
