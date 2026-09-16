@@ -82,27 +82,42 @@ returns a handle from `hl.bind`, `hl.window_rule`, `hl.workspace_rule` and
 `hl.layer_rule`, and **all four carry `set_enabled`** — so a mode change
 materialises a desk without a config reload.
 
-## Base plus delta
+## Base plus delta, scene sets outright
 
-One `base` declares the whole desk. Each mode states only its difference.
+One `base` declares the whole desk: the scene catalog plus every binding tree,
+service and project. Each mode names its **scene set** outright, each scene on a
+monitor role, and states everything else as a difference from the base
+(declaration version 3).
 
 ```text
 base
-  workspaces  code creative proton media gaming logs misc
-  bindings    global nav window layout
+  scenes      code proton obsidian-linear logs dofus pokemon media …
+  bindings    global nav window layout dofus
   services    theme-auto obsidian obsidian-index linear-sync state-backup
 
-mode game
-  workspaces  only [gaming]
-  bindings    + dofus
+mode gaming
+  scenes      dofus@primary pokemon@primary media@secondary …
   services    − obsidian − obsidian-index − linear-sync
   notify      none
 
-mode llm
-  workspaces  + llm
-  bindings    + llm
-  services    + ollama
+mode neutral  (hidden)
+  scenes      code@primary proton@primary communication@secondary logs@secondary
+  bindings    − dofus
 ```
+
+The workspaces a mode admits are derived from its scene set (a scene's name is
+its workspace's name). `monitor` is a host role (`primary`, `secondary`), never
+an output; the mode's role wins over the host file's workspace pin, a missing
+output falls back to primary, and the scene moves back when the monitor
+returns. `neutral` is `hidden`: the recovery fallback, never listed as a peer.
+
+A mode is **refused whole** at resolve time when its set is malformed: an
+unknown scene or monitor role, a scene listed twice, or two listed scenes
+claiming the same block class string (compared textually). The refusal is an
+`admit/mode_refused` record naming the mode, the class and both scenes. The
+token table lives in the hypr repo's `docs/scenes.md` ("Validation").
+Known gap: pokemon's browser blocks claim `slot:pokemon/*` tag strings until
+launch identity stamping lands, because they share a class with dofus's.
 
 **Deltas are a writing convenience and never a runtime concept.** The
 reconciler resolves base + mode into a complete declaration _first_, then diffs
@@ -110,8 +125,9 @@ that against reality. Applying deltas incrementally would make the result
 depend on the order they were applied, which is the whole class of bug this
 design exists to remove.
 
-`only` is exclusive (nothing else survives); `+` and `−` are additive. A mode
-that lists neither keeps the base.
+For the delta kinds (bindings, services, projects) `only` is exclusive
+(nothing else survives); `+` and `−` are additive. A mode that lists neither
+keeps the base.
 
 ## Dependencies: composition here, ordering in systemd
 
@@ -124,7 +140,7 @@ the thing it belongs to, at one of two strengths:
 
 ```text
 requires   cannot function without it
-  binding:dofus     ->  workspace:gaming
+  binding:dofus     ->  scene:dofus
 
 wants      uses it, runs without it
   service:obsidian  ->  service:obsidian-index, service:linear-sync
@@ -144,8 +160,9 @@ impossible to express. "The services it uses" is usually `wants`; reserve
 
 The resolver takes the transitive closure, so a mode that opens Obsidian gets
 its services without naming them, and every other mode that opens Obsidian does
-not repeat them. References are qualified (`service:`, `project:`, `workspace:`, `binding:`)
-because these edges cross kinds.
+not repeat them. References are qualified (`service:`, `project:`, `scene:`, `binding:`)
+because these edges cross kinds. A `scene:` reference is checked, never added:
+a mode that admits something requiring a scene it does not list is refused.
 
 **Ordering, readiness and failure** between a capability's units are _not_
 ours. `Requires=`, `Wants=`, `After=`, `BindsTo=` and `PartOf=` already express
