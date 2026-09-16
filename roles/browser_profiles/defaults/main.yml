@@ -20,4 +20,5 @@ zen_profile_extras: [zen-themes.json]
 zen_chrome_extras:
   - userChrome.css
   - userContent.css
+  - zen-palette.css
   - zen-logo-macchiato.svg
