@@ -45,3 +45,32 @@ the registry, not of the store: the gate test pins the schemas and the
 table against each other. The scene-policy workspace's rows/applied/last
 are named in schemas/scene-policy.schema.json (LEO-241); veto.json and
 hyprfocus-held.json still carry their kind from this table only.
+
+## Re-seeding a declaration (LEO-337)
+
+`hyprfocus.json` is the one store re-seeded automatically, and only forward:
+`,hyprfocus seed <file>` (`hypr/bin/,hyprfocus`) compares the stored
+`version` against the file being seeded, and when the store's is lower it
+replaces the store once, without `--force`. A stored `version` equal to or
+higher than the file being seeded still refuses without `--force` — the
+store is edited at runtime, and a store already at the current version may
+carry hand-tuned fields a blind overwrite would discard.
+
+This is the only reseed path; nothing else — the compositor's Lua side
+included — carries a second copy of this logic. A version bump is warranted
+even when the declaration's _shape_ is unchanged, whenever shipped content
+(workspace names, mode deltas, presentation) has drifted enough that a store
+seeded from an older file no longer matches what the host configs expect —
+which is what happened when the workspace names changed but
+`assets/hyprfocus.default.json`'s `version` did not, and the CLI had no
+comparison to catch it. See `hyprfocus.md`'s "The one idea" for what the
+declaration governs, and the quickshell sibling's `schemas/hyprfocus.schema.json`
+for the `version` field itself.
+
+`,hyprfocus seed` has no way to _locate_ the shipped default at runtime —
+every known call site passes the source path explicitly (see
+`hyprfocus-handoff.md`), and there is no installed or packaged path this
+store re-seeds itself from. Calling the reseed check automatically on every
+`hyprfocus` invocation, with no explicit source, therefore stays undone
+until a discoverable shipped-default path exists; see the LEO-337 progress
+comment on the issue for the record of that gap.
