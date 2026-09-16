@@ -39,6 +39,7 @@ table disagree, or when a schema ships without a class at all.
 | nvim/tools.json              | observation | tool presence per host, probe results with a generated_at                      |
 | obsidian/ui.json + tags.json | observation | editor state and tags derived from use (owned by the scripts repo's stores)    |
 | hypr/monitor-profile.json    | declaration | host monitor data                                                              |
+| geometry.json                | declaration | per-monitor base left/right outer gap, published by conf/host.lua's `build()` (LEO-340); the bar mirrors it as its side inset, falling back to `Theme.barInset*2` when a monitor has no entry. Base gap only — never the transient solo widen from `hypr/events/solo_gaps.lua`. |
 
 Schemas without a row here, or a row without a schema, are a defect of
 the registry, not of the store: the gate test pins the schemas and the
