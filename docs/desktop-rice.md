@@ -44,15 +44,15 @@ under-used rather than missing:
 
 Every complaint traces to a hardcoded value, not a design flaw.
 
-| Symptom                  | Cause                                                                       | Where                       | Today         |
-| ------------------------ | --------------------------------------------------------------------------- | --------------------------- | ------------- |
-| Shell text too small     | 75 literal `pixelSize:` values; `Theme` exposes no scale                    | `quickshell/modules/**`     | 10–17px       |
-| No space between things  | Gaps tuned for a laptop, applied to a 5120×1440 panel                       | `hypr/hypr/conf.lua`        | in 2 / out 5  |
-| Cheatsheet vanishes      | Overlay closed when nesting left the SUPER-Space hub session                | `quickshell/modules/whichkey/WhichKey.qml` | immediate |
-| Theme switch is partial  | `theme.json` drives the shell only; GTK/Qt/kitty/nvim are pinned in Ansible | `roles/theming/defaults`    | `macchiato`   |
-| Bar is noisy             | 14 always-on modules on an opaque ground                                    | `modules/bar/Bar.qml`       | h 30, α 1.0   |
-| Nothing is transparent   | Opacity globally disabled, though the event hook to drive it exists         | `hypr/events/opacity.lua`   | 1.0 / 1.0     |
-| Regressions go unnoticed | `just check` is `fmt-check`; no tests in either desktop repo                | `hypr/`, `quickshell/`      | 0 tests       |
+| Symptom                  | Cause                                                                       | Where                                      | Today        |
+| ------------------------ | --------------------------------------------------------------------------- | ------------------------------------------ | ------------ |
+| Shell text too small     | 75 literal `pixelSize:` values; `Theme` exposes no scale                    | `quickshell/modules/**`                    | 10–17px      |
+| No space between things  | Gaps tuned for a laptop, applied to a 5120×1440 panel                       | `hypr/hypr/conf.lua`                       | in 2 / out 5 |
+| Cheatsheet vanishes      | Overlay closed when nesting left the SUPER-Space hub session                | `quickshell/modules/whichkey/WhichKey.qml` | immediate    |
+| Theme switch is partial  | `theme.json` drives the shell only; GTK/Qt/kitty/nvim are pinned in Ansible | `roles/theming/defaults`                   | `macchiato`  |
+| Bar is noisy             | 14 always-on modules on an opaque ground                                    | `modules/bar/Bar.qml`                      | h 30, α 1.0  |
+| Nothing is transparent   | Opacity globally disabled, though the event hook to drive it exists         | `hypr/events/opacity.lua`                  | 1.0 / 1.0    |
+| Regressions go unnoticed | `just check` is `fmt-check`; no tests in either desktop repo                | `hypr/`, `quickshell/`                     | 0 tests      |
 
 ## Spacing is the headline
 
@@ -98,7 +98,7 @@ sun timer  ─┐                          ┌─→ quickshell   (native watch)
 SUPER+q t  ─┼─→  theme.json  ──────────┼─→ hyprland     (native watch)
 switcher   ─┘         │                └─→ ,theme.sh apply
                       │                        │
-                      └────────────────────────┴─→ kitty · nvim · gtk · qt · hyprpaper
+                      └────────────────────────┴─→ kitty · nvim · gtk · qt · awww
 ```
 
 `,theme.sh apply` is the only component that does not exist yet. It exists
@@ -264,7 +264,7 @@ Widen `theme.json`, write `,theme.sh apply`, unpin the Ansible role.
 | Qt        | rewrite qt5ct/qt6ct `color_scheme_path`, Kvantum `theme`, poke `xsettingsd` |
 | Hyprland  | `hyprctl keyword general:col.active_border`                                 |
 | Neovim    | `lua/theme/` gains a store reader and a watcher                             |
-| Wallpaper | one per palette, swapped over `hyprpaper` IPC                               |
+| Wallpaper | one per palette, swapped by `awww` (awww-daemon)                            |
 
 `roles/theming` stops pinning `theme_flavour: macchiato` and instead installs
 every flavour plus the fan-out. Ansible provisions the capability; the store

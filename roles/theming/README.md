@@ -15,19 +15,19 @@ owns the live palette seam.
 
 Every toolkit needs telling separately, and the portals read none of those files:
 
-| Layer   | File                                                             | Note                                                                                                      |
-| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| GTK2    | `~/.gtkrc-2.0.mine`                                              | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0`                                                    |
-| GTK3    | `~/.config/gtk-3.0/settings.ini`                                 |                                                                                                           |
-| GTK4    | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets` | libadwaita ignores `gtk-theme-name` entirely                                                              |
-| Qt      | `qt6ct.conf` / `qt5ct.conf` + Kvantum                            | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                                   |
-| X11     | `xsettingsd.conf`                                                | XWayland clients                                                                                          |
-| Portals | **dconf** `/org/gnome/desktop/interface/*`                       | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not       |
-| Session | `~/.config/environment.d/50-theming.conf`                        | palette-invariant only now — `XCURSOR_*` moved to `,theme.sh`'s live fan-out, see its `apply_cursor` step |
-| btop    | `~/.config/btop/btop.conf`                                       | skeleton + runtime palette via `apply_btop`                                                              |
-| launcher| `~/.config/rofi/config.rasi` + `~/.local/share/rofi/themes/custom.rasi` | skeleton (config) + user theme (custom) + palette via `apply_rofi`                              |
-| wlogout | `~/.config/wlogout/style.css`                                    | skeleton + runtime flavour in icon paths via `apply_wlogout`                                              |
-| zathura | `~/.config/zathura/zathurarc`                                    | skeleton + runtime palette via `apply_zathura`                                                           |
+| Layer    | File                                                                    | Note                                                                                                      |
+| -------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| GTK2     | `~/.gtkrc-2.0.mine`                                                     | the `.mine` file, because nwg-look owns `~/.gtkrc-2.0`                                                    |
+| GTK3     | `~/.config/gtk-3.0/settings.ini`                                        |                                                                                                           |
+| GTK4     | `settings.ini` + **symlinked** `gtk.css`/`gtk-dark.css`/`assets`        | libadwaita ignores `gtk-theme-name` entirely                                                              |
+| Qt       | `qt6ct.conf` / `qt5ct.conf` + Kvantum                                   | fonts are QDataStream blobs, see `templates/_qtfont.j2`                                                   |
+| X11      | `xsettingsd.conf`                                                       | XWayland clients                                                                                          |
+| Portals  | **dconf** `/org/gnome/desktop/interface/*`                              | what `xdg-desktop-portal-gtk` reports — miss this and the app is themed but its file chooser is not       |
+| Session  | `~/.config/environment.d/50-theming.conf`                               | palette-invariant only now — `XCURSOR_*` moved to `,theme.sh`'s live fan-out, see its `apply_cursor` step |
+| btop     | `~/.config/btop/btop.conf`                                              | skeleton + runtime palette via `apply_btop`                                                               |
+| launcher | `~/.config/rofi/config.rasi` + `~/.local/share/rofi/themes/custom.rasi` | skeleton (config) + user theme (custom) + palette via `apply_rofi`                                        |
+| wlogout  | `~/.config/wlogout/style.css`                                           | skeleton + runtime flavour in icon paths via `apply_wlogout`                                              |
+| zathura  | `~/.config/zathura/zathurarc`                                           | skeleton + runtime palette via `apply_zathura`                                                            |
 
 `templates/zen-user.js.j2`, `zen-userChrome.css.j2`, `zen-userContent.css.j2`
 and `zen-palette.css.j2` render the shared Zen config; `roles/browser_profiles`

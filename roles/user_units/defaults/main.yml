@@ -11,8 +11,6 @@ user_units_enabled:
   - copyq.service
   - foot-server.service
   - geoclue-agent.service
-  - hypridle.service
-  - hyprpaper.service
   - linear-app.service
   - obsidian.service
   - proton-mail.service
