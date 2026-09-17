@@ -113,7 +113,11 @@ The workspaces a mode admits are derived from its scene set (a scene's name is
 its workspace's name). `monitor` is a host role (`primary`, `secondary`), never
 an output; the mode's role wins over the host file's workspace pin, a missing
 output falls back to primary, and the scene moves back when the monitor
-returns. `neutral` is `hidden`: the recovery fallback, never listed as a peer.
+returns. `neutral` is `hidden`: the recovery fallback, never listed as a peer
+and never a default. The desk boots and rests in `work`; the picker offers
+`work`, `study` and `gaming`. A timed mode's expiry falls back to whichever
+mode was active before it (the pointer's `previous`), or to `work` when
+nothing was recorded — never to `neutral`.
 
 A mode is **refused whole** at resolve time when its set is malformed: an
 unknown scene or monitor role, a scene listed twice, or two listed scenes
