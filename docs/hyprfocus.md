@@ -114,10 +114,16 @@ its workspace's name). `monitor` is a host role (`primary`, `secondary`), never
 an output; the mode's role wins over the host file's workspace pin, a missing
 output falls back to primary, and the scene moves back when the monitor
 returns. `neutral` is `hidden`: the recovery fallback, never listed as a peer
-and never a default. The desk boots and rests in `work`; the picker offers
-`work`, `study` and `gaming`. A timed mode's expiry falls back to whichever
-mode was active before it (the pointer's `previous`), or to `work` when
-nothing was recorded — never to `neutral`.
+and never a default. **Login always enters `work`**, unless the pointer
+names a timed mode still running (`until` in the future), in which case that
+mode resumes as itself and keeps its own `previous`; a stale/expired timed
+pointer, a missing store, or a pointer naming an unknown mode all boot to
+`work` too — never to `previous`, and never to `neutral`. The picker offers
+`work`, `study` and `gaming`. Once the desk is running, a timed mode's
+expiry (not a boot) falls back to whichever mode was active before it (the
+pointer's `previous`), or to `work` when nothing was recorded — this is the
+hypr repo's `hypr/hyprfocus/init.lua` `effective_mode`; the boot decision is
+`hypr/hyprfocus/boot.lua`, a separate rule applied once by `hyprland.start`.
 
 A mode is **refused whole** at resolve time when its set is malformed: an
 unknown scene or monitor role, a scene listed twice, or two listed scenes
