@@ -15,7 +15,6 @@ user_units_enabled:
   - obsidian.service
   - proton-mail.service
   - proton-pass.service
-  - shelly-ui.service
   - shikane.service
   - signal-desktop.service
   - spotify.service
