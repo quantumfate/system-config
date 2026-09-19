@@ -706,6 +706,12 @@ export FZF_DEFAULT_OPTS=" \
   --color=info:#6e738d,header:#6e738d,gutter:-1,border:#363a4f"
 export SKIM_DEFAULT_OPTIONS="--bind 'tab:down,shift-tab:up'"
 
+# The palette in force right now, written by `,theme.sh` on every apply —
+# day/night and mode switches included. Sourced last so it wins over the
+# defaults above, and absent on a machine that has never applied a theme.
+[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/theme.zsh" ] \
+  && source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/theme.zsh"
+
 ## feh, sized to 80% of the focused monitor rather than to the image's own
 ## pixel size — a screenshot of a 4K screen otherwise opens larger than the
 ## screen it was taken on.
