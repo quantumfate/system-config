@@ -13,14 +13,17 @@ and hence this role running after it.
 
 ## Zen profiles are first-class names, created here
 
-The seed list names every zen profile the desk drives: the default profile,
-`-P Media`, and `-P GamingMedia`. GamingMedia is not an alias: zen is
-single-instance per profile, and the gaming scene's companion
-(`zen-twilight -P GamingMedia --name zen-gaming-media`, LEO-296) launches that
-profile as its own process — its window class `zen-gaming-media` is pinned to
-`name:gaming` by hypr's windowrules, and the accent reaches it through the one
-shared `user.js` its `user.js` symlink points back at, re-rendered per palette
-by `theming` (pending tier: next launch).
+The seed list names every zen profile the desk drives: the default profile and
+`-P Media`. One profile per identity, never one per window role: a scene's
+companion browser is a second _window_ of the media profile, claimed and
+placed by the desk's scene engine (it stamps the window it launched), so no
+profile exists only to carry a window class. A profile per window role also
+signed two sync clients into one account under the same device name, which the
+account cannot tell apart.
+
+The accent reaches every profile through the one shared `user.js` its symlink
+points back at, re-rendered per palette by `theming` (pending tier: next
+launch).
 
 The link pass is idempotent across profile ages: an existing-but-unlinked
 profile (created by hand mid-run of the playbook, for instance) gets its

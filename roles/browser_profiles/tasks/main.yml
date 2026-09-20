@@ -6,12 +6,6 @@
     - firefox
     - zen-twilight
     - zen-twilight -P Media
-    # The gaming scene's own zen instance (the class hypr's windowrules pin to
-    # name:gaming; the scene's declared companion spawns it — LEO-296). Zen
-    # is single-instance per profile, so this is a distinct PROFILE, and its
-    # user.js/chrome links ride the same shared source every other profile
-    # links.
-    - zen-twilight -P GamingMedia
   changed_when: false
 
 - name: Check for the shared user.js

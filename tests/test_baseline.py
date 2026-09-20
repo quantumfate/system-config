@@ -16,10 +16,12 @@ def test_the_store_directory_is_knob_surface() -> None:
     assert "QF_STORE" in env, "user units need the shared quantum-store directory"
 
 
-def test_gaming_media_profile_is_first_class() -> None:
+def test_zen_profiles_are_one_per_identity() -> None:
     create = (root / "roles/browser_profiles/tasks/main.yml").read_text()
-    assert "-P GamingMedia" in create, (
-        "the gaming scene's companion rides its own zen profile; the seed list names it"
+    assert "-P Media" in create, "the media profile is seeded here"
+    assert "-P GamingMedia" not in create, (
+        "a scene's companion browser is a second window of the media profile, "
+        "claimed by the scene engine -- no profile exists to carry a window class"
     )
 
 
