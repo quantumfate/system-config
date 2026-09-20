@@ -154,32 +154,6 @@
 # Everything above renders the SEED flavour. The live choice belongs to the
 # theme store, so the last thing a converge does is hand the decision back to
 # it — otherwise a playbook run silently reverts a palette you picked weeks ago.
-- name: Ensure the systemd user dir exists
-  ansible.builtin.file:
-    path: "{{ target_home }}/.config/systemd/user"
-    state: directory
-    mode: "0755"
-
-- name: Deploy the theme-auto user units
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ target_home }}/.config/systemd/user/{{ item }}"
-    mode: "0644"
-  loop:
-    - theme-auto.service
-    - theme-auto.timer
-  notify: Restart theme-auto timer
-
-# Only the timer is enabled; the service stays trigger-driven so
-# `systemctl --user start theme-auto` is a clean manual re-apply.
-- name: Enable the theme-auto timer
-  ansible.builtin.systemd_service:
-    name: theme-auto.timer
-    enabled: true
-    state: started
-    daemon_reload: true
-    scope: user
-
 # Does nothing when the scripts checkout is not there yet (a first run, before
 # roles/project_checkouts) — the seed above is already correct in that case.
 - name: Re-assert the theme store over the rendered seed

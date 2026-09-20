@@ -5,12 +5,3 @@
   ansible.builtin.command: pkill -HUP xsettingsd
   changed_when: false
   failed_when: false
-
-# The timer holds the schedule; restarting it is what picks up an edited
-# OnCalendar. The service itself is oneshot and needs no restart.
-- name: Restart theme-auto timer
-  ansible.builtin.systemd_service:
-    name: theme-auto.timer
-    state: restarted
-    daemon_reload: true
-    scope: user
