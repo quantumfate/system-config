@@ -14,8 +14,6 @@ export ZSH_LOG_DIR="{{ zsh_log_dir }}"
 export ZSH_LOG_WORKDIR="{{ zsh_log_workdir }}"
 {% if zsh_tailspin_theme %}export TAILSPIN_THEME="{{ zsh_tailspin_theme }}"
 {% endif %}
-# One palette everywhere bat is reachable — direct calls, man pages, .lessfilter.
-export BAT_THEME="{{ zsh_bat_theme }}"
 # systemd's own pager, same no-wrap rules as ours.
 export SYSTEMD_LESS="FRSXMK"
 

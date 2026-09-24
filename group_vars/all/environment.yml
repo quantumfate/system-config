@@ -33,4 +33,7 @@ env_session_vars:
   QF_STORE: "${XDG_STATE_HOME:-$HOME/.local/state}/quantum-store"
   XDG_CONFIG_HOME: "$HOME/.config"
   BROWSER: "zen-twilight"
-  BAT_THEME: "Catppuccin Macchiato"
+  # No BAT_THEME here: `,theme.sh apply` owns it (and delta, eza, fzf, less,
+  # zsh highlighting) through $XDG_CONFIG_HOME/zsh/theme.zsh, which the rc
+  # sources. A fixed flavour in this file outranked every palette switch for
+  # anything the session started before the first apply had run.
