@@ -6,7 +6,7 @@ gtk-icon-theme-name={{ theme_icons }}
 gtk-cursor-theme-name={{ theme_cursor }}
 gtk-cursor-theme-size={{ theme_cursor_size }}
 gtk-font-name={{ theme_ui_font }} {{ theme_ui_font_size }}
-gtk-application-prefer-dark-theme=1
+gtk-application-prefer-dark-theme={{ 1 if theme_flavour_is_dark else 0 }}
 
 # Icons only where they carry meaning alone: toolbars yes, menus/buttons no.
 gtk-toolbar-style=GTK_TOOLBAR_ICONS

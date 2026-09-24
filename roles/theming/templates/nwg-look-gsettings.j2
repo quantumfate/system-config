@@ -14,6 +14,6 @@ font-hinting=slight
 font-antialiasing=rgba
 font-rgba-order=rgb
 text-scaling-factor=1.0
-color-scheme=prefer-dark
+color-scheme={{ 'prefer-dark' if theme_flavour_is_dark else 'prefer-light' }}
 event-sounds=true
 input-feedback-sounds=false

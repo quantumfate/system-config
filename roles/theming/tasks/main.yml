@@ -30,8 +30,6 @@
     - "{{ target_home }}/.config/environment.d"
     - "{{ target_home }}/.icons/default"
     - "{{ target_home }}/.local/share/nwg-look"
-    # Used to come from chezmoi; nothing else creates it since user.js moved here.
-    - "{{ browser_config_src }}"
     # Skeletons previously shipped by chezmoi (btop, rofi, wlogout, zathura);
     # now rendered here so a converge owns them exactly once, and the live
     # palette seam is written by `,theme.sh` at the end of the run.
@@ -138,20 +136,7 @@
     force: true
     follow: false
 
-- name: Render the shared Zen config
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: "0644"
-  loop:
-    - {src: zen-user.js.j2, dest: "{{ browser_config_src }}/user.js"}
-    - {src: zen-userChrome.css.j2, dest: "{{ browser_config_src }}/userChrome.css"}
-    - {src: zen-userContent.css.j2, dest: "{{ browser_config_src }}/userContent.css"}
-    - {src: zen-palette.css.j2, dest: "{{ browser_config_src }}/zen-palette.css"}
-  loop_control:
-    label: "{{ item.dest | basename }}"
-
-# Everything above renders the SEED flavour. The live choice belongs to the
+# Everything below renders the SEED flavour. The live choice belongs to the
 # theme store, so the last thing a converge does is hand the decision back to
 # it — otherwise a playbook run silently reverts a palette you picked weeks ago.
 # Does nothing when the scripts checkout is not there yet (a first run, before

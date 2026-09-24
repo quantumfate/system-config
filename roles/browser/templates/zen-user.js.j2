@@ -1,4 +1,4 @@
-// ~/.config/zen-chezmoi/user.js — rendered by roles/theming.
+// ~/.config/zen/shared/user.js — rendered by roles/browser.
 // Betterfox base plus this machine's privacy and design prefs; fonts and the
 // design section come from defaults/main.yml.
 //
@@ -123,6 +123,7 @@ user_pref("extensions.enabledScopes", 5);
 user_pref("network.http.referer.XOriginTrimmingPolicy", 2);
 
 /** CONTAINERS ***/
+user_pref("privacy.userContext.enabled", true);
 user_pref("privacy.userContext.ui.enabled", true);
 
 /** VARIOUS ***/
@@ -255,6 +256,13 @@ user_pref("browser.tabs.loadInBackground", false); // switch to new tabs immedia
 user_pref("browser.toolbars.bookmarks.visibility", "always");
 user_pref("browser.startup.homepage", "about:blank");
 user_pref("browser.startup.page", 1);
+// Never resurrect the last session. startup.page=1 already opens the homepage
+// instead of the previous windows; the crash path is the backdoor: powering
+// off with Zen still running reads as an unclean exit, and the default
+// resume_from_crash would replay every window of it on the next launch.
+user_pref("browser.sessionstore.resume_from_crash", false);
+user_pref("browser.sessionstore.resume_session_once", false);
+user_pref("browser.sessionstore.max_resumed_crashes", 0);
 
 // === Privacy extras (beyond Betterfox) ===
 user_pref("browser.safebrowsing.downloads.enabled", false);
@@ -297,7 +305,22 @@ user_pref("signon.autofillForms", false);
 user_pref("signon.generation.enabled", false);
 user_pref("signon.management.page.breach-alerts.enabled", false);
 user_pref("signon.rememberSignons", false);
-user_pref("dom.forms.autocomplete.formautofill", true); // address autofill only
+user_pref("dom.forms.autocomplete.formautofill", false);
+// Proton Pass owns credentials, addresses and cards; the built-in form-fill
+// machinery stays completely off so nothing competes with it.
+user_pref("extensions.formautofill.creditCards.enabled", false);
+user_pref("extensions.formautofill.addresses.enabled", false);
+
+// === Search engines (DuckDuckGo only) ===
+// The engine list itself is a UI-owned file (search.json.mozlz4), so the
+// prefs clear the surface: DuckDuckGo is always the default, and every other
+// engine is hidden from the one-off search bar. Kept away from Betterfox's
+// SEARCH section so the two stay separable.
+user_pref("browser.search.defaultenginename", "DuckDuckGo");
+user_pref("browser.search.defaultenginename.private", "DuckDuckGo");
+user_pref("browser.urlbar.placeholderName", "DuckDuckGo");
+user_pref("browser.urlbar.placeholderName.private", "DuckDuckGo");
+user_pref("browser.search.hiddenOneOffs", "Bing,Ecosia,Google,Perplexity,Startpage,Wikipedia (en)");
 
 // === AI blocking (Zen-specific) ===
 user_pref("browser.ai.control.default", "enabled");

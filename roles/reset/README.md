@@ -41,7 +41,7 @@ flush sends all of it to the archive:
 | `Proton Pass`, `Proton Mail`, …  | Proton sessions                                        |
 | `vesktop`, `spotify`, `obsidian` | app logins and local settings                          |
 
-`roles/browser_profiles` only symlinks prefs _into_ profiles — it does not
+`roles/browser` only symlinks prefs _into_ profiles — it does not
 create their contents. Put anything you want kept into `reset_config_keep`
 before the run, or copy it out of the archive after.
 

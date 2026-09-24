@@ -1,0 +1,120 @@
+---
+# The browser role owns Zen (and Firefox) provisioning from one shared config
+# directory: it renders the seed files (*), seeds the static assets, creates
+# the named profiles, and links everything into each profile. The runtime
+# palette is not this role's: `,theme.sh apply_zen` (the scripts checkout)
+# writes the live accent into the same shared directory, which every profile
+# reaches through the links below.
+#
+# (*) These templates were the theming role's until the browser role absorbed
+# them; the theme_* font vars they reference still come from `roles/theming`
+# defaults, which runs before this role in site.yml.
+
+# The shared directory is rendered twice: the seed below is what a converge
+# owns, and the last task hands the choice back to the theme store (the live
+# palette wins over a seed rendered from this role's static accent).
+- name: Ensure the shared browser config directory exists
+  ansible.builtin.file:
+    path: "{{ browser_config_src }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - { path: "{{ browser_config_src }}"}
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Seed the shared Zen assets
+  # zen-themes.json is Zen's mod registry — seed it, never overwrite what Zen
+  # itself wrote since. Everything else the role owns outright.
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ browser_config_src }}/{{ item.name }}"
+    mode: "0644"
+    force: "{{ item.force }}"
+  loop:
+    - {name: zen-logo-macchiato.svg, src: zen-logo-macchiato.svg, force: true}
+    - {name: zen-themes.json, src: zen-themes.json, force: false}
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Render the shared Zen config
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - {src: zen-user.js.j2, dest: "{{ browser_config_src }}/user.js"}
+    - {src: zen-userChrome.css.j2, dest: "{{ browser_config_src }}/userChrome.css"}
+    - {src: zen-userContent.css.j2, dest: "{{ browser_config_src }}/userContent.css"}
+    - {src: zen-palette.css.j2, dest: "{{ browser_config_src }}/zen-palette.css"}
+  loop_control:
+    label: "{{ item.dest | basename }}"
+
+# --- profiles ---------------------------------------------------------------
+
+# A named profile is created explicitly, never by launching with `-P`: with an
+# instance of the browser already running, `-P <name>` is handed to THAT
+# instance, which ignores the profile and opens a window in the one it has --
+# so the profile is not created and the window carries the running instance's
+# WM_CLASS. `-CreateProfile` talks to no running instance and is idempotent.
+- name: Create the named browser profiles
+  ansible.builtin.command:
+    cmd: zen-twilight -CreateProfile "{{ item }}"
+  loop: "{{ zen_named_profiles }}"
+  changed_when: false
+
+# Each scene that needs a browser window of its own gets a profile of its own:
+# one profile is one instance and one instance is one WM_CLASS, so scenes can
+# only tell their windows apart by the profile they were launched from.
+- name: Initialise every profile once, so its directory exists to link into
+  ansible.builtin.shell:
+    cmd: timeout 10 {{ item }} --headless >/dev/null 2>&1 || true
+  loop:
+    - firefox
+    - zen-twilight
+    - zen-twilight -P Media
+    - zen-twilight -P Dofus
+    - zen-twilight -P pokemon-left
+    - zen-twilight -P pokemon-right
+  changed_when: false
+
+- name: Check for the shared user.js
+  ansible.builtin.stat:
+    path: "{{ browser_config_src }}/user.js"
+  register: user_js
+
+# The merged containers file is per-profile material; the declared identity map
+# is staged once and handed to the merge helper per profile directory.
+- name: Stage the declared container identities
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  register: zen_containers_declared
+
+- name: Write the declared container identities
+  ansible.builtin.copy:
+    content: "{{ zen_containers | to_json }}\n"
+    dest: "{{ zen_containers_declared.path }}"
+    mode: "0600"
+
+- name: Link prefs into each profile
+  ansible.builtin.include_tasks: link_profiles.yml
+  loop: "{{ browser_roots }}"
+  loop_control:
+    loop_var: browser
+    label: "{{ browser.name }}"
+  when: user_js.stat.exists
+
+- name: Remove the staged container identities
+  ansible.builtin.file:
+    path: "{{ zen_containers_declared.path }}"
+    state: absent
+
+# Everything above renders the SEED flavour. The live choice belongs to the
+# theme store, so the last thing this role does is hand the decision back to
+# it — otherwise a playbook run silently reverts a palette you picked weeks
+# ago. Does nothing when the scripts checkout is not there yet (a first run,
+# before roles/project_checkouts) — the seed above is already correct then.
+# `roles/theming` re-asserts the same way over its own rendered surfaces.
+- name: Re-assert the theme store over the rendered seed
+  ansible.builtin.command: "{{ theme_apply_script }} apply"

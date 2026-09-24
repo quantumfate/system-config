@@ -21,21 +21,10 @@ theme_kvantum: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
 theme_qt_colors: "catppuccin-{{ theme_flavour }}-{{ theme_accent }}"
 theme_icons: Papirus-Dark
 
-# The accent for surfaces that take a colour instead of a theme name (Zen).
-#
-# Zen reads this from user.js, which is parsed once at launch, so unlike kitty or
-# GTK it cannot follow a live palette switch — one value has to work on both
-# grounds. This sits on the mauve axis between Latte's #8839ef and Macchiato's
-# #c6a0f6, and is the choice that maximises the worse of the two contrasts:
-#
-#   colour            on Latte base   on Macchiato base
-#   Latte mauve            4.79            2.72
-#   Macchiato mauve        1.90            6.84
-#   this                   2.98            4.37
-#
-# Either flavour's own mauve is close to invisible on the other's ground; this
-# is never striking and never washed out. See the Zen note in the desktop plan.
-theme_accent_hex: "#9a7ae0"
+# Whether the seed flavour is a dark palette. The toolkit files must declare a
+# scheme that matches the SEED — the runtime flip is `,theme.sh`'s job, but a
+# machine seeded with latte must not come up announcing prefer-dark.
+theme_flavour_is_dark: "{{ theme_flavour != 'latte' }}"
 
 # UI type. One notch above the GTK/Qt defaults; mono font is the terminal's.
 theme_ui_font: "Adwaita Sans"

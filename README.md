@@ -162,7 +162,7 @@ Each role documents itself; the tag is the role name unless noted.
 [`session_env`](roles/session_env/README.md) ·
 [`zsh`](roles/zsh/README.md) ·
 [`theming`](roles/theming/README.md) ·
-[`browser_profiles`](roles/browser_profiles/README.md)
+[`browser`](roles/browser/README.md)
 
 **Lifecycle** — [`cleanup`](roles/cleanup/README.md) ·
 [`reset`](roles/reset/README.md)

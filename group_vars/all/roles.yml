@@ -42,7 +42,7 @@ roles_default:
   session_env: true
   zsh: true
   theming: true
-  browser_profiles: true
+  browser: true
   audio: true
   obsidian_index: true
   obsidian_linear: true

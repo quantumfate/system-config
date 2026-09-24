@@ -1,0 +1,79 @@
+---
+# The shared browser prefs directory this role renders into and links from.
+# Named once here because the same path is what `,theme.sh apply_zen` writes
+# the runtime palette into; two repos, one shared dir.
+# `browser_config_src` is defined in group_vars/all/main.yml — two roles used
+# to touch it, and role defaults are only in scope during their own role, so
+# the home of a path two roles share belongs at group scope.
+
+# The accent for surfaces that take a colour instead of a theme name (Zen).
+#
+# Zen reads this from user.js, which is parsed once at launch, so unlike kitty
+# or GTK it cannot follow a live palette switch — one value has to work on both
+# grounds. This sits on the mauve axis between Latte's #8839ef and Macchiato's
+# #c6a0f6, and is the choice that maximises the worse of the two contrasts:
+#
+#   colour            on Latte base   on Macchiato base
+#   Latte mauve            4.79            2.72
+#   Macchiato mauve        1.90            6.84
+#   this                   2.98            4.37
+#
+# Either flavour's own mauve is close to invisible on the other's ground; this
+# is never striking and never washed out. See the Zen note in the desktop plan.
+theme_accent_hex: "#9a7ae0"
+
+# Profile dirs to skip when symlinking — not real browser profiles. `shared`
+# is this role's own config dir under `.config/zen`; the rest are browser
+# maintenance dirs that must never be treated as profiles.
+browser_profile_excludes:
+  - Profile Groups
+  - firefox-mpris
+  - Pending Pings
+  - Crash Reports
+  - shared
+
+# Named Zen profiles, one per scene that keeps a browser window of its own
+# (hypr's `conf/base.lua` names the matching launch commands and classes).
+# The pokemon scene keeps two browsers open next to the emulator, one per
+# screen side; each gets a profile of its own so its window class is distinct.
+zen_named_profiles:
+  - Media
+  - Dofus
+  - pokemon-left
+  - pokemon-right
+
+# Container identities provisioned into each Zen profile's `containers.json`.
+# Keys are profile names as `profiles.ini` names them (the directory suffix
+# after the install salt); the default profile's dir is "Default (twilight)".
+# The merge is by name: identities already present keep their userContextId
+# (so site associations and user-picked ids survive a re-converge), missing
+# ones are appended with fresh ids. The DEFAULT container itself is a Zen UI
+# choice made after provisioning, never a pref this role writes.
+zen_containers:
+  "Default (twilight)":
+    - {name: Personal, icon: fingerprint, color: blue}
+    - {name: Studying, icon: tree, color: pink}
+    - {name: Productivity, icon: circle, color: blue}
+    - {name: Research, icon: circle, color: turquoise}
+    - {name: Sensitive Research, icon: circle, color: green}
+  Dofus:
+    - {name: Dofus, icon: circle, color: pink}
+  Media:
+    - {name: Social Media, icon: circle, color: blue}
+    - {name: Gaming, icon: fingerprint, color: blue}
+    - {name: Anime, icon: fingerprint, color: gray}
+    - {name: Shopping, icon: fingerprint, color: pink}
+
+browser_roots:
+  - {name: Zen, path: "{{ target_home }}/.config/zen", zen: true}
+  - {name: Firefox, path: "{{ target_home }}/.config/mozilla/firefox", zen: false}
+
+# Symlinked into the profile root.
+zen_profile_extras: [zen-themes.json]
+
+# Symlinked into <profile>/chrome.
+zen_chrome_extras:
+  - userChrome.css
+  - userContent.css
+  - zen-palette.css
+  - zen-logo-macchiato.svg

@@ -119,8 +119,8 @@
     - role: theming
       when: roles_enabled.theming
       tags: [dotfiles, theming]
-    - role: browser_profiles
-      when: roles_enabled.browser_profiles
+    - role: browser
+      when: roles_enabled.browser
       tags: [dotfiles, browser]
 
     - role: audio
