@@ -1,5 +1,10 @@
-# Wayland session environment. Shared vars (PATH, Proton, BROWSER, BAT_THEME)
-# live in ~/.config/environment.d/00-shell.conf, managed by the same role.
+# Wayland session environment. Shared vars (PATH, Proton, BROWSER) live in
+# ~/.config/environment.d/00-shell.conf, managed by the same role.
+#
+# BAT_THEME is deliberately NOT among them any more: `,theme.sh apply` owns
+# the shell's colours through $XDG_CONFIG_HOME/zsh/theme.zsh, and a fixed
+# flavour seeded here outranked every palette switch for anything the session
+# started before the first apply had run.
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORM=wayland
 export QT_QPA_PLATFORMTHEME=qt6ct
