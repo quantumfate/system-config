@@ -23,7 +23,6 @@
         - ansible
         - ansible-lint
         - prettier
-        - nixpkgs-fmt
       Debian:
         - git
         - just
@@ -39,7 +38,6 @@
         - ansible
         - ansible-lint
         - prettier
-        - nixpkgs-fmt
       RedHat:
         - git
         - just
@@ -55,7 +53,6 @@
         - ansible
         - ansible-lint
         - prettier
-        - nixpkgs-fmt
   tasks:
     - name: Install toolchain packages
       ansible.builtin.package:

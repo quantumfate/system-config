@@ -20,10 +20,6 @@ dist/
 build/
 *.egg-info/
 
-# Nix
-result
-result-*
-
 # Ansible
 *.retry
 .vault_pass

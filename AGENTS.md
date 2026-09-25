@@ -249,7 +249,6 @@ New to the repo, read in this order:
 | `host_vars/`  | `roles_override` per machine, one file per inventory host                                                 |
 | `roles/`      | one role per concern (`base`, `display_manager`, `gaming`, `obsidian_linear`, `user_units`, `theming`, …) |
 | `docs/`       | `hyprfocus.md` (the cross-repo engine), `desktop-rice.md`                                                 |
-| `flake.nix`   | a nix flake for the same provisioning scope                                                               |
 
 ## Contract
 

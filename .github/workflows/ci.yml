@@ -4,13 +4,43 @@ on:
   push:
     branches: [main, master]
   pull_request:
+
+# Validate-only: formatting and tests. The toolchain is installed with
+# apt/pip/npm rather than entered through a nix devShell — the flake that
+# shell came from is gone, and with it the second provisioning path CI used
+# to evaluate.
+#
+# The privacy gate `just check` ends with lives in the sibling `hypr` repo,
+# so that repo is checked out beside this one — the same layout a developer
+# has.
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v30
+      - name: Check out system-config
+        uses: actions/checkout@v4
         with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - run: nix develop --command just check
+          path: system-config
+
+      - name: Check out the sibling hypr repo (privacy gate)
+        uses: actions/checkout@v4
+        with:
+          repository: quantumfate/hypr
+          path: hypr
+
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends just shfmt
+          sudo npm install -g prettier
+          python3 -m pip install --user ruff pytest pyyaml
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          # stylua ships as a release binary; there is no distro package.
+          curl -fsSL -o /tmp/stylua.zip \
+            https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip
+          sudo unzip -o -d /usr/local/bin /tmp/stylua.zip stylua
+          sudo chmod +x /usr/local/bin/stylua
+
+      - name: Gate
+        working-directory: system-config
+        run: just check

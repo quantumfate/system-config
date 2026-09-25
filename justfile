@@ -34,6 +34,3 @@ check: fmt-check test
 	@../hypr/bin/,privacy-check
 
 
-# Enter the reproducible nix dev shell
-dev:
-    nix develop
