@@ -32,9 +32,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends just shfmt
-          sudo npm install -g prettier
-          python3 -m pip install --user ruff pytest pyyaml
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          # Pinned: prettier's markdown table formatting changed between
+          # 3.8 and 3.9, so an unpinned CI disagrees with the version the
+          # repo was formatted by and fails on files nobody touched.
+          sudo npm install -g prettier@3.8.1
+          # pipx, not `pip install --user`: this runner's python is
+          # externally managed and refuses the latter.
+          pipx install ruff
+          pipx install pytest
           # stylua ships as a release binary; there is no distro package.
           curl -fsSL -o /tmp/stylua.zip \
             https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip
