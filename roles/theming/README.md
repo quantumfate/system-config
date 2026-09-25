@@ -48,7 +48,7 @@ The seed's scheme follows the seed flavour, never a hardcoded preference: a
 dark seed renders `gtk-application-prefer-dark-theme=1` and
 `color-scheme=prefer-dark` into `settings.ini` and the nwg-look store, a
 latte seed renders the light equivalents, and `,theme.sh` keeps those files
-in agreement with the *live* palette on every apply — apps adapt to the
+in agreement with the _live_ palette on every apply — apps adapt to the
 system scheme, nothing is ever forced one way. A fresh install therefore
 starts in the scheme its flavour implies instead of always dark.
 

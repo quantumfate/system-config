@@ -49,9 +49,7 @@ def compress(lz4, data: dict) -> bytes:
     uncompressed_size = len(raw_json)
     max_comp_size = uncompressed_size * 2 + 64
     out_buf = ctypes.create_string_buffer(max_comp_size)
-    comp_size = lz4.LZ4_compress_default(
-        raw_json, out_buf, uncompressed_size, max_comp_size
-    )
+    comp_size = lz4.LZ4_compress_default(raw_json, out_buf, uncompressed_size, max_comp_size)
     header = MAGIC + struct.pack("<I", uncompressed_size)
     return header + out_buf.raw[:comp_size]
 

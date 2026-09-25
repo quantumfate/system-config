@@ -14,6 +14,7 @@ script = root / "roles/browser/files/configure_search.py"
 
 # Import helper functions directly from configure_search
 import sys
+
 sys.path.insert(0, str(script.parent))
 from configure_search import compress, decompress, get_lz4, HIDDEN_ENGINES
 
